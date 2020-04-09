@@ -24,12 +24,12 @@ include(Colors)
 #                         Locate files (change as needed).
 # --------------------------------------------------------------------------------
 set(SOURCES
-    src/app/example.cc
+    src/app/registers.cc
 )
 
 set(TESTFILES
     tests/main.cc
-    tests/dummy.test.cc
+    tests/registers.test.cc
 )
 
 # --------------------------------------------------------------------------------
