@@ -26,6 +26,7 @@ include(Colors)
 set(SOURCES
     src/app/register.cc
     src/app/operand.cc
+    src/app/instruction.cc
 )
 
 set(TESTFILES
