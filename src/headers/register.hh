@@ -3,6 +3,9 @@
 #include <memory>
 
 enum class register_code {
+    // Memory registers
+    mar, mdr, 
+
     // General Purpose Registers
     rax, rbx, rcx, rdx,
     eax, ebx, ecx, edx,
@@ -19,7 +22,6 @@ class Register {
 private:
     register_code code;
 public:
-    using register_ptr = std::shared_ptr<Register>;
 
     Register() = delete;
     Register(register_code);
@@ -34,6 +36,7 @@ public:
     virtual ~Register() = default;
 };
 
+using register_ptr = std::shared_ptr<Register>;
 
 class FullRegister : public Register {
 private:

@@ -28,12 +28,14 @@ set(SOURCES
     src/app/operand.cc
     src/app/instruction.cc
     src/app/program.cc
+    src/app/ram.cc
 )
 
 set(TESTFILES
     tests/main.cc
     tests/register.test.cc
     tests/program.test.cc
+    tests/ram.test.cc
 )
 
 # --------------------------------------------------------------------------------
