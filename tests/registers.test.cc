@@ -1,5 +1,5 @@
 #include <catch.hpp>
-#include "registers.hh"
+#include "register.hh"
 
 TEST_CASE("full registers") {
     FullRegister reg(register_code::rax);

@@ -24,7 +24,8 @@ include(Colors)
 #                         Locate files (change as needed).
 # --------------------------------------------------------------------------------
 set(SOURCES
-    src/app/registers.cc
+    src/app/register.cc
+    src/app/operand.cc
 )
 
 set(TESTFILES

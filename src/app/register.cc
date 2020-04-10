@@ -1,4 +1,4 @@
-#include "registers.hh"
+#include "register.hh"
 
 Register::Register(register_code c) : code(c) {}
 
