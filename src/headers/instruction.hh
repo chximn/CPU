@@ -12,6 +12,9 @@ private:
     std::vector<Operand> operands;
 
 public:
+    Instruction() = delete;
+    Instruction(instruction_code, std::vector<Operand> const & ops);
+
     instruction_code get_code() const;
     std::vector<Operand> const & get_operands() const;
 };
