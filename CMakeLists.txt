@@ -29,6 +29,7 @@ set(SOURCES
     src/app/instruction.cc
     src/app/program.cc
     src/app/ram.cc
+    src/app/alu.cc
 )
 
 set(TESTFILES
@@ -36,6 +37,7 @@ set(TESTFILES
     tests/register.test.cc
     tests/program.test.cc
     tests/ram.test.cc
+    tests/alu.test.cc
 )
 
 # --------------------------------------------------------------------------------
