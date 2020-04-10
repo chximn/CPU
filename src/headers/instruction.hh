@@ -9,12 +9,12 @@ enum class instruction_code {
 class Instruction {
 private:
     instruction_code code;
-    std::vector<Operand> operands;
+    std::vector<operand_ptr> operands;
 
 public:
     Instruction() = delete;
-    Instruction(instruction_code, std::vector<Operand> const & ops);
+    Instruction(instruction_code, std::vector<operand_ptr> const & ops);
 
     instruction_code get_code() const;
-    std::vector<Operand> const & get_operands() const;
+    std::vector<operand_ptr> const & get_operands() const;
 };

@@ -1,9 +1,12 @@
 #pragma once
 #include "register.hh"
 #include <cstdint>
+#include <memory>
 
 // abstract class
 class Operand {};
+
+using operand_ptr = std::shared_ptr<Operand>;
 
 class ImmediateOperand : public Operand {
 private:
