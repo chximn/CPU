@@ -4,7 +4,10 @@
 #include <memory>
 
 // abstract class
-class Operand {};
+class Operand {
+public:
+    virtual ~Operand() = default;
+};
 
 using operand_ptr = std::shared_ptr<Operand>;
 
