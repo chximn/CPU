@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <vector>
+#include <memory>
 #include "register.hh"
 
 #define MEMORY_SIZE 1024
@@ -13,7 +14,10 @@ public:
 
     register_ptr address_register;
     register_ptr data_register;
+    uint8_t size;
 
     void load() const;
     void write();
 };
+
+using ram_ptr = std::shared_ptr<RandomAccessMemory>;

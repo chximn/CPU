@@ -11,7 +11,16 @@ void RandomAccessMemory::load() const {
 }
 
 void RandomAccessMemory::write() {
+    uint64_t mask = 0;
+    mask = ~mask;
+    mask = mask >> (64 - size);
+
     auto offset = address_register->get_value();
     uint64_t* pointer = const_cast<uint64_t *>(reinterpret_cast<const uint64_t *>(data + offset));
-    *pointer = data_register->get_value();
+    uint64_t old_value = *pointer;
+    uint64_t new_value = data_register->get_value();
+
+    uint64_t value = (new_value & mask) | (old_value & (~mask));
+
+    *pointer = value;
 }
