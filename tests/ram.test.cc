@@ -29,4 +29,22 @@ TEST_CASE("ram") {
         auto value = ram.data_register->get_value() & 0xffff;
         REQUIRE(value == 0xdead);
     }
+
+
+    SECTION("16bit") {
+        ram.address_register->set_value(10);
+        ram.data_register->set_value(0xabcd1234deadbeef);
+        ram.size = 64;
+        ram.write();
+
+        ram.data_register->set_value(0x1234);
+        ram.size = 16;
+        ram.write();
+
+        ram.size = 64;
+        ram.load();
+
+        auto value = ram.data_register->get_value();
+        REQUIRE(value == 0xabcd1234dead1234);
+    }
 }
