@@ -16,7 +16,7 @@ TEST_CASE("alu") {
         // move rax, rbx
         alu.source = rbx;
         alu.destination = rax;
-        alu.operation = arithemetic_logic_operation::mov;
+        alu.operation = alu_operation::mov;
         alu.execute();
 
         REQUIRE(rax->get_value() == 2647);
@@ -28,7 +28,7 @@ TEST_CASE("alu") {
         // move eax, ebx
         alu.source = ebx;
         alu.destination = eax;
-        alu.operation = arithemetic_logic_operation::mov;
+        alu.operation = alu_operation::mov;
         alu.execute();
 
         REQUIRE(eax->get_value() == 2647);
@@ -41,7 +41,7 @@ TEST_CASE("alu") {
 
         alu.source = rbx;
         alu.destination = rax;
-        alu.operation = arithemetic_logic_operation::add;
+        alu.operation = alu_operation::add;
         alu.execute();
 
         REQUIRE(rax->get_value() == 2647);
@@ -53,7 +53,7 @@ TEST_CASE("alu") {
 
         alu.source = ebx;
         alu.destination = eax;
-        alu.operation = arithemetic_logic_operation::add;
+        alu.operation = alu_operation::add;
         alu.execute();
 
         REQUIRE(eax->get_value() == 2647);

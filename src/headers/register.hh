@@ -3,8 +3,8 @@
 #include <memory>
 
 enum class register_code {
-    // Memory registers
-    mar, mdr, 
+    // Memory Registers
+    mar, mdr,
 
     // General Purpose Registers
     rax, rbx, rcx, rdx,
@@ -15,7 +15,10 @@ enum class register_code {
 
      // Floating Point Registers
      st0, st1, st2, st3,
-     st4, st5, st6, st7
+     st4, st5, st6, st7,
+
+     // ControlUnit Registers
+     rip, ir, _immediate
 };
 
 class Register {

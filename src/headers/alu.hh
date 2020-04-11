@@ -1,7 +1,7 @@
 #pragma once
 #include "register.hh"
 
-enum class arithemetic_logic_operation {
+enum class alu_operation {
     mov, add, sub, div, _and, _or
 };
 
@@ -13,7 +13,7 @@ public:
     register_ptr destination;
     register_ptr extra;
 
-    arithemetic_logic_operation operation;
+    alu_operation operation;
 
     void execute() const;
 };

@@ -19,5 +19,3 @@ public:
     void load() const;
     void write();
 };
-
-using ram_ptr = std::shared_ptr<RandomAccessMemory>;
