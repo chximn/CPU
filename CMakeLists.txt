@@ -32,6 +32,7 @@ set(SOURCES
     src/app/alu.cc
     src/app/cu.cc
     src/app/cpu.cc
+    src/app/fpu.cc
 )
 
 set(TESTFILES
@@ -41,6 +42,7 @@ set(TESTFILES
     tests/ram.test.cc
     tests/alu.test.cc
     tests/cpu.test.cc
+    tests/fpu.test.cc
 )
 
 # --------------------------------------------------------------------------------
