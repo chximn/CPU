@@ -34,11 +34,11 @@ uint64_t ControlUnit::evaluate_address(MemoryOperand operand)  {
     return base + index * scale + displacement;
 }
 
-void ControlUnit::fetch() {
-    ram.address_register->set_value(instruction_pointer_register->get_value());
+void ControlUnit::fetch(register_ptr cs) {
+    ram.address_register->set_value(instruction_pointer_register->get_value() + cs->get_value());
     ram.load();
     instruction_register->set_value(ram.data_register->get_value());
-    instruction_pointer_register->set_value(instruction_pointer_register->get_value() + 4);
+    instruction_pointer_register->set_value(instruction_pointer_register->get_value() + 8);
 }
 
 void ControlUnit::evaluate_destination(operand_ptr operand) {

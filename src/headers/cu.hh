@@ -6,6 +6,8 @@
 #include <map>
 #include "alu.hh"
 
+class CentralProcessingUnit;
+
 class ControlUnit {
 private:
     register_ptr instruction_pointer_register;
@@ -25,7 +27,7 @@ public:
     ControlUnit() = delete;
     ControlUnit(std::map<register_code, register_ptr> &, ArithemeticLogicUnit &, RandomAccessMemory &);
 
-    void fetch();
+    void fetch(register_ptr cs);
     void decode();
     void load();
     void execute();
@@ -37,4 +39,6 @@ public:
     register_ptr get_instruction_register() const;
     bool get_load_from_memory() const;
     bool get_write_to_memory() const;
+
+    friend CentralProcessingUnit;
 };

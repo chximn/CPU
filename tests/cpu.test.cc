@@ -8,7 +8,10 @@ TEST_CASE("cpu") {
     RandomAccessMemory ram;
     CentralProcessingUnit cpu(ram);
 
+
     auto registers = cpu.get_registers();
+    auto cs = registers[register_code::cs];
+    cs->set_value(0);
     ArithemeticLogicUnit & alu = cpu.get_arithemetic_logic_unit();
 
     std::vector<operand_ptr> operands {
@@ -29,8 +32,8 @@ TEST_CASE("cpu") {
     ip->set_value(800);
 
     SECTION("fetch instruction") {
-        cu.fetch();
-        REQUIRE(ip->get_value() == 804);
+        cu.fetch(cs);
+        REQUIRE(ip->get_value() == 808);
 
         uint64_t instruction_pointer = (ir->get_value());
         Instruction * loaded_instruction = reinterpret_cast<Instruction *>(instruction_pointer);
@@ -47,7 +50,7 @@ TEST_CASE("cpu") {
     }
 
     SECTION("decode") {
-        cu.fetch();
+        cu.fetch(cs);
         cu.decode();
 
         REQUIRE(cu.get_load_from_memory() == false);
@@ -57,7 +60,7 @@ TEST_CASE("cpu") {
     }
 
     SECTION("load") {
-        cu.fetch();
+        cu.fetch(cs);
         cu.decode();
 
         ram.data_register->set_value(2647);
@@ -66,7 +69,7 @@ TEST_CASE("cpu") {
     }
 
     SECTION("execute") {
-        cu.fetch();
+        cu.fetch(cs);
         cu.decode();
         cu.load();
         cu.execute();
@@ -75,7 +78,7 @@ TEST_CASE("cpu") {
     }
 
     SECTION("write") {
-        cu.fetch();
+        cu.fetch(cs);
         cu.decode();
         cu.load();
         cu.execute();
