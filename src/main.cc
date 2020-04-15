@@ -18,10 +18,12 @@ int main() {
         std::make_shared<RegisterOperand>(register_code::eax)
     });
 
+    Instruction i3(instruction_code::hlt, std::vector<operand_ptr>{});
 
     Program program;
     program.add_instruction(i1);
     program.add_instruction(i2);
+    program.add_instruction(i3);
     program.add_data(std::vector<uint8_t>{0, 1, 2, 3, 4, 5, 6, 7});
 
 

@@ -3,7 +3,7 @@
 #include <vector>
 
 enum class instruction_code {
-    mov, lea, add, sub, fld, jmp, movdqua
+    mov, lea, add, sub, fld, jmp, movdqua, hlt
 };
 
 class Instruction {

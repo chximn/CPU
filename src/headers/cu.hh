@@ -17,6 +17,8 @@ private:
     bool load_from_memory;
     bool write_to_memory;
 
+    bool halt;
+
     std::map<register_code, register_ptr> & registers;
     ArithemeticLogicUnit & alu;
     RandomAccessMemory & ram;

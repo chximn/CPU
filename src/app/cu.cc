@@ -4,6 +4,7 @@ ControlUnit::ControlUnit(std::map<register_code, register_ptr> & r, ArithemeticL
     instruction_pointer_register(std::make_shared<FullRegister>(register_code::rip)),
     instruction_register(std::make_shared<FullRegister>(register_code::ir)),
     immediate_register(std::make_shared<FullRegister>(register_code::_immediate)),
+    halt(false),
     registers(r),
     alu(a),
     ram(mem) {}
@@ -102,6 +103,12 @@ void ControlUnit::decode() {
         // case instruction_code::add:
         //
         //     break;
+
+        case instruction_code::hlt:
+            halt = true;
+            load_from_memory = false;
+            write_to_memory = false;
+            break;
 
         default:
             throw "unknown or unimplemented instruction";

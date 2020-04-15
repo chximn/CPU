@@ -37,7 +37,7 @@ CentralProcessingUnit::CentralProcessingUnit(RandomAccessMemory & r):
 void CentralProcessingUnit::start() {
     control_unit.instruction_pointer_register->set_value(0);
 
-    for (int i = 0; i < 2; i++) {
+    while (!control_unit.halt) {
         control_unit.fetch(registers[register_code::cs]);
         control_unit.decode();
         control_unit.load();
