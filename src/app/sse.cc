@@ -52,5 +52,9 @@ void VectorUnit::execute() {
             }
             break;
         }
+
+        default:
+            throw "unknown or unimplemented vector operation";
+            break;
     }
 }

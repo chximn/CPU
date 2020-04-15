@@ -104,7 +104,7 @@ void ControlUnit::decode() {
         //     break;
 
         default:
-            // TODO: throw exception
+            throw "unknown or unimplemented instruction";
             break;
     }
 }

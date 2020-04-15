@@ -68,7 +68,7 @@ void FloatingPointUnit::execute() {
         }
 
         default:
-            // TODO: throw exception or handle non existant fpu operation
+            throw "unkown or unimplemented floating point operation";
             break;
     }
 
