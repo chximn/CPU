@@ -1,7 +1,7 @@
 #include "program.hh"
 
 void Program::add_instruction(Instruction const & instruction) {
-    instructions.push_back(instruction);
+    instructions.push_back(&instruction);
 }
 
 uint64_t Program::add_data(std::vector<uint8_t> const & new_data) {
@@ -10,7 +10,7 @@ uint64_t Program::add_data(std::vector<uint8_t> const & new_data) {
     return address;
 }
 
-std::vector<Instruction> const & Program::get_instructions() const {
+std::vector<const Instruction *> const & Program::get_instructions() const {
     return instructions;
 }
 

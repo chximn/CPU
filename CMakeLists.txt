@@ -35,6 +35,7 @@ set(SOURCES
     src/app/fpu.cc
     src/app/vector_register.cc
     src/app/sse.cc
+    src/app/loader.cc
 )
 
 set(TESTFILES
@@ -46,6 +47,7 @@ set(TESTFILES
     tests/cpu.test.cc
     tests/fpu.test.cc
     tests/vectorial.test.cc
+    tests/loader.test.cc
 )
 
 # --------------------------------------------------------------------------------

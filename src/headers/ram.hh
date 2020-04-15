@@ -4,7 +4,7 @@
 #include <memory>
 #include "register.hh"
 
-#define MEMORY_SIZE 1024
+#define MEMORY_SIZE 1048576 // 1 megabyte
 
 class RandomAccessMemory {
 private:

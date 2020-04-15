@@ -6,13 +6,17 @@ enum class register_code {
     // Memory Registers
     mar, mdr,
 
-    // General Purpose Registers
+    // segment registers
+    cs, ds,
 
+    // General Purpose Registers
     rax, rbx, rcx, rdx,
     eax, ebx, ecx, edx,
      ax,  bx,  cx,  dx,
      al,  bl,  cl,  dl,
      ah,  bh,  ch,  dh,
+
+    // TODO: add r8.. registers
 
     // Floating Point Registers
     st0, st1, st2, st3,

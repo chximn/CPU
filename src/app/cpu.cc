@@ -29,6 +29,9 @@ CentralProcessingUnit::CentralProcessingUnit(RandomAccessMemory & r):
     registers[register_code::dx]  = std::make_shared<PartRegister>(register_code::dx,  registers[register_code::rdx], 16, 0);
     registers[register_code::dl]  = std::make_shared<PartRegister>(register_code::dl,  registers[register_code::rdx], 8,  0);
     registers[register_code::dh]  = std::make_shared<PartRegister>(register_code::dh,  registers[register_code::rdx], 8,  8);
+
+    registers[register_code::cs] = std::make_shared<FullRegister>(register_code::cs);
+    registers[register_code::ds] = std::make_shared<FullRegister>(register_code::ds);
 }
 
 void CentralProcessingUnit::start() {

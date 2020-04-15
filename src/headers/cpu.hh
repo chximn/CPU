@@ -5,6 +5,8 @@
 #include "cu.hh"
 #include "ram.hh"
 
+class Loader;
+
 class CentralProcessingUnit {
 private:
     RandomAccessMemory & ram;
@@ -24,5 +26,6 @@ public:
     ControlUnit & get_control_unit();
     ArithemeticLogicUnit & get_arithemetic_logic_unit();
     std::map<register_code, register_ptr> const & get_registers() const;
-    // friend Loader;
+
+    friend Loader;
 };
