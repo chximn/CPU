@@ -7,18 +7,23 @@ enum class register_code {
     mar, mdr,
 
     // General Purpose Registers
+
     rax, rbx, rcx, rdx,
     eax, ebx, ecx, edx,
      ax,  bx,  cx,  dx,
      al,  bl,  cl,  dl,
      ah,  bh,  ch,  dh,
 
-     // Floating Point Registers
-     st0, st1, st2, st3,
-     st4, st5, st6, st7,
+    // Floating Point Registers
+    st0, st1, st2, st3,
+    st4, st5, st6, st7,
 
-     // ControlUnit Registers
-     rip, ir, _immediate
+    // ControlUnit Registers
+    rip, ir, _immediate,
+
+    // Vector Registers
+    xmm0, xmm1, xmm2, xmm3,
+    xmm4, xmm5, xmm6, xmm7
 };
 
 class Register {

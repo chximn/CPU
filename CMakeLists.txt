@@ -33,6 +33,8 @@ set(SOURCES
     src/app/cu.cc
     src/app/cpu.cc
     src/app/fpu.cc
+    src/app/vector_register.cc
+    src/app/sse.cc
 )
 
 set(TESTFILES
@@ -43,6 +45,7 @@ set(TESTFILES
     tests/alu.test.cc
     tests/cpu.test.cc
     tests/fpu.test.cc
+    tests/vectorial.test.cc
 )
 
 # --------------------------------------------------------------------------------
