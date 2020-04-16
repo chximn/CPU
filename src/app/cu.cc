@@ -27,12 +27,20 @@ bool ControlUnit::get_write_to_memory() const {
 
 
 uint64_t ControlUnit::evaluate_address(MemoryOperand operand)  {
-    uint64_t base  = registers[operand.get_base()]->get_value();
-    uint64_t index = registers[operand.get_index()]->get_value();
-    uint8_t  scale = operand.get_scale();
-    uint64_t displacement = operand.get_displacement();
+    uint64_t address = operand.get_displacement();
 
-    return base + index * scale + displacement;
+    if (operand.get_use_base()) {
+        address += registers[operand.get_base()]->get_value();;
+    }
+
+    if (operand.get_use_index()) {
+        uint64_t index = registers[operand.get_index()]->get_value();
+        uint8_t  scale = operand.get_scale();
+
+        address += index * scale;
+    }
+
+    return address + registers[register_code::ds]->get_value();
 }
 
 void ControlUnit::fetch(register_ptr cs) {
@@ -53,6 +61,7 @@ void ControlUnit::evaluate_destination(operand_ptr operand) {
 
     else if (memory_operand_pointer != nullptr) {
         ram.address_register->set_value(evaluate_address(*memory_operand_pointer));
+        ram.size = memory_operand_pointer->get_size();
         alu.destination = ram.data_register;
         write_to_memory = true;
     }
@@ -73,6 +82,7 @@ void ControlUnit::evaluate_source(operand_ptr operand) {
 
     else if (memory_operand_pointer != nullptr) {
         ram.address_register->set_value(evaluate_address(*memory_operand_pointer));
+        ram.size = memory_operand_pointer->get_size();
         alu.source = ram.data_register;
         load_from_memory = true;
     }
@@ -97,12 +107,18 @@ void ControlUnit::decode() {
             write_to_memory = false;
             evaluate_destination(operands.at(0));
             evaluate_source(operands.at(1));
+
             break;
         }
 
-        // case instruction_code::add:
-        //
-        //     break;
+        case instruction_code::add:
+            alu.operation = alu_operation::add;
+            load_from_memory = false;
+            write_to_memory = false;
+            evaluate_destination(operands.at(0));
+            evaluate_source(operands.at(1));
+
+            break;
 
         case instruction_code::hlt:
             halt = true;
@@ -121,7 +137,7 @@ void ControlUnit::load() {
 }
 
 void ControlUnit::execute() {
-    alu.execute();
+    if (!halt) alu.execute();
 }
 
 void ControlUnit::write() {

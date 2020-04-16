@@ -42,9 +42,10 @@ TEST_CASE("cpu") {
     }
 
     SECTION("evaluate address") {
+        registers[register_code::ds]->set_value(7);
         registers[register_code::eax]->set_value(2200);
         registers[register_code::ecx]->set_value(100);
-        MemoryOperand operand(register_code::eax, register_code::ecx, 4, 47);
+        MemoryOperand operand(register_code::eax, register_code::ecx, 4, 40, 64);
 
         REQUIRE(cu.evaluate_address(operand) == 2647);
     }
