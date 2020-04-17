@@ -40,7 +40,11 @@ uint64_t ControlUnit::evaluate_address(MemoryOperand operand)  {
         address += index * scale;
     }
 
-    return address + registers[register_code::ds]->get_value();
+    if (operand.get_use_segment()) {
+        address += registers[operand.get_segment()]->get_value();
+    }
+
+    return address;
 }
 
 void ControlUnit::fetch(register_ptr cs) {
