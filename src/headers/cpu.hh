@@ -2,6 +2,8 @@
 #include <map>
 #include "register.hh"
 #include "alu.hh"
+#include "fpu.hh"
+#include "sse.hh"
 #include "cu.hh"
 #include "ram.hh"
 
@@ -12,9 +14,11 @@ private:
     RandomAccessMemory & ram;
 
     std::map<register_code, register_ptr> registers;
+    register_ptr flags;
+
     ArithemeticLogicUnit arithmetic_logic_unit;
-    // FloatingPointerUnit floating_point_unit;
-    // VectorUnit vector_unit;
+    FloatingPointUnit floating_point_unit;
+    VectorUnit vector_unit;
     ControlUnit control_unit;
 
 public:

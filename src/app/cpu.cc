@@ -2,7 +2,9 @@
 
 CentralProcessingUnit::CentralProcessingUnit(RandomAccessMemory & r):
     ram(r),
-    arithmetic_logic_unit(),
+    flags(std::make_shared<FullRegister>(register_code::rflags)),
+    arithmetic_logic_unit(flags),
+    vector_unit(ram),
     control_unit(registers, arithmetic_logic_unit, ram) {
 
 
@@ -32,6 +34,9 @@ CentralProcessingUnit::CentralProcessingUnit(RandomAccessMemory & r):
 
     registers[register_code::cs] = std::make_shared<FullRegister>(register_code::cs);
     registers[register_code::ds] = std::make_shared<FullRegister>(register_code::ds);
+
+    registers[register_code::eflags] = std::make_shared<PartRegister>(register_code::eflags, registers[register_code::rflags], 32, 0);
+    registers[register_code::flags]  = std::make_shared<PartRegister>(register_code::flags,  registers[register_code::rflags], 16, 0);
 }
 
 void CentralProcessingUnit::start() {

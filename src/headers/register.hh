@@ -18,6 +18,9 @@ enum class register_code {
 
     // TODO: add r8.. registers
 
+    // Flags
+    rflags, eflags, flags,
+
     // Floating Point Registers
     st0, st1, st2, st3,
     st4, st5, st6, st7,
