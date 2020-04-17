@@ -81,4 +81,17 @@ TEST_CASE("alu") {
 
         REQUIRE(al->get_value() == 0b11111110); // -2
     }
+
+    SECTION("add8 instruction w/ negative operand") {
+        bl->set_value(0b00000101); // -5
+        al->set_value(0b00000011); // +3
+
+        alu.size = 8;
+        alu.source = al;
+        alu.destination = bl;
+        alu.operation = alu_operation::sub;
+        alu.execute();
+
+        REQUIRE(bl->get_value() == 0b00000010); // +2
+    }
 }

@@ -58,6 +58,46 @@ void ArithemeticLogicUnit::execute() {
             break;
         }
 
+        case alu_operation::sub: {
+
+            uint64_t result = 0;
+            auto source_value = source->get_value();
+            auto destination_value = destination->get_value();
+
+            if (size == 8) {
+                auto s = *reinterpret_cast<int8_t *>(&source_value);
+                auto d = *reinterpret_cast<int8_t *>(&destination_value);
+                auto r = d - s;
+                result += r;
+            }
+
+            else if (size == 16) {
+                auto s = *reinterpret_cast<int16_t *>(&source_value);
+                auto d = *reinterpret_cast<int16_t *>(&destination_value);
+                auto r = d - s;
+                result += r;
+            }
+
+            else if (size == 32) {
+                auto s = *reinterpret_cast<int32_t *>(&source_value);
+                auto d = *reinterpret_cast<int32_t *>(&destination_value);
+                auto r = d - s;
+                result += r;
+            }
+
+            else if (size == 64) {
+                auto s = *reinterpret_cast<int64_t *>(&source_value);
+                auto d = *reinterpret_cast<int64_t *>(&destination_value);
+                auto r = d - s;
+                result += r;
+            }
+
+            else throw "invalid alu size modifier";
+
+            destination->set_value(result);
+            break;
+        }
+
         default:
 
             break;
