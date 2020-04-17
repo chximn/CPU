@@ -115,14 +115,27 @@ void ControlUnit::decode() {
             break;
         }
 
-        case instruction_code::add:
+        case instruction_code::lea: {
+            alu.operation = alu_operation::mov  ;
+            load_from_memory = false;
+            write_to_memory = false;
+
+            ram.address_register->set_value(evaluate_address(*std::dynamic_pointer_cast<MemoryOperand>(operands.at(1))));
+
+            alu.source = ram.address_register;
+            alu.destination = registers[std::dynamic_pointer_cast<RegisterOperand>(operands.at(0))->get_reg()];
+            break;
+        }
+
+        case instruction_code::add: {
             alu.operation = alu_operation::add;
             load_from_memory = false;
             write_to_memory = false;
             evaluate_destination(operands.at(0));
             evaluate_source(operands.at(1));
-
+            alu.size = instruction.get_size();
             break;
+        }
 
         case instruction_code::hlt:
             halt = true;

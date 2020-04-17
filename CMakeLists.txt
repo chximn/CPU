@@ -48,6 +48,7 @@ set(TESTFILES
     tests/fpu.test.cc
     tests/vectorial.test.cc
     tests/loader.test.cc
+    tests/examples.test.cc
 )
 
 # --------------------------------------------------------------------------------
