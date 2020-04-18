@@ -34,4 +34,6 @@ void Loader::load(Program const & program) {
     // set cpu segment registers
     cpu.registers[register_code::cs]->set_value(LOADER_DEFAULT_CODE_SEGMENT);
     cpu.registers[register_code::ds]->set_value(LOADER_DEFAULT_DATA_SEGMENT);
+    cpu.registers[register_code::ss]->set_value(LOADER_DEFAULT_STACK_SEGMENT);
+    cpu.registers[register_code::rsp]->set_value(LOADER_DEFAULT_STACK_SEGMENT + LOADER_DEFAULT_STACK_SIZE);
 }

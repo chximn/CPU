@@ -58,4 +58,6 @@ TEST_CASE("loader") {
 
     REQUIRE(registers[register_code::cs]->get_value() == LOADER_DEFAULT_CODE_SEGMENT);
     REQUIRE(registers[register_code::ds]->get_value() == LOADER_DEFAULT_DATA_SEGMENT);
+    REQUIRE(registers[register_code::ss]->get_value() == LOADER_DEFAULT_STACK_SEGMENT);
+    REQUIRE(registers[register_code::rsp]->get_value() == LOADER_DEFAULT_STACK_SEGMENT + LOADER_DEFAULT_STACK_SIZE);
 }

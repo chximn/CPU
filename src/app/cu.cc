@@ -98,6 +98,11 @@ void ControlUnit::evaluate_source(operand_ptr operand) {
 }
 
 void ControlUnit::decode() {
+    execute_alu = false;
+    execute_sse = false;
+    execute_fpu = false;
+    halt = false;
+
     uint64_t instruction_pointer = (instruction_register->get_value());
     Instruction instruction = *reinterpret_cast<Instruction *>(instruction_pointer);
 
@@ -111,19 +116,29 @@ void ControlUnit::decode() {
             write_to_memory = false;
             evaluate_destination(operands.at(0));
             evaluate_source(operands.at(1));
-
+            execute_alu = true;
             break;
         }
 
         case instruction_code::lea: {
-            alu.operation = alu_operation::mov  ;
+            alu.operation = alu_operation::mov;
             load_from_memory = false;
             write_to_memory = false;
-
             ram.address_register->set_value(evaluate_address(*std::dynamic_pointer_cast<MemoryOperand>(operands.at(1))));
-
             alu.source = ram.address_register;
             alu.destination = registers[std::dynamic_pointer_cast<RegisterOperand>(operands.at(0))->get_reg()];
+            execute_alu = true;
+            break;
+        }
+
+        case instruction_code::push: {
+            alu.operation = alu_operation::mov;
+            load_from_memory = false;
+            evaluate_source(operands.at(0));
+            alu.destination = ram.data_register;
+            write_to_memory = true;
+            registers[register_code::rsp]->set_value(registers[register_code::rsp]->get_value() - instruction.get_size() / 8);
+            execute_alu = true;
             break;
         }
 
@@ -134,6 +149,7 @@ void ControlUnit::decode() {
             evaluate_destination(operands.at(0));
             evaluate_source(operands.at(1));
             alu.size = instruction.get_size();
+            execute_alu = true;
             break;
         }
 
@@ -154,7 +170,16 @@ void ControlUnit::load() {
 }
 
 void ControlUnit::execute() {
-    if (!halt) alu.execute();
+    if (halt) return;
+
+    uint64_t instruction_pointer = (instruction_register->get_value());
+    Instruction instruction = *reinterpret_cast<Instruction *>(instruction_pointer);
+
+    if (instruction.get_code() == instruction_code::push) {
+        ram.address_register->set_value(registers[register_code::rsp]->get_value() + registers[register_code::ss]->get_value());
+    }
+
+    if (execute_alu) alu.execute();
 }
 
 void ControlUnit::write() {

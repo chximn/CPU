@@ -7,7 +7,7 @@ enum class register_code {
     mar, mdr,
 
     // segment registers
-    cs, ds,
+    cs, ds, ss,
 
     // General Purpose Registers
     rax, rbx, rcx, rdx,
@@ -15,6 +15,8 @@ enum class register_code {
      ax,  bx,  cx,  dx,
      al,  bl,  cl,  dl,
      ah,  bh,  ch,  dh,
+
+    rsp, esp, sp,
 
     // TODO: add r8.. registers
 

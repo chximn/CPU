@@ -12,6 +12,8 @@ TEST_CASE("examples") {
 
     Loader loader(cpu, ram);
 
+    Instruction halt(instruction_code::hlt, std::vector<operand_ptr>{});
+
     SECTION("example 01: mov, add, mov") {
         // mov al, [0x5]
         Instruction i1(instruction_code::mov, std::vector<operand_ptr> {
@@ -44,8 +46,6 @@ TEST_CASE("examples") {
             std::make_shared<MemoryOperand>(8, 8, register_code::ds)
         }, 8);
 
-        // hlt
-        Instruction i6(instruction_code::hlt, std::vector<operand_ptr>{});
 
         Program program;
         program.add_instruction(i1);
@@ -53,7 +53,7 @@ TEST_CASE("examples") {
         program.add_instruction(i3);
         program.add_instruction(i4);
         program.add_instruction(i5);
-        program.add_instruction(i6);
+        program.add_instruction(halt);
         program.add_data(std::vector<uint8_t>{0, 1, 2, 3, 4, 5, 6, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1});
 
 
@@ -86,13 +86,11 @@ TEST_CASE("examples") {
             std::make_shared<MemoryOperand>(register_code::ax, 0, 8, register_code::ds)
         }, 8);
 
-        Instruction i4(instruction_code::hlt, std::vector<operand_ptr>{});
-
         Program program;
         program.add_instruction(i1);
         program.add_instruction(i2);
         program.add_instruction(i3);
-        program.add_instruction(i4);
+        program.add_instruction(halt);
 
         program.add_data(std::vector<uint8_t>{0, 1, 2, 3, 4, 5, 6, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1});
         loader.load(program);
@@ -100,5 +98,34 @@ TEST_CASE("examples") {
         cpu.start();
 
         REQUIRE(registers[register_code::cl]->get_value() == 5);
+    }
+
+    SECTION("example 03: push") {
+        Instruction i1(instruction_code::mov, std::vector<operand_ptr> {
+            std::make_shared<RegisterOperand>(register_code::bx),
+            std::make_shared<ImmediateOperand>(0x2647)
+        }, 16);
+
+        Instruction i2(instruction_code::push, std::vector<operand_ptr> {
+            std::make_shared<RegisterOperand>(register_code::bx)
+        }, 16);
+
+        Instruction i3(instruction_code::mov, std::vector<operand_ptr> {
+            std::make_shared<RegisterOperand>(register_code::ax),
+            std::make_shared<MemoryOperand>(register_code::rsp, 0, 16, register_code::ss)
+        }, 16);
+
+        Program program;
+        program.add_instruction(i1);
+        program.add_instruction(i2);
+        program.add_instruction(i3);
+        program.add_instruction(halt);
+
+        loader.load(program);
+
+        cpu.start();
+
+        REQUIRE(registers[register_code::rsp]->get_value() == LOADER_DEFAULT_STACK_SEGMENT + LOADER_DEFAULT_STACK_SIZE - 2);
+        REQUIRE(registers[register_code::bx]->get_value() == 0x2647);
     }
 }

@@ -18,6 +18,9 @@ private:
     bool write_to_memory;
 
     bool halt;
+    bool execute_alu;
+    bool execute_fpu;
+    bool execute_sse;
 
     std::map<register_code, register_ptr> & registers;
     ArithemeticLogicUnit & alu;
