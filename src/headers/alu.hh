@@ -3,7 +3,7 @@
 #include <map>
 
 enum class alu_operation {
-    mov, add, sub, div, _and, _or
+    mov, add, sub, div, _and, _or, _xor, _not
 };
 
 enum class flag_code {

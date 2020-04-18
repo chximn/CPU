@@ -7,7 +7,9 @@ enum class instruction_code {
     push, pop,
 
 
-    add,
+    add, sub,
+
+    _and, _or, _xor, _not,
 
     hlt
 };

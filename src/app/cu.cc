@@ -156,13 +156,67 @@ void ControlUnit::decode() {
             break;
         }
 
-
         case instruction_code::add: {
             alu.operation = alu_operation::add;
             load_from_memory = false;
             write_to_memory = false;
             evaluate_destination(operands.at(0));
             evaluate_source(operands.at(1));
+            alu.size = instruction.get_size();
+            execute_alu = true;
+            break;
+        }
+
+        case instruction_code::sub: {
+            alu.operation = alu_operation::sub;
+            load_from_memory = false;
+            write_to_memory = false;
+            evaluate_destination(operands.at(0));
+            evaluate_source(operands.at(1));
+            alu.size = instruction.get_size();
+            execute_alu = true;
+            break;
+        }
+
+        case instruction_code::_and: {
+            alu.operation = alu_operation::_and;
+            load_from_memory = false;
+            write_to_memory = false;
+            evaluate_destination(operands.at(0));
+            evaluate_source(operands.at(1));
+            alu.size = instruction.get_size();
+            execute_alu = true;
+            break;
+        }
+
+        case instruction_code::_or: {
+            alu.operation = alu_operation::_or;
+            load_from_memory = false;
+            write_to_memory = false;
+            evaluate_destination(operands.at(0));
+            evaluate_source(operands.at(1));
+            alu.size = instruction.get_size();
+            execute_alu = true;
+            break;
+        }
+
+        case instruction_code::_xor: {
+            alu.operation = alu_operation::_xor;
+            load_from_memory = false;
+            write_to_memory = false;
+            evaluate_destination(operands.at(0));
+            evaluate_source(operands.at(1));
+            alu.size = instruction.get_size();
+            execute_alu = true;
+            break;
+        }
+
+        case instruction_code::_not: {
+            alu.operation = alu_operation::_not;
+            load_from_memory = false;
+            write_to_memory = false;
+            evaluate_destination(operands.at(0));
+            evaluate_source(operands.at(0));
             alu.size = instruction.get_size();
             execute_alu = true;
             break;

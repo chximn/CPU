@@ -15,15 +15,7 @@ void ArithemeticLogicUnit::execute() {
 
     switch (operation) {
         case alu_operation::mov: {
-
-            uint64_t mask_s = 0;
-            mask_s = ~mask_s;
-            mask_s = mask_s >> (64 - size);
-
-            uint64_t mask_d = ~mask_s;
-
-            uint64_t result = (destination->get_value() & mask_d) | (source->get_value() & mask_s);
-            destination->set_value(result);
+            destination->set_value(source->get_value());
             break;
         }
 
@@ -104,6 +96,26 @@ void ArithemeticLogicUnit::execute() {
             else throw "invalid alu size modifier";
 
             destination->set_value(result);
+            break;
+        }
+
+        case alu_operation::_and: {
+            destination->set_value(source->get_value() & destination->get_value());
+            break;
+        }
+
+        case alu_operation::_or: {
+            destination->set_value(source->get_value() | destination->get_value());
+            break;
+        }
+
+        case alu_operation::_xor: {
+            destination->set_value(source->get_value() ^ destination->get_value());
+            break;
+        }
+
+        case alu_operation::_not: {
+            destination->set_value( ~(destination->get_value()) );
             break;
         }
 

@@ -82,7 +82,7 @@ TEST_CASE("alu") {
         REQUIRE(al->get_value() == 0b11111110); // -2
     }
 
-    SECTION("add8 instruction w/ negative operand") {
+    SECTION("sub8 instruction") {
         bl->set_value(0b00000101); // -5
         al->set_value(0b00000011); // +3
 
@@ -93,5 +93,55 @@ TEST_CASE("alu") {
         alu.execute();
 
         REQUIRE(bl->get_value() == 0b00000010); // +2
+    }
+
+    SECTION("and8 instruction") {
+        bl->set_value(0b00000101);
+        al->set_value(0b00000011);
+
+        alu.size = 8;
+        alu.source = al;
+        alu.destination = bl;
+        alu.operation = alu_operation::_and;
+        alu.execute();
+
+        REQUIRE(bl->get_value() == 0b00000001);
+    }
+
+    SECTION("or8 instruction") {
+        bl->set_value(0b00000101);
+        al->set_value(0b00000011);
+
+        alu.size = 8;
+        alu.source = al;
+        alu.destination = bl;
+        alu.operation = alu_operation::_or;
+        alu.execute();
+
+        REQUIRE(bl->get_value() == 0b00000111);
+    }
+
+    SECTION("xor8 instruction") {
+        bl->set_value(0b00000101);
+        al->set_value(0b00000011);
+
+        alu.size = 8;
+        alu.source = al;
+        alu.destination = bl;
+        alu.operation = alu_operation::_xor;
+        alu.execute();
+
+        REQUIRE(bl->get_value() == 0b00000110);
+    }
+
+    SECTION("not8 instruction") {
+        bl->set_value(0b00000101);
+
+        alu.size = 8;
+        alu.destination = bl;
+        alu.operation = alu_operation::_not;
+        alu.execute();
+
+        REQUIRE(bl->get_value() == 0b11111010);
     }
 }
