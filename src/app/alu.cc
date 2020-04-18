@@ -14,9 +14,18 @@ void ArithemeticLogicUnit::execute() {
     flags_register->set_value(0);
 
     switch (operation) {
-        case alu_operation::mov:
-            destination->set_value(source->get_value());
+        case alu_operation::mov: {
+
+            uint64_t mask_s = 0;
+            mask_s = ~mask_s;
+            mask_s = mask_s >> (64 - size);
+
+            uint64_t mask_d = ~mask_s;
+
+            uint64_t result = (destination->get_value() & mask_d) | (source->get_value() & mask_s);
+            destination->set_value(result);
             break;
+        }
 
         case alu_operation::add: {
 

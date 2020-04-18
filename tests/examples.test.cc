@@ -111,7 +111,7 @@ TEST_CASE("examples") {
         }, 16);
 
         Instruction i3(instruction_code::mov, std::vector<operand_ptr> {
-            std::make_shared<RegisterOperand>(register_code::ax),
+            std::make_shared<RegisterOperand>(register_code::cx),
             std::make_shared<MemoryOperand>(register_code::rsp, 0, 16, register_code::ss)
         }, 16);
 
@@ -126,6 +126,38 @@ TEST_CASE("examples") {
         cpu.start();
 
         REQUIRE(registers[register_code::rsp]->get_value() == LOADER_DEFAULT_STACK_SEGMENT + LOADER_DEFAULT_STACK_SIZE - 2);
+        REQUIRE(registers[register_code::cx]->get_value() == 0x2647);
         REQUIRE(registers[register_code::bx]->get_value() == 0x2647);
+    }
+
+    SECTION("example 04: pop") {
+
+        Instruction i1(instruction_code::mov, std::vector<operand_ptr> {
+            std::make_shared<RegisterOperand>(register_code::rbx),
+            std::make_shared<ImmediateOperand>(0x2647)
+        }, 64);
+
+        Instruction i2(instruction_code::push, std::vector<operand_ptr> {
+            std::make_shared<RegisterOperand>(register_code::rbx)
+        }, 64);
+
+        Instruction i3(instruction_code::pop, std::vector<operand_ptr> {
+            std::make_shared<RegisterOperand>(register_code::rax)
+        }, 64);
+
+        Program program;
+        program.add_instruction(i1);
+        program.add_instruction(i2);
+        program.add_instruction(i3);
+        program.add_instruction(halt);
+
+        loader.load(program);
+
+        registers[register_code::rax]->set_value(0);
+        cpu.start();
+
+        REQUIRE(registers[register_code::rbx]->get_value() == 0x2647);
+        REQUIRE(registers[register_code::rax]->get_value() == 0x2647);
+        REQUIRE(registers[register_code::rsp]->get_value() == LOADER_DEFAULT_STACK_SEGMENT + LOADER_DEFAULT_STACK_SIZE);
     }
 }

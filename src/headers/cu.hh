@@ -22,6 +22,8 @@ private:
     bool execute_fpu;
     bool execute_sse;
 
+    uint64_t pop_temp_address;
+
     std::map<register_code, register_ptr> & registers;
     ArithemeticLogicUnit & alu;
     RandomAccessMemory & ram;
