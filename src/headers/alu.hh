@@ -9,7 +9,7 @@ enum class alu_operation {
 };
 
 enum class flag_code {
-    cf, pf, af, zf, sf, df, of
+    pf, zf, sf, of, cf
 };
 
 

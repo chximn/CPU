@@ -3,10 +3,8 @@
 ArithemeticLogicUnit::ArithemeticLogicUnit(register_ptr flags_reg): flags_register(flags_reg) {
     flags[flag_code::cf] = std::make_shared<PartRegister>(register_code::flags, flags_reg, 1, 0);
     flags[flag_code::pf] = std::make_shared<PartRegister>(register_code::flags, flags_reg, 1, 2);
-    flags[flag_code::af] = std::make_shared<PartRegister>(register_code::flags, flags_reg, 1, 4);
     flags[flag_code::zf] = std::make_shared<PartRegister>(register_code::flags, flags_reg, 1, 6);
     flags[flag_code::sf] = std::make_shared<PartRegister>(register_code::flags, flags_reg, 1, 7);
-    flags[flag_code::df] = std::make_shared<PartRegister>(register_code::flags, flags_reg, 1, 10);
     flags[flag_code::of] = std::make_shared<PartRegister>(register_code::flags, flags_reg, 1, 11);
 }
 
@@ -149,5 +147,7 @@ void ArithemeticLogicUnit::execute() {
     }
 
     if (destination->get_value() == 0) flags[flag_code::zf]->set_value(1);
+    if ((destination->get_value() >> (size - 1)) & 1) flags[flag_code::sf]->set_value(1);
+    if ((destination->get_value() & 1) == 0) flags[flag_code::pf]->set_value(1);
 
 }

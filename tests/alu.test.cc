@@ -93,6 +93,7 @@ TEST_CASE("alu") {
         alu.execute();
 
         REQUIRE(bl->get_value() == 0b00000010); // +2
+        REQUIRE(alu.flags[flag_code::pf]->get_value() == 1);
     }
 
     SECTION("and8 instruction") {
