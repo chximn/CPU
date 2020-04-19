@@ -4,7 +4,7 @@
 #include <map>
 
 enum class alu_operation {
-    mov, add, sub, div, idiv, mul, imul,
+    mov, add, sub, div, mul, neg,
     _and, _or, _xor, _not
 };
 

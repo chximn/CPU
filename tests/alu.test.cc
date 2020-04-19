@@ -144,4 +144,15 @@ TEST_CASE("alu") {
 
         REQUIRE(bl->get_value() == 0b11111010);
     }
+
+    SECTION("neg instruction") {
+        bl->set_value(0b00000101);
+
+        alu.size = 8;
+        alu.destination = bl;
+        alu.operation = alu_operation::neg;
+        alu.execute();
+
+        REQUIRE(bl->get_value() == 0b11111011);
+    }
 }

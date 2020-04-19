@@ -116,6 +116,13 @@ void ArithemeticLogicUnit::execute() {
             break;
         }
 
+        case alu_operation::neg: {
+            uint64_t value = destination->get_value();
+            uint64_t mask = (~static_cast<uint64_t>(0) >> (64 - size));
+            destination->set_value((~value & mask) + 1);
+            break;
+        }
+
         case alu_operation::_and: {
             destination->set_value(source->get_value() & destination->get_value());
             break;

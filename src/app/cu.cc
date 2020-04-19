@@ -211,6 +211,16 @@ void ControlUnit::decode() {
             break;
         }
 
+        case instruction_code::neg: {
+            alu.operation = alu_operation::neg;
+            load_from_memory = false;
+            write_to_memory = false;
+            evaluate_destination(operands.at(0));
+            alu.size = instruction.get_size();
+            execute_alu = true;
+            break;
+        }
+
         case instruction_code::_and: {
             alu.operation = alu_operation::_and;
             load_from_memory = false;
