@@ -178,6 +178,39 @@ void ControlUnit::decode() {
             break;
         }
 
+        case instruction_code::mul: {
+            alu.operation = alu_operation::mul;
+            load_from_memory = false;
+            write_to_memory = false;
+            evaluate_source(operands.at(0));
+            alu.destination = registers[register_code::rax];
+            alu.extra = registers[register_code::rdx];
+            alu.size = instruction.get_size();
+            execute_alu = true;
+            break;
+        }
+
+        case instruction_code::div: {
+            alu.operation = alu_operation::div;
+            load_from_memory = false;
+            write_to_memory = false;
+            evaluate_source(operands.at(0));
+
+            if (instruction.get_size() == 8) {
+                alu.destination = registers[register_code::al];
+                alu.extra = registers[register_code::ah];
+            }
+
+            else {
+                alu.destination = registers[register_code::rax];
+                alu.extra = registers[register_code::rdx];
+            }
+
+            alu.size = instruction.get_size();
+            execute_alu = true;
+            break;
+        }
+
         case instruction_code::_and: {
             alu.operation = alu_operation::_and;
             load_from_memory = false;

@@ -24,6 +24,7 @@ include(Colors)
 #                         Locate files (change as needed).
 # --------------------------------------------------------------------------------
 set(SOURCES
+    src/app/helpers.cc
     src/app/register.cc
     src/app/operand.cc
     src/app/instruction.cc
@@ -40,6 +41,7 @@ set(SOURCES
 
 set(TESTFILES
     tests/main.cc
+    tests/helpers.test.cc
     tests/register.test.cc
     tests/program.test.cc
     tests/ram.test.cc

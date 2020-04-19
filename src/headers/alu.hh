@@ -1,9 +1,11 @@
 #pragma once
+#include "helpers.hh"
 #include "register.hh"
 #include <map>
 
 enum class alu_operation {
-    mov, add, sub, div, _and, _or, _xor, _not
+    mov, add, sub, div, idiv, mul, imul,
+    _and, _or, _xor, _not
 };
 
 enum class flag_code {

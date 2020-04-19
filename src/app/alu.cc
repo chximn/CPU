@@ -99,6 +99,23 @@ void ArithemeticLogicUnit::execute() {
             break;
         }
 
+        case alu_operation::mul: {
+            uint64_t r, c;
+            helpers::multiply(source->get_value(), destination->get_value(), r, c, size);
+
+            destination->set_value(r);
+            extra->set_value(c);
+            break;
+        }
+
+        case alu_operation::div: {
+            uint64_t q, r;
+            helpers::multiply(destination->get_value(), source->get_value(), q, r, size);
+            destination->set_value(q);
+            extra->set_value(r);
+            break;
+        }
+
         case alu_operation::_and: {
             destination->set_value(source->get_value() & destination->get_value());
             break;
