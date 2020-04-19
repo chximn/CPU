@@ -255,6 +255,12 @@ void ControlUnit::decode() {
             break;
         }
 
+        case instruction_code::nop:
+            load_from_memory = false;
+            write_to_memory = false;
+            execute_alu = false;
+            break;
+
         case instruction_code::hlt:
             halt = true;
             load_from_memory = false;

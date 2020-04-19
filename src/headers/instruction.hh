@@ -11,7 +11,7 @@ enum class instruction_code {
 
     _and, _or, _xor, _not,
 
-    hlt
+    nop, hlt
 };
 
 class Instruction {
