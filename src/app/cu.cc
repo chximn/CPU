@@ -265,6 +265,17 @@ void ControlUnit::decode() {
             break;
         }
 
+        case instruction_code::cmp: {
+            alu.operation = alu_operation::cmp;
+            load_from_memory = false;
+            write_to_memory = false;
+            evaluate_destination(operands.at(0));
+            evaluate_source(operands.at(1));
+            alu.size = instruction.get_size();
+            execute_alu = true;
+            break;
+        }
+
         case instruction_code::nop:
             load_from_memory = false;
             write_to_memory = false;

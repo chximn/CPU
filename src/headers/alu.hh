@@ -5,7 +5,9 @@
 
 enum class alu_operation {
     mov, add, sub, div, mul, neg,
-    _and, _or, _xor, _not
+    _and, _or, _xor, _not,
+
+    cmp
 };
 
 enum class flag_code {

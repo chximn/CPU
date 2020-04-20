@@ -156,4 +156,18 @@ TEST_CASE("alu") {
 
         REQUIRE(bl->get_value() == 0b11111011);
     }
+
+    SECTION("cmp instruction") {
+        al->set_value(0b00000001);
+        bl->set_value(0b00000101);
+
+        alu.size = 8;
+        alu.source = bl;
+        alu.destination = al;
+        alu.operation = alu_operation::cmp;
+        alu.execute();
+
+        REQUIRE(alu.flags[flag_code::sf]->get_value() == 1);
+        REQUIRE(alu.flags[flag_code::zf]->get_value() == 0);
+    }
 }

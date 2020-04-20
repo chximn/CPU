@@ -10,6 +10,7 @@ ArithemeticLogicUnit::ArithemeticLogicUnit(register_ptr flags_reg): flags_regist
 
 void ArithemeticLogicUnit::execute() {
     flags_register->set_value(0);
+    bool update_flags = true;
 
     switch (operation) {
         case alu_operation::mov: {
@@ -57,8 +58,49 @@ void ArithemeticLogicUnit::execute() {
             break;
         }
 
-        case alu_operation::sub: {
+        case alu_operation::cmp: {
+            uint64_t result = 0;
+            auto source_value = source->get_value();
+            auto destination_value = destination->get_value();
 
+            if (size == 8) {
+                auto s = *reinterpret_cast<int8_t *>(&source_value);
+                auto d = *reinterpret_cast<int8_t *>(&destination_value);
+                auto r = d - s;
+                result += r;
+            }
+
+            else if (size == 16) {
+                auto s = *reinterpret_cast<int16_t *>(&source_value);
+                auto d = *reinterpret_cast<int16_t *>(&destination_value);
+                auto r = d - s;
+                result += r;
+            }
+
+            else if (size == 32) {
+                auto s = *reinterpret_cast<int32_t *>(&source_value);
+                auto d = *reinterpret_cast<int32_t *>(&destination_value);
+                auto r = d - s;
+                result += r;
+            }
+
+            else if (size == 64) {
+                auto s = *reinterpret_cast<int64_t *>(&source_value);
+                auto d = *reinterpret_cast<int64_t *>(&destination_value);
+                auto r = d - s;
+                result += r;
+            }
+
+            else throw "invalid alu size modifier";
+
+            update_flags = false;
+            if (result == 0) flags[flag_code::zf]->set_value(1);
+            if ((result >> (size - 1)) & 1) flags[flag_code::sf]->set_value(1);
+            if ((result & 1) == 0) flags[flag_code::pf]->set_value(1);
+            break;
+        }
+
+        case alu_operation::sub: {
             uint64_t result = 0;
             auto source_value = source->get_value();
             auto destination_value = destination->get_value();
@@ -146,8 +188,9 @@ void ArithemeticLogicUnit::execute() {
             break;
     }
 
-    if (destination->get_value() == 0) flags[flag_code::zf]->set_value(1);
-    if ((destination->get_value() >> (size - 1)) & 1) flags[flag_code::sf]->set_value(1);
-    if ((destination->get_value() & 1) == 0) flags[flag_code::pf]->set_value(1);
-
+    if (update_flags) {
+        if (destination->get_value() == 0) flags[flag_code::zf]->set_value(1);
+        if ((destination->get_value() >> (size - 1)) & 1) flags[flag_code::sf]->set_value(1);
+        if ((destination->get_value() & 1) == 0) flags[flag_code::pf]->set_value(1);
+    }
 }
