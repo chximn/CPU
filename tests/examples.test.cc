@@ -34,13 +34,13 @@ TEST_CASE("examples") {
             std::make_shared<RegisterOperand>(register_code::al)
         }, 8);
 
-        // add [0x8], al
-        Instruction i4(instruction_code::mov, std::vector<operand_ptr> {
+        // add [0x8], dl
+        Instruction i4(instruction_code::add, std::vector<operand_ptr> {
             std::make_shared<MemoryOperand>(8, 8, register_code::ds),
             std::make_shared<RegisterOperand>(register_code::dl)
         }, 8);
 
-        // add bh, [0x8]
+        // mov bh, [0x8]
         Instruction i5(instruction_code::mov, std::vector<operand_ptr> {
             std::make_shared<RegisterOperand>(register_code::bh),
             std::make_shared<MemoryOperand>(8, 8, register_code::ds)
@@ -59,9 +59,10 @@ TEST_CASE("examples") {
 
         loader.load(program);
 
+        registers[register_code::ebx]->set_value(0);
         cpu.start();
 
-        REQUIRE(registers[register_code::bh]->get_value() == 8);
+        REQUIRE(registers[register_code::bh]->get_value() == 9);
     }
 
 

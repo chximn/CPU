@@ -11,7 +11,9 @@ enum class instruction_code {
 
     _and, _or, _xor, _not,
 
-    cmp, 
+    shl, shr,
+
+    cmp,
 
     nop, hlt
 };

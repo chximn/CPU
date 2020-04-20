@@ -68,6 +68,7 @@ void ControlUnit::evaluate_destination(operand_ptr operand) {
         ram.size = memory_operand_pointer->get_size();
         alu.destination = ram.data_register;
         write_to_memory = true;
+        load_from_memory = true;
     }
 
     else if (immediate_operand_pointer != nullptr) {
@@ -116,6 +117,12 @@ void ControlUnit::decode() {
             write_to_memory = false;
             evaluate_destination(operands.at(0));
             evaluate_source(operands.at(1));
+
+            auto pointer = std::dynamic_pointer_cast<MemoryOperand>(operands.at(0));
+            if (pointer != nullptr) {
+                load_from_memory = false;
+            }
+
             execute_alu = true;
             alu.size = instruction.get_size();
             break;
@@ -273,6 +280,25 @@ void ControlUnit::decode() {
             evaluate_source(operands.at(1));
             alu.size = instruction.get_size();
             execute_alu = true;
+            break;
+        }
+
+        case instruction_code::shl: {
+            alu.operation = alu_operation::shl;
+            load_from_memory = false;
+            write_to_memory = false;
+
+            evaluate_destination(operands.at(0));
+
+            if (operands.size() == 2) evaluate_source(operands.at(1));
+            else {
+                alu.source = immediate_register;
+                immediate_register->set_value(1);
+            }
+
+            alu.size = instruction.get_size();
+            execute_alu = true;
+
             break;
         }
 

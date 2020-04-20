@@ -183,6 +183,16 @@ void ArithemeticLogicUnit::execute() {
             break;
         }
 
+        case alu_operation::shl: {
+            destination->set_value( (destination->get_value()) << (source->get_value()) );
+            break;
+        }
+
+        case alu_operation::shr: {
+            destination->set_value( (destination->get_value()) >> (source->get_value()) );
+            break;
+        }
+
         default:
 
             break;

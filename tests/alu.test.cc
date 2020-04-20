@@ -170,4 +170,30 @@ TEST_CASE("alu") {
         REQUIRE(alu.flags[flag_code::sf]->get_value() == 1);
         REQUIRE(alu.flags[flag_code::zf]->get_value() == 0);
     }
+
+    SECTION("shl instructions") {
+        al->set_value(0b0001010);
+        bl->set_value(3);
+
+        alu.size = 8;
+        alu.source = bl;
+        alu.destination = al;
+        alu.operation = alu_operation::shl;
+        alu.execute();
+
+        REQUIRE(al->get_value() == 0b01010000);
+    }
+
+    SECTION("shr instructions") {
+        al->set_value(0b0001010);
+        bl->set_value(3);
+
+        alu.size = 8;
+        alu.source = bl;
+        alu.destination = al;
+        alu.operation = alu_operation::shr;
+        alu.execute();
+
+        REQUIRE(al->get_value() == 0b00000001);
+    }
 }
