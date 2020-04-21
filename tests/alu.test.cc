@@ -8,8 +8,11 @@ TEST_CASE("alu") {
     ArithemeticLogicUnit alu(flags);
     auto rax = std::make_shared<FullRegister>(register_code::rax);
     auto rbx = std::make_shared<FullRegister>(register_code::rbx);
+    auto rdx = std::make_shared<FullRegister>(register_code::rdx);
     auto eax = std::make_shared<PartRegister>(register_code::eax, rax, 32, 0);
     auto ebx = std::make_shared<PartRegister>(register_code::ebx, rbx, 32, 0);
+    auto edx = std::make_shared<PartRegister>(register_code::edx, rdx, 32, 0);
+
 
     auto al = std::make_shared<PartRegister>(register_code::ebx, rax, 8, 0);
     auto bl = std::make_shared<PartRegister>(register_code::ebx, rbx, 8, 0);
@@ -195,5 +198,19 @@ TEST_CASE("alu") {
         alu.execute();
 
         REQUIRE(al->get_value() == 0b00000001);
+    }
+
+    SECTION("mul instruction") {
+        eax->set_value(56);
+        ebx->set_value(1000);
+
+        alu.size = 32;
+        alu.source = ebx;
+        alu.destination = eax;
+        alu.extra = edx;
+        alu.operation = alu_operation::mul;
+        alu.execute();
+
+        REQUIRE(eax->get_value() == 56000);
     }
 }

@@ -141,10 +141,13 @@ void ArithemeticLogicUnit::execute() {
 
         case alu_operation::mul: {
             uint64_t r, c;
-            helpers::multiply(source->get_value(), destination->get_value(), r, c, size);
+            auto a = source->get_value();
+            auto b = destination->get_value();
+            helpers::multiply(a, b, r, c, size);
 
             destination->set_value(r);
             extra->set_value(c);
+
             break;
         }
 

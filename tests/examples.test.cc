@@ -292,9 +292,53 @@ TEST_CASE("examples") {
         program.add_instruction(halt);
 
         loader.load(program);
-
         cpu.start();
 
         REQUIRE(registers[register_code::ebx]->get_value() == 2647);
+    }
+
+    SECTION("example 07: factorial of 5") {
+        std::vector<Instruction> instructions {
+
+            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+                std::make_shared<RegisterOperand>(register_code::eax),
+                std::make_shared<ImmediateOperand>(1)
+            }, 32),
+
+            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+                std::make_shared<RegisterOperand>(register_code::ecx),
+                std::make_shared<ImmediateOperand>(1)
+            }, 32),
+
+            Instruction(instruction_code::mul, std::vector<operand_ptr> {
+                std::make_shared<RegisterOperand>(register_code::ecx)
+            }, 32),
+
+            Instruction(instruction_code::add, std::vector<operand_ptr> {
+                std::make_shared<RegisterOperand>(register_code::ecx),
+                std::make_shared<ImmediateOperand>(1)
+            }, 32),
+
+            Instruction(instruction_code::cmp, std::vector<operand_ptr> {
+                std::make_shared<RegisterOperand>(register_code::ecx),
+                std::make_shared<ImmediateOperand>(6)
+            }, 32),
+
+            Instruction(instruction_code::jne, std::vector<operand_ptr> {
+                std::make_shared<ImmediateOperand>(-32)
+            }, 32),
+        };
+
+        Program program;
+        for (auto const & i : instructions) {
+            program.add_instruction(i);
+        }
+
+        program.add_instruction(halt);
+
+        loader.load(program);
+        cpu.start();
+
+        REQUIRE(registers[register_code::eax]->get_value() == 120);
     }
 }
