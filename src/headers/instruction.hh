@@ -15,7 +15,7 @@ enum class instruction_code {
 
     cmp,
 
-    jmp, je, jne, jl, jg, jle, jge,
+    jmp, je, jne, jl, jg, jle, jge, call, ret,
 
     nop, hlt
 };

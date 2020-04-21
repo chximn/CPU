@@ -485,6 +485,40 @@ void ControlUnit::decode() {
             break;
         }
 
+        case instruction_code::call: {
+            load_from_memory = false;
+            write_to_memory = false;
+
+            auto immediate_operand_pointer = std::dynamic_pointer_cast<ImmediateOperand>(operands.at(0));
+            if (immediate_operand_pointer != nullptr) {
+                alu.operation = alu_operation::add;
+            }
+
+            else alu.operation = alu_operation::mov;
+
+            evaluate_source(operands.at(0));
+            alu.destination = instruction_pointer_register;
+            alu.size = 64;
+            ram.size = 64;
+            ram.data_register->set_value(instruction_pointer_register->get_value());
+            write_to_memory = true;
+            execute_alu = true;
+            break;
+        }
+
+        case instruction_code::ret: {
+            load_from_memory = true;
+            write_to_memory = false;
+            ram.size = 64;
+
+            alu.operation = alu_operation::mov;
+            alu.destination = instruction_pointer_register;
+            alu.source = ram.data_register;
+            alu.size = 64;
+            execute_alu = true;
+            break;
+        }
+
         case instruction_code::nop:
             load_from_memory = false;
             write_to_memory = false;
@@ -507,21 +541,23 @@ void ControlUnit::load() {
     uint64_t instruction_pointer = (instruction_register->get_value());
     Instruction instruction = *reinterpret_cast<Instruction *>(instruction_pointer);
 
-    if (instruction.get_code() == instruction_code::pop) {
+    if (instruction.get_code() == instruction_code::pop || instruction.get_code() == instruction_code::ret) {
         pop_temp_address = ram.address_register->get_value();
         ram.address_register->set_value(registers[register_code::rsp]->get_value() + registers[register_code::ss]->get_value());
     }
 
-    else if (instruction.get_code() == instruction_code::push) registers[register_code::rsp]->set_value(registers[register_code::rsp]->get_value() - instruction.get_size() / 8);
+    else if (instruction.get_code() == instruction_code::push || instruction.get_code() == instruction_code::call)
+        registers[register_code::rsp]->set_value(registers[register_code::rsp]->get_value() - instruction.get_size() / 8);
 
     if (load_from_memory) ram.load();
 
-    if (instruction.get_code() == instruction_code::pop) {
+    if (instruction.get_code() == instruction_code::pop || instruction.get_code() == instruction_code::call) {
         registers[register_code::rsp]->set_value(registers[register_code::rsp]->get_value() + instruction.get_size() / 8);
         ram.address_register->set_value(pop_temp_address);
     }
 
-    if (instruction.get_code() == instruction_code::push) ram.address_register->set_value(registers[register_code::rsp]->get_value() + registers[register_code::ss]->get_value());
+    if (instruction.get_code() == instruction_code::push || instruction.get_code() == instruction_code::call)
+        ram.address_register->set_value(registers[register_code::rsp]->get_value() + registers[register_code::ss]->get_value());
 }
 
 void ControlUnit::execute() {

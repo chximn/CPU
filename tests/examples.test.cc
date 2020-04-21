@@ -341,4 +341,80 @@ TEST_CASE("examples") {
 
         REQUIRE(registers[register_code::eax]->get_value() == 120);
     }
+
+    SECTION("example 08: call") {
+        std::vector<Instruction> instructions {
+            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+                std::make_shared<RegisterOperand>(register_code::rax),
+                std::make_shared<ImmediateOperand>(0)
+            }, 64),
+
+            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+                std::make_shared<RegisterOperand>(register_code::eax),
+                std::make_shared<ImmediateOperand>(2647)
+            }, 32),
+
+            Instruction(instruction_code::call, std::vector<operand_ptr> {
+                std::make_shared<ImmediateOperand>(8)
+            }, 64),
+
+            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+                std::make_shared<RegisterOperand>(register_code::eax),
+                std::make_shared<ImmediateOperand>(1000)
+            }, 32),
+
+            Instruction(instruction_code::pop, std::vector<operand_ptr> {
+                std::make_shared<RegisterOperand>(register_code::rbx)
+            }, 64)
+        };
+
+        Program program;
+        for (auto const & i : instructions) {
+            program.add_instruction(i);
+        }
+
+        program.add_instruction(halt);
+
+        loader.load(program);
+        cpu.start();
+
+        REQUIRE(registers[register_code::eax]->get_value() == 2647);
+        REQUIRE(registers[register_code::rbx]->get_value() == 3 * 8);
+    }
+
+    SECTION("example 08: call + ret") {
+        std::vector<Instruction> instructions {
+            Instruction(instruction_code::jmp, std::vector<operand_ptr> {
+                std::make_shared<ImmediateOperand>(16)
+            }, 64),
+
+            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+                std::make_shared<RegisterOperand>(register_code::eax),
+                std::make_shared<ImmediateOperand>(2647)
+            }, 32),
+
+            Instruction(instruction_code::ret, std::vector<operand_ptr> {}, 64),
+
+            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+                std::make_shared<RegisterOperand>(register_code::eax),
+                std::make_shared<ImmediateOperand>(1000)
+            }, 32),
+
+            Instruction(instruction_code::call, std::vector<operand_ptr> {
+                std::make_shared<ImmediateOperand>(-32),
+            }, 64)
+        };
+
+        Program program;
+        for (auto const & i : instructions) {
+            program.add_instruction(i);
+        }
+
+        program.add_instruction(halt);
+
+        loader.load(program);
+        cpu.start();
+
+        REQUIRE(registers[register_code::eax]->get_value() == 2647);
+    }
 }
