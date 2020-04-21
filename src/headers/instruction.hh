@@ -1,6 +1,7 @@
 #pragma once
 #include "operand.hh"
 #include <vector>
+#include <memory>
 
 enum class instruction_code {
     mov, lea,
@@ -35,3 +36,5 @@ public:
     uint8_t get_size() const;
     std::vector<operand_ptr> const & get_operands() const;
 };
+
+using instruction_ptr = std::shared_ptr<Instruction>;

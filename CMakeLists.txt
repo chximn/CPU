@@ -19,6 +19,10 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 include(ConfigSafeGuards)
 include(Colors)
 
+# Include bison and flex
+find_package(BISON)
+find_package(FLEX)
+
 
 # --------------------------------------------------------------------------------
 #                         Locate files (change as needed).
@@ -50,7 +54,30 @@ set(TESTFILES
     tests/fpu.test.cc
     tests/vectorial.test.cc
     tests/loader.test.cc
+    tests/assembler.test.cc
     tests/examples.test.cc
+)
+
+#---------------------------------------------------------------------------------
+#                                  Bison and Flex
+#---------------------------------------------------------------------------------
+BISON_TARGET(parser src/assembler/parser.yy  ${CMAKE_CURRENT_BINARY_DIR}/parser.cpp)
+FLEX_TARGET(scanner src/assembler/scanner.ll ${CMAKE_CURRENT_BINARY_DIR}/scanner.cpp)
+ADD_FLEX_BISON_DEPENDENCY(scanner parser)
+add_library(assembler
+    src/assembler/assembler.cc
+    src/assembler/scanner.hh
+    src/assembler/scanner.ll
+    src/assembler/parser.yy
+    src/assembler/driver.cc
+    ${BISON_parser_OUTPUTS}
+    ${FLEX_scanner_OUTPUTS}
+)
+
+target_include_directories(assembler
+    PUBLIC ${PROJECT_SOURCE_DIR}/src/assembler
+    PUBLIC ${PROJECT_SOURCE_DIR}/src/headers
+    PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 # --------------------------------------------------------------------------------
@@ -68,6 +95,7 @@ target_include_directories(engine
 # If you add more executables, copy these lines accordingly.
 add_executable(app src/main.cc)   # Name of exec. and location of file.
 target_link_libraries(app PRIVATE engine) # Link the executable to `engine` (if it uses it).
+target_link_libraries(app PRIVATE assembler) # Link the executable to `engine` (if it uses it).
 
 # Set the compile options you want, possibly depending on compiler (change as needed).
 # Do similar for the executables if you wish to set options for them as well.
@@ -118,13 +146,11 @@ set_target_properties(engine app PROPERTIES
 set(TEST_MAIN unit_tests) # Default name for test executable (change if you wish).
 
 
-# add_subdirectory(external/Catch2)
-
 add_library(Catch2 INTERFACE)
 target_include_directories(Catch2 INTERFACE lib/)
 
 add_executable(${TEST_MAIN} ${TESTFILES})
-target_link_libraries(${TEST_MAIN} Catch2 engine pthread)
+target_link_libraries(${TEST_MAIN} Catch2 engine assembler pthread)
 add_custom_target(catch
     COMMAND "${PROJECT_BINARY_DIR}/${TEST_MAIN}"
     DEPENDS ${TEST_MAIN})
