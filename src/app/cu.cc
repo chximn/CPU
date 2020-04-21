@@ -1,5 +1,7 @@
 #include "cu.hh"
 
+#include <iostream>
+
 ControlUnit::ControlUnit(std::map<register_code, register_ptr> & r, ArithemeticLogicUnit & a, RandomAccessMemory & mem):
     instruction_pointer_register(std::make_shared<FullRegister>(register_code::rip)),
     instruction_register(std::make_shared<FullRegister>(register_code::ir)),
@@ -298,6 +300,187 @@ void ControlUnit::decode() {
 
             alu.size = instruction.get_size();
             execute_alu = true;
+
+            break;
+        }
+
+        case instruction_code::shr: {
+            alu.operation = alu_operation::shl;
+            load_from_memory = false;
+            write_to_memory = false;
+
+            evaluate_destination(operands.at(0));
+
+            if (operands.size() == 2) evaluate_source(operands.at(1));
+            else {
+                alu.source = immediate_register;
+                immediate_register->set_value(1);
+            }
+
+            alu.size = instruction.get_size();
+            execute_alu = true;
+
+            break;
+        }
+
+        case instruction_code::jmp: {
+            load_from_memory = false;
+            write_to_memory = false;
+
+            auto immediate_operand_pointer = std::dynamic_pointer_cast<ImmediateOperand>(operands.at(0));
+            if (immediate_operand_pointer != nullptr) {
+                alu.operation = alu_operation::add;
+
+            }
+
+            else alu.operation = alu_operation::mov;
+
+            evaluate_source(operands.at(0));
+            alu.destination = instruction_pointer_register;
+            alu.size = 64;
+            execute_alu = true;
+            break;
+        }
+
+        case instruction_code::je: {
+            load_from_memory = false;
+            write_to_memory = false;
+
+            if (alu.flags[flag_code::zf]->get_value() != 1) {
+                execute_alu = false;
+                break;
+            }
+
+            auto immediate_operand_pointer = std::dynamic_pointer_cast<ImmediateOperand>(operands.at(0));
+            if (immediate_operand_pointer != nullptr) {
+                alu.operation = alu_operation::add;
+            }
+
+            else alu.operation = alu_operation::mov;
+
+            evaluate_source(operands.at(0));
+            alu.destination = instruction_pointer_register;
+            alu.size = 64;
+            execute_alu = true;
+            break;
+        }
+
+        case instruction_code::jne: {
+            load_from_memory = false;
+            write_to_memory = false;
+
+            if (alu.flags[flag_code::zf]->get_value() != 0) {
+                execute_alu = false;
+                break;
+            }
+
+            auto immediate_operand_pointer = std::dynamic_pointer_cast<ImmediateOperand>(operands.at(0));
+            if (immediate_operand_pointer != nullptr) {
+                alu.operation = alu_operation::add;
+            }
+
+            else alu.operation = alu_operation::mov;
+
+            evaluate_source(operands.at(0));
+            alu.destination = instruction_pointer_register;
+            alu.size = 64;
+            execute_alu = true;
+            break;
+        }
+
+        case instruction_code::jg: {
+            load_from_memory = false;
+            write_to_memory = false;
+
+            if (alu.flags[flag_code::sf]->get_value() != 0 && alu.flags[flag_code::zf]->get_value() != 0) {
+                execute_alu = false;
+                break;
+            }
+
+            auto immediate_operand_pointer = std::dynamic_pointer_cast<ImmediateOperand>(operands.at(0));
+            if (immediate_operand_pointer != nullptr) {
+                alu.operation = alu_operation::add;
+            }
+
+            else alu.operation = alu_operation::mov;
+
+            evaluate_source(operands.at(0));
+            alu.destination = instruction_pointer_register;
+            alu.size = 64;
+            execute_alu = true;
+            break;
+        }
+
+        case instruction_code::jl: {
+            load_from_memory = false;
+            write_to_memory = false;
+
+            if (alu.flags[flag_code::sf]->get_value() != 1 && alu.flags[flag_code::zf]->get_value() != 0) {
+                execute_alu = false;
+                break;
+            }
+
+            auto immediate_operand_pointer = std::dynamic_pointer_cast<ImmediateOperand>(operands.at(0));
+            if (immediate_operand_pointer != nullptr) {
+                alu.operation = alu_operation::add;
+            }
+
+            else alu.operation = alu_operation::mov;
+
+            evaluate_source(operands.at(0));
+            alu.destination = instruction_pointer_register;
+            alu.size = 64;
+            execute_alu = true;
+            break;
+        }
+
+        case instruction_code::jge: {
+            load_from_memory = false;
+            write_to_memory = false;
+
+            if (alu.flags[flag_code::zf]->get_value() == 1 || alu.flags[flag_code::sf]->get_value() == 0) {
+                auto immediate_operand_pointer = std::dynamic_pointer_cast<ImmediateOperand>(operands.at(0));
+                if (immediate_operand_pointer != nullptr) {
+                    alu.operation = alu_operation::add;
+                }
+
+                else alu.operation = alu_operation::mov;
+
+                evaluate_source(operands.at(0));
+                alu.destination = instruction_pointer_register;
+                alu.size = 64;
+                execute_alu = true;
+                break;
+            }
+
+            else {
+                execute_alu = false;
+            }
+
+            break;
+        }
+
+        case instruction_code::jle: {
+            load_from_memory = false;
+            write_to_memory = false;
+
+            if (alu.flags[flag_code::zf]->get_value() == 1 || alu.flags[flag_code::sf]->get_value() == 1) {
+                auto immediate_operand_pointer = std::dynamic_pointer_cast<ImmediateOperand>(operands.at(0));
+                if (immediate_operand_pointer != nullptr) {
+                    alu.operation = alu_operation::add;
+                }
+
+                else alu.operation = alu_operation::mov;
+
+                evaluate_source(operands.at(0));
+                alu.destination = instruction_pointer_register;
+                alu.size = 64;
+                execute_alu = true;
+            }
+
+            else {
+                execute_alu = false;
+            }
 
             break;
         }

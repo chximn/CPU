@@ -161,4 +161,140 @@ TEST_CASE("examples") {
         REQUIRE(registers[register_code::rax]->get_value() == 0x2647);
         REQUIRE(registers[register_code::rsp]->get_value() == LOADER_DEFAULT_STACK_SEGMENT + LOADER_DEFAULT_STACK_SIZE);
     }
+
+    SECTION("example 05: jmp") {
+        Instruction i1(instruction_code::mov, std::vector<operand_ptr> {
+            std::make_shared<RegisterOperand>(register_code::ebx),
+            std::make_shared<ImmediateOperand>(2647)
+        }, 32);
+
+        Instruction i2(instruction_code::jmp, std::vector<operand_ptr> {
+            std::make_shared<ImmediateOperand>(8)
+        });
+
+        Instruction i3(instruction_code::mov, std::vector<operand_ptr> {
+            std::make_shared<RegisterOperand>(register_code::ebx),
+            std::make_shared<ImmediateOperand>(1000)
+        }, 32);
+
+        Program program;
+        program.add_instruction(i1);
+        program.add_instruction(i2);
+        program.add_instruction(i3);
+        program.add_instruction(halt);
+
+        loader.load(program);
+
+        cpu.start();
+
+        REQUIRE(registers[register_code::ebx]->get_value() == 2647);
+    }
+
+    SECTION("example 06: je, jne, jg, gl, jge, jle") {
+
+
+        std::vector<Instruction> instructions {
+            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+                std::make_shared<RegisterOperand>(register_code::ebx),
+                std::make_shared<ImmediateOperand>(2647)
+            }, 32),
+
+            Instruction(instruction_code::cmp, std::vector<operand_ptr> {
+                std::make_shared<RegisterOperand>(register_code::ebx),
+                std::make_shared<ImmediateOperand>(2647)
+            }, 32),
+
+            Instruction(instruction_code::je, std::vector<operand_ptr> {
+                std::make_shared<ImmediateOperand>(8)
+            }),
+
+            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+                std::make_shared<RegisterOperand>(register_code::ebx),
+                std::make_shared<ImmediateOperand>(1000)
+            }, 32),
+
+            Instruction(instruction_code::cmp, std::vector<operand_ptr> {
+                std::make_shared<RegisterOperand>(register_code::ebx),
+                std::make_shared<ImmediateOperand>(1000)
+            }, 32),
+
+            Instruction(instruction_code::jne, std::vector<operand_ptr> {
+                std::make_shared<ImmediateOperand>(8)
+            }),
+
+            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+                std::make_shared<RegisterOperand>(register_code::ebx),
+                std::make_shared<ImmediateOperand>(1000)
+            }, 32),
+
+            Instruction(instruction_code::cmp, std::vector<operand_ptr> {
+                std::make_shared<RegisterOperand>(register_code::ebx),
+                std::make_shared<ImmediateOperand>(2000)
+            }, 32),
+
+            Instruction(instruction_code::jg, std::vector<operand_ptr> {
+                std::make_shared<ImmediateOperand>(8)
+            }),
+
+            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+                std::make_shared<RegisterOperand>(register_code::ebx),
+                std::make_shared<ImmediateOperand>(1000)
+            }, 32),
+
+            Instruction(instruction_code::cmp, std::vector<operand_ptr> {
+                std::make_shared<RegisterOperand>(register_code::ebx),
+                std::make_shared<ImmediateOperand>(3000)
+            }, 32),
+
+            Instruction(instruction_code::jl, std::vector<operand_ptr> {
+                std::make_shared<ImmediateOperand>(8)
+            }),
+
+            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+                std::make_shared<RegisterOperand>(register_code::ebx),
+                std::make_shared<ImmediateOperand>(1000)
+            }, 32),
+
+            Instruction(instruction_code::cmp, std::vector<operand_ptr> {
+                std::make_shared<RegisterOperand>(register_code::ebx),
+                std::make_shared<ImmediateOperand>(2647)
+            }, 32),
+
+            Instruction(instruction_code::jle, std::vector<operand_ptr> {
+                std::make_shared<ImmediateOperand>(8)
+            }),
+
+            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+                std::make_shared<RegisterOperand>(register_code::ebx),
+                std::make_shared<ImmediateOperand>(1000)
+            }, 32),
+
+            Instruction(instruction_code::cmp, std::vector<operand_ptr> {
+                std::make_shared<RegisterOperand>(register_code::ebx),
+                std::make_shared<ImmediateOperand>(2647)
+            }, 32),
+
+            Instruction(instruction_code::jge, std::vector<operand_ptr> {
+                std::make_shared<ImmediateOperand>(8)
+            }),
+
+            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+                std::make_shared<RegisterOperand>(register_code::ebx),
+                std::make_shared<ImmediateOperand>(1000)
+            }, 32)
+        };
+
+        Program program;
+        for (auto const & i : instructions) {
+            program.add_instruction(i);
+        }
+
+        program.add_instruction(halt);
+
+        loader.load(program);
+
+        cpu.start();
+
+        REQUIRE(registers[register_code::ebx]->get_value() == 2647);
+    }
 }
