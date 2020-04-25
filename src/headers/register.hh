@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <memory>
 
-enum class register_code {
+enum register_code {
     // Memory Registers
     mar, mdr,
 
@@ -51,6 +51,9 @@ public:
     virtual void increment() = 0;
 
     virtual ~Register() = default;
+
+    static std::string to_string(register_code);
+    static uint8_t register_size(register_code);
 };
 
 using register_ptr = std::shared_ptr<Register>;

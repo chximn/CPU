@@ -1,5 +1,6 @@
 #pragma once
 #include "register.hh"
+#include "helpers.hh"
 #include <cstdint>
 #include <memory>
 
@@ -7,6 +8,8 @@
 class Operand {
 public:
     virtual ~Operand() = default;
+    virtual uint8_t get_size() const = 0;
+    virtual std::string to_string() const = 0;
 };
 
 using operand_ptr = std::shared_ptr<Operand>;
@@ -14,11 +17,17 @@ using operand_ptr = std::shared_ptr<Operand>;
 class ImmediateOperand : public Operand {
 private:
     uint64_t value;
+    uint8_t size;
 public:
     ImmediateOperand() = delete;
     ImmediateOperand(uint64_t);
 
     uint64_t get_value() const;
+
+    uint8_t get_size() const override;
+    void set_size(uint8_t);
+
+    std::string to_string() const override;
 };
 
 class MemoryOperand : public Operand {
@@ -55,7 +64,13 @@ public:
     bool get_use_segment() const;
     bool get_use_base() const;
     bool get_use_index() const;
-    uint8_t get_size() const;
+
+    uint8_t get_size() const override;
+
+    void set_size(uint8_t);
+    void set_segment(register_code);
+
+    std::string to_string() const override;
 };
 
 class RegisterOperand : public Operand {
@@ -67,4 +82,6 @@ public:
     RegisterOperand(register_code);
 
     register_code get_reg() const;
+    uint8_t get_size() const override;
+    std::string to_string() const override;
 };

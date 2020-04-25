@@ -3,12 +3,12 @@
 #include <vector>
 #include <memory>
 
-enum class instruction_code {
+enum instruction_code {
     mov, lea,
     push, pop,
 
 
-    add, sub, mul, div, neg,
+    add, sub, mul, _div, neg,
 
     _and, _or, _xor, _not,
 
@@ -35,6 +35,11 @@ public:
     instruction_code get_code() const;
     uint8_t get_size() const;
     std::vector<operand_ptr> const & get_operands() const;
+
+    std::string to_string() const;
+
+
+    static std::string to_string(instruction_code);
 };
 
 using instruction_ptr = std::shared_ptr<Instruction>;

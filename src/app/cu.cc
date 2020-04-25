@@ -199,7 +199,7 @@ void ControlUnit::decode() {
             break;
         }
 
-        case instruction_code::div: {
+        case instruction_code::_div: {
             alu.operation = alu_operation::div;
             load_from_memory = false;
             write_to_memory = false;

@@ -70,6 +70,7 @@ add_library(assembler
     src/assembler/scanner.ll
     src/assembler/parser.yy
     src/assembler/driver.cc
+    src/assembler/logger.cc
     ${BISON_parser_OUTPUTS}
     ${FLEX_scanner_OUTPUTS}
 )

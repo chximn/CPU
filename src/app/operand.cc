@@ -1,9 +1,30 @@
 #include "operand.hh"
 
-ImmediateOperand::ImmediateOperand(uint64_t v): value(v) {}
+ImmediateOperand::ImmediateOperand(uint64_t v): value(v), size(0) {}
 
 uint64_t ImmediateOperand::get_value() const {
     return value;
+}
+
+uint8_t ImmediateOperand::get_size() const {
+    if (size) return size;
+
+    if (value >> 8 == 0)  return 8;
+    if (value >> 16 == 0) return 16;
+    if (value >> 32 == 0) return 32;
+    return 64;
+}
+
+void ImmediateOperand::set_size(uint8_t s) {
+    auto old_size = size;
+    size = 0;
+    if (get_size() > s) size = old_size;
+    else size = s;
+}
+
+
+std::string ImmediateOperand::to_string() const {
+    return std::to_string(value);
 }
 
 MemoryOperand::MemoryOperand(register_code b, register_code i, uint8_t s, uint64_t d, uint8_t si, register_code seg):
@@ -78,12 +99,59 @@ bool MemoryOperand::get_use_index() const {
     return use_index;
 }
 
+void MemoryOperand::set_size(uint8_t s) {
+    size = s;
+}
+
+void MemoryOperand::set_segment(register_code c) {
+    segment = c;
+    use_segment = true;
+}
+
 uint8_t MemoryOperand::get_size() const {
     return size;
+}
+
+std::string MemoryOperand::to_string() const {
+
+    std::string str;
+
+    if (size == 8)  str += "byte";
+    if (size == 16) str += "word";
+    if (size == 32) str += "dword";
+    if (size == 64) str += "qword";
+
+
+    str += " ";
+
+    if (use_segment) str += Register::to_string(segment) + ":";
+    str += "[";
+    if (use_base) str += Register::to_string(base);
+    if (use_index) {
+        if (use_base) str += " + ";
+        str += Register::to_string(index) + " * " + std::to_string(scale);
+    }
+
+    if (displacement != 0) {
+        if (use_index || use_base) str += " + ";
+        str += std::to_string(displacement);
+    }
+
+    str += "]";
+
+    return str;
 }
 
 RegisterOperand::RegisterOperand(register_code r): reg(r) {}
 
 register_code RegisterOperand::get_reg() const {
     return reg;
+}
+
+uint8_t RegisterOperand::get_size() const {
+    return Register::register_size(reg);
+}
+
+std::string RegisterOperand::to_string() const {
+    return Register::to_string(reg);
 }

@@ -1,5 +1,45 @@
 #include "register.hh"
 
+std::string Register::to_string(register_code code) {
+    std::string names[] = {
+        "mar", "mdr", "cs", "ds", "ss",
+        "rax", "rbx", "rcx", "rdx",
+        "eax", "ebx", "ecx", "edx",
+        "ax", "bx", "cx", "dx",
+        "al", "bl", "cl", "dl",
+        "ah", "bh", "ch", "dh",
+        "rsp", "esp", "sp",
+        "rflags", "eflags", "flags",
+        "st0", "st1", "st2", "st3",
+        "st4", "st5", "st6", "st7",
+        "rip", "ir", "_immediate",
+        "xmm0", "xmm1", "xmm2", "xmm3",
+        "xmm4", "xmm5", "xmm6", "xmm7"
+    };
+
+    return names[code];
+}
+
+uint8_t Register::register_size(register_code code) {
+    uint8_t sizes[] = {
+        64, 64, 16, 16, 16,
+        64, 64, 64, 64,
+        32, 32, 32, 32,
+        16, 16, 16, 16,
+        8, 8, 8, 8,
+        8, 8, 8, 8,
+        64, 32, 16,
+        64, 32, 16,
+
+        64, 64, 64, 64, 64, 64, 64, 64,
+        64, 64, 64,
+
+        128, 128, 128, 128, 128, 128, 128, 128
+    };
+
+    return sizes[code];
+}
+
 Register::Register(register_code c) : code(c) {}
 
 register_code Register::get_code() const {
