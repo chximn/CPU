@@ -215,7 +215,16 @@ instruction:
 
     CMP two_alu_operands { $$ = std::make_shared<Instruction>(instruction_code::cmp, $2, $2.at(0)->get_size()); } |
 
-    /* jmp, je, jne, jl, jg, jle, jge, call, ret, */
+    JMP { $$ = std::make_shared<Instruction>(instruction_code::jmp, std::vector<operand_ptr>{}, 0); } |
+    JE  immediate_op { $$ = std::make_shared<Instruction>(instruction_code::je,  std::vector<operand_ptr>{ $2 }, 0); } |
+    JNE immediate_op { $$ = std::make_shared<Instruction>(instruction_code::jne, std::vector<operand_ptr>{ $2 }, 0); } |
+    JL  immediate_op { $$ = std::make_shared<Instruction>(instruction_code::jl,  std::vector<operand_ptr>{ $2 }, 0); } |
+    JLE immediate_op { $$ = std::make_shared<Instruction>(instruction_code::jle, std::vector<operand_ptr>{ $2 }, 0); } |
+    JG  immediate_op { $$ = std::make_shared<Instruction>(instruction_code::jg,  std::vector<operand_ptr>{ $2 }, 0); } |
+    JGE immediate_op { $$ = std::make_shared<Instruction>(instruction_code::jge, std::vector<operand_ptr>{ $2 }, 0); } |
+
+    CALL immediate_op { $$ = std::make_shared<Instruction>(instruction_code::call, std::vector<operand_ptr>{ $2 }, 0); } |
+    RET  { $$ = std::make_shared<Instruction>(instruction_code::ret, std::vector<operand_ptr>{}, 0); } |
 
     NOP { $$ = std::make_shared<Instruction>(instruction_code::nop, std::vector<operand_ptr>{}, 0); } |
     HLT { $$ = std::make_shared<Instruction>(instruction_code::hlt, std::vector<operand_ptr>{}, 0); }

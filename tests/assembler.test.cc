@@ -23,6 +23,15 @@ TEST_CASE("assembler") {
           "shl eax, 2\n"
           "shl eax, cl\n"
           "shl dword [eax], 2\n"
+          "jmp\n"
+          "jne 8\n"
+          "je 8\n"
+          "jg 8\n"
+          "jl 8\n"
+          "jle 8\n"
+          "jge 8\n"
+          "call 8\n"
+          "ret\n"
           "nop\n"
           "hlt\n\n";
 
