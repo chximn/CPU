@@ -141,7 +141,6 @@ using token = yy::Parser::token;
 
 "\n" {
     loc->lines();
-    logger::increment_line();
     return token::NL;
 }
 

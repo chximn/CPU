@@ -122,20 +122,20 @@ instruction:
     LEA register_op "," memory_op {
         auto op = std::dynamic_pointer_cast<MemoryOperand>($4);
 
-        if (op->get_size() != 0) logger::error("invalid size specification");
-        if (op->get_use_segment()) logger::error("invalid segment specification");
+        if (op->get_size() != 0) logger::error("invalid size specification", @1.begin.line);
+        if (op->get_use_segment()) logger::error("invalid segment specification", @1.begin.line);
 
         $$ = std::make_shared<Instruction>(instruction_code::lea, std::vector<operand_ptr>{$2, $4}, $2->get_size());
     } |
 
     PUSH one_alu_operand {
-        if ($2.at(0)->get_size() == 0) logger::error("size must be specified");
+        if ($2.at(0)->get_size() == 0) logger::error("size must be specified", @1.begin.line);
         $$ = std::make_shared<Instruction>(instruction_code::push, $2, $2.at(0)->get_size());
     } |
 
     POP one_alu_operand  {
-        if ($2.at(0)->get_size() == 0) logger::error("size must be specified");
-        if (std::dynamic_pointer_cast<ImmediateOperand>($2.at(0)) != nullptr) logger::error("invalid operand");
+        if ($2.at(0)->get_size() == 0) logger::error("size must be specified", @1.begin.line);
+        if (std::dynamic_pointer_cast<ImmediateOperand>($2.at(0)) != nullptr) logger::error("invalid operand", @1.begin.line);
         $$ = std::make_shared<Instruction>(instruction_code::push, $2, $2.at(0)->get_size());
     } |
 
@@ -152,6 +152,8 @@ instruction:
     XOR two_alu_operands { $$ = std::make_shared<Instruction>(instruction_code::_xor, $2, $2.at(0)->get_size()); } |
 
     NOT one_alu_operand { $$ = std::make_shared<Instruction>(instruction_code::_not, $2, $2.at(0)->get_size()); } |
+
+
 
     /* shl, */
     /* shr, */
@@ -170,25 +172,26 @@ one_alu_operand:
 
 two_alu_operands:
     register_op "," immediate_op {
-        if ($1->get_size() < $3->get_size()) logger::error("size mismatch");
+        if ($1->get_size() < $3->get_size()) logger::error("size mismatch", @1.begin.line);
         $$ = std::vector<operand_ptr>{$1, $3}; } |
 
     register_op "," memory_op    {
         if ($3->get_size() == 0) std::dynamic_pointer_cast<MemoryOperand>($3)->set_size($1->get_size());
-        else if ($1->get_size() != $3->get_size()) logger::error("size mismatch");
+        else if ($1->get_size() != $3->get_size()) logger::error("size mismatch", @1.begin.line);
         $$ = std::vector<operand_ptr>{$1, $3}; } |
 
     register_op "," register_op {
-        if ($1->get_size() != $3->get_size()) logger::error("size mismatch");
+        if ($1->get_size() != $3->get_size()) logger::error("size mismatch", @1.begin.line);
         $$ = std::vector<operand_ptr>{$1, $3}; } |
 
     memory_op   "," register_op  {
-        if ($3->get_size() == 0) std::dynamic_pointer_cast<MemoryOperand>($1)->set_size($3->get_size());
-        if ($1->get_size() != $3->get_size()) logger::error("size mismatch");
+        if ($1->get_size() == 0) std::dynamic_pointer_cast<MemoryOperand>($1)->set_size($3->get_size());
+        if ($1->get_size() != $3->get_size()) logger::error("size mismatch", @1.begin.line);
         $$ = std::vector<operand_ptr>{$1, $3}; } |
 
     memory_op   "," immediate_op {
-        if ($1->get_size() < $3->get_size()) logger::error("size mismatch");
+        if ($1->get_size() == 0) logger::error("memory operand size must be provided", @1.begin.line);
+        if ($1->get_size() < $3->get_size()) logger::error("size mismatch", @1.begin.line);
         $$ = std::vector<operand_ptr>{$1, $3}; }
 
 comment: COMMENT
@@ -210,7 +213,7 @@ memory_op:
 memory_op_without_size:
     REGISTER ":" memory_op_without_segment {
         if ($1 != register_code::cs && $1 != register_code::ds && $1 != register_code::ss)
-            logger::error("invalid segment");
+            logger::error("invalid segment", @1.begin.line);
 
         std::dynamic_pointer_cast<MemoryOperand>($3)->set_segment($1);
         $$ = $3;
@@ -231,7 +234,7 @@ memory_op_without_segment:
 scale:
     NUMBER {
         if ($1 != 1 && $1 != 2 && $1 != 4 && $1 != 8)
-            logger::error("invalid scale");
+            logger::error("invalid scale", @1.begin.line);
 
         $$ = $1;
     }
@@ -245,6 +248,6 @@ size_specifier:
 %%
 
 void yy::Parser::error(const location_type &l, const std::string & err_msg) {
-    logger::error(err_msg, l.begin.line - 1);
+    logger::error(err_msg, l.begin.line);
     exit(-1);
 }

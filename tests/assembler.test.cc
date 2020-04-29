@@ -4,7 +4,7 @@
 
 TEST_CASE("assembler") {
 
-    auto code ="\n\n\n\n\n\n\n\n\n\n"
+    auto code = ""
           "mov eax, 1000\n"
           "mov eax, [1000]\n"
           "mov eax, [eax]\n"
