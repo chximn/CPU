@@ -21,8 +21,8 @@ TEST_CASE("assembler") {
           "push dword 100\n"
           "shl eax\n"
           "shl eax, 2\n"
-          "shl eax, cx\n"
-          "shl [eax], 2\n"
+          "shl eax, cl\n"
+          "shl dword [eax], 2\n"
           "nop\n"
           "hlt\n\n";
 

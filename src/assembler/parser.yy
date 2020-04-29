@@ -153,10 +153,65 @@ instruction:
 
     NOT one_alu_operand { $$ = std::make_shared<Instruction>(instruction_code::_not, $2, $2.at(0)->get_size()); } |
 
+    SHL register_op { $$ = std::make_shared<Instruction>(instruction_code::shl, std::vector<operand_ptr>{$2}, $2->get_size()); } |
+    SHL register_op "," immediate_op {
+        $$ = std::make_shared<Instruction>(instruction_code::shl, std::vector<operand_ptr>{$2, $4}, $2->get_size());
+    } |
 
+    SHL register_op "," register_op {
+        if (std::dynamic_pointer_cast<RegisterOperand>($4)->get_reg() != register_code::cl)
+            logger::error("only CL can be used as a register operand", @1.begin.line);
 
-    /* shl, */
-    /* shr, */
+        $$ = std::make_shared<Instruction>(instruction_code::shl, std::vector<operand_ptr>{$2, $4}, $2->get_size());
+    } |
+
+    SHL memory_op {
+        if (std::dynamic_pointer_cast<MemoryOperand>($2)->get_size() == 0) logger::error("memory operand size must be specified", @1.begin.line);
+        $$ = std::make_shared<Instruction>(instruction_code::shl, std::vector<operand_ptr>{$2}, $2->get_size());
+    } |
+
+    SHL memory_op "," immediate_op {
+        if (std::dynamic_pointer_cast<MemoryOperand>($2)->get_size() == 0) logger::error("memory operand size must be specified", @1.begin.line);
+        $$ = std::make_shared<Instruction>(instruction_code::shl, std::vector<operand_ptr>{$2, $4}, $2->get_size());
+    } |
+
+    SHL memory_op "," register_op {
+        if (std::dynamic_pointer_cast<MemoryOperand>($2)->get_size() == 0) logger::error("memory operand size must be specified", @1.begin.line);
+        if (std::dynamic_pointer_cast<RegisterOperand>($4)->get_reg() != register_code::cl)
+            logger::error("only CL can be used as a register operand", @1.begin.line);
+
+        $$ = std::make_shared<Instruction>(instruction_code::shl, std::vector<operand_ptr>{$2, $4}, $2->get_size());
+    } |
+
+    SHR register_op { $$ = std::make_shared<Instruction>(instruction_code::shr, std::vector<operand_ptr>{$2}, $2->get_size()); } |
+    SHR register_op "," immediate_op {
+        $$ = std::make_shared<Instruction>(instruction_code::shr, std::vector<operand_ptr>{$2, $4}, $2->get_size());
+    } |
+
+    SHR register_op "," register_op {
+        if (std::dynamic_pointer_cast<RegisterOperand>($4)->get_reg() != register_code::cl)
+            logger::error("only CL can be used as a register operand", @1.begin.line);
+
+        $$ = std::make_shared<Instruction>(instruction_code::shr, std::vector<operand_ptr>{$2, $4}, $2->get_size());
+    } |
+
+    SHR memory_op {
+        if (std::dynamic_pointer_cast<MemoryOperand>($2)->get_size() == 0) logger::error("memory operand size must be specified", @1.begin.line);
+        $$ = std::make_shared<Instruction>(instruction_code::shr, std::vector<operand_ptr>{$2}, $2->get_size());
+    } |
+
+    SHR memory_op "," immediate_op {
+        if (std::dynamic_pointer_cast<MemoryOperand>($2)->get_size() == 0) logger::error("memory operand size must be specified", @1.begin.line);
+        $$ = std::make_shared<Instruction>(instruction_code::shr, std::vector<operand_ptr>{$2, $4}, $2->get_size());
+    } |
+
+    SHR memory_op "," register_op {
+        if (std::dynamic_pointer_cast<MemoryOperand>($2)->get_size() == 0) logger::error("memory operand size must be specified", @1.begin.line);
+        if (std::dynamic_pointer_cast<RegisterOperand>($4)->get_reg() != register_code::cl)
+            logger::error("only CL can be used as a register operand", @1.begin.line);
+
+        $$ = std::make_shared<Instruction>(instruction_code::shr, std::vector<operand_ptr>{$2, $4}, $2->get_size());
+    } |
 
     CMP two_alu_operands { $$ = std::make_shared<Instruction>(instruction_code::cmp, $2, $2.at(0)->get_size()); } |
 
