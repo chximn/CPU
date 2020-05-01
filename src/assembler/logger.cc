@@ -18,7 +18,7 @@ void logger::set_lines(std::vector<std::string> const & ls) {
 void logger::error(std::string const & s, int line) {
 	std::cerr << "[\e[91mERROR\e[0m] " << s << "\n";
 
-	for (int i = std::max(0, line - LOGGER_PADDING); i < line; i++)
+	for (int i = std::max(1, line - LOGGER_PADDING); i < line; i++)
 		std::cerr << "\e[90m" << format_line_number(i) << " |\t" << lines.at(i - 1) << "\e[0m\n";
 
 	std::cerr << "\e[91m" << format_line_number(line) << "\e[0m |\t" << lines.at(line - 1) << "\e[0m\n";

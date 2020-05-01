@@ -155,3 +155,12 @@ uint8_t RegisterOperand::get_size() const {
 std::string RegisterOperand::to_string() const {
     return Register::to_string(reg);
 }
+
+EvaluatableOperand::EvaluatableOperand(std::string const & s): name(s) {}
+
+std::string EvaluatableOperand::get_name() const { return name; }
+uint8_t EvaluatableOperand::get_size() const { return 0; }
+std::string EvaluatableOperand::to_string() const { return name; }
+
+LabelOperand::LabelOperand(std::string const & s): EvaluatableOperand(s) {}
+ObjectOperand::ObjectOperand(std::string const & s): EvaluatableOperand(s) {}

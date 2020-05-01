@@ -5,10 +5,10 @@
 
 class Driver {
 private:
-    SymbolTable symbol_table;
     Program program;
 public:
     Driver() = default;
 
+    SymbolTable symbol_table;
     Program const & get_program();
 };

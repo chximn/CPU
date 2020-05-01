@@ -38,6 +38,7 @@
 %token                  TIMES         "*"
 %token                  COLON         ":"
 
+%token <std::string>    LABEL
 %token <int>            NUMBER
 %token <std::string>    COMMENT
 %token <register_code>  REGISTER
@@ -60,6 +61,8 @@
 %type <operand_ptr> memory_op
 %type <operand_ptr> memory_op_without_segment
 %type <operand_ptr> memory_op_without_size
+%type <operand_ptr> label_op
+%type <operand_ptr> imm_label_op
 %type <uint8_t>     scale
 %type <uint8_t>     size_specifier
 
@@ -68,15 +71,26 @@
 program:
     instructions {
 
-        logger::info("done!");
+        logger::info("instructions: ");
         for (auto const & i : $1) {
             logger::info(i->to_string());
+        }
+
+        logger::info("labels: ");
+        for (auto const & i : driver.symbol_table.labels) {
+            logger::info(i.first + " --> " + i.second->to_string());
         }
 
         YYACCEPT;
     }
 
 instructions:
+    LABEL ":" instructions {
+        logger::info("found label " + $1 + " at line " + std::to_string(@1.begin.line) );
+        driver.symbol_table.labels[$1] = $3.at(0);
+        $$ = $3;
+    } |
+
 	comment NL instructions {
 		$$ = $3;
 	} |
@@ -216,14 +230,15 @@ instruction:
     CMP two_alu_operands { $$ = std::make_shared<Instruction>(instruction_code::cmp, $2, $2.at(0)->get_size()); } |
 
     JMP { $$ = std::make_shared<Instruction>(instruction_code::jmp, std::vector<operand_ptr>{}, 0); } |
-    JE  immediate_op { $$ = std::make_shared<Instruction>(instruction_code::je,  std::vector<operand_ptr>{ $2 }, 0); } |
-    JNE immediate_op { $$ = std::make_shared<Instruction>(instruction_code::jne, std::vector<operand_ptr>{ $2 }, 0); } |
-    JL  immediate_op { $$ = std::make_shared<Instruction>(instruction_code::jl,  std::vector<operand_ptr>{ $2 }, 0); } |
-    JLE immediate_op { $$ = std::make_shared<Instruction>(instruction_code::jle, std::vector<operand_ptr>{ $2 }, 0); } |
-    JG  immediate_op { $$ = std::make_shared<Instruction>(instruction_code::jg,  std::vector<operand_ptr>{ $2 }, 0); } |
-    JGE immediate_op { $$ = std::make_shared<Instruction>(instruction_code::jge, std::vector<operand_ptr>{ $2 }, 0); } |
+    JE  imm_label_op { $$ = std::make_shared<Instruction>(instruction_code::je,  std::vector<operand_ptr>{ $2 }, 0); } |
+    JNE imm_label_op { $$ = std::make_shared<Instruction>(instruction_code::jne, std::vector<operand_ptr>{ $2 }, 0); } |
+    JL  imm_label_op { $$ = std::make_shared<Instruction>(instruction_code::jl,  std::vector<operand_ptr>{ $2 }, 0); } |
+    JLE imm_label_op { $$ = std::make_shared<Instruction>(instruction_code::jle, std::vector<operand_ptr>{ $2 }, 0); } |
+    JG  imm_label_op { $$ = std::make_shared<Instruction>(instruction_code::jg,  std::vector<operand_ptr>{ $2 }, 0); } |
+    JGE imm_label_op { $$ = std::make_shared<Instruction>(instruction_code::jge, std::vector<operand_ptr>{ $2 }, 0); } |
 
-    CALL immediate_op { $$ = std::make_shared<Instruction>(instruction_code::call, std::vector<operand_ptr>{ $2 }, 0); } |
+    CALL imm_label_op { $$ = std::make_shared<Instruction>(instruction_code::call, std::vector<operand_ptr>{ $2 }, 0); } |
+
     RET  { $$ = std::make_shared<Instruction>(instruction_code::ret, std::vector<operand_ptr>{}, 0); } |
 
     NOP { $$ = std::make_shared<Instruction>(instruction_code::nop, std::vector<operand_ptr>{}, 0); } |
@@ -259,6 +274,12 @@ two_alu_operands:
         $$ = std::vector<operand_ptr>{$1, $3}; }
 
 comment: COMMENT
+
+
+imm_label_op: label_op | immediate_op
+
+label_op:
+    LABEL { $$ = std::make_shared<LabelOperand>($1); }
 
 register_op:
     REGISTER { $$ = std::make_shared<RegisterOperand>($1); }

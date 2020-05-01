@@ -7,6 +7,7 @@ TEST_CASE("assembler") {
     auto code = ""
           "mov eax, 1000\n"
           "mov eax, [1000]\n"
+          ".loop:\n"
           "mov eax, [eax]\n"
           "mov eax, [eax + 1000]\n"
           "mov eax, [eax + ecx]\n"

@@ -85,3 +85,26 @@ public:
     uint8_t get_size() const override;
     std::string to_string() const override;
 };
+
+class EvaluatableOperand : public Operand {
+private:
+    std::string name;
+public:
+    EvaluatableOperand() = delete;
+    EvaluatableOperand(std::string const &);
+
+    std::string get_name() const;
+    uint8_t get_size() const override;
+    std::string to_string() const override;
+};
+
+class LabelOperand : public EvaluatableOperand {
+public:
+    LabelOperand(std::string const &);
+};
+
+class ObjectOperand : public EvaluatableOperand {
+public:
+    ObjectOperand() = delete;
+    ObjectOperand(std::string const &);
+};

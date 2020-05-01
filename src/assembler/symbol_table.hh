@@ -1,14 +1,11 @@
 #pragma once
 #include <map>
-
-class Driver;
+#include "instruction.hh"
 
 class SymbolTable {
-private:
-    std::map<std::string, int> labels;
-    std::map<std::string, int> objects;
-
 public:
+    std::map<std::string, instruction_ptr> labels;
+    std::map<std::string, int> objects;
     SymbolTable() = default;
-    friend Driver;
+
 };
