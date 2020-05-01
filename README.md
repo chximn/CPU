@@ -3,8 +3,8 @@
 
 ### Prerequisites
 Make sure you have installed all of the following prerequisites on your machine:
-* `flex`
-* `bison`
+* `flex>=2.6.4`
+* `bison>=3.3.2`
 * `cmake>=3.8`
 * a `C++17` compiler `gcc, g++, ...`
 
