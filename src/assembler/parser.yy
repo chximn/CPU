@@ -327,25 +327,25 @@ memory_op_without_segment:
 
     "[" REGISTER "+" REGISTER "*" scale "+" SYMBOL "]" {
         auto op = std::make_shared<MemoryOperand>($2, $4, $6, 0, 0);
-        op->set_evaluatable_displacement(std::make_shared<ObjectOperand>($8));
+        op->set_object_displacement(std::make_shared<ObjectOperand>($8));
         $$ = op;
     } |
 
     "[" REGISTER "*" scale "+" SYMBOL "]" {
         auto op = std::make_shared<MemoryOperand>($2, $4, 0, 0);
-        op->set_evaluatable_displacement(std::make_shared<ObjectOperand>($6));
+        op->set_object_displacement(std::make_shared<ObjectOperand>($6));
         $$ = op;
     } |
 
     "[" REGISTER "+" SYMBOL "]" {
         auto op = std::make_shared<MemoryOperand>($2, 0, 0);
-        op->set_evaluatable_displacement(std::make_shared<ObjectOperand>($4));
+        op->set_object_displacement(std::make_shared<ObjectOperand>($4));
         $$ = op;
     } |
 
     "[" SYMBOL "]" {
         auto op = std::make_shared<MemoryOperand>(0, 0);
-        op->set_evaluatable_displacement(std::make_shared<ObjectOperand>($2));
+        op->set_object_displacement(std::make_shared<ObjectOperand>($2));
         $$ = op;
     }
 

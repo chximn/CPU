@@ -42,11 +42,11 @@ private:
     bool use_index;
     bool use_segment;
 
-    operand_ptr evaluatable_displacement;
-    bool use_evaluatable_displacement;
+    operand_ptr object_displacement;
+    bool use_object_displacement;
 
     uint8_t size;
-    
+
 public:
     MemoryOperand() = delete;
     MemoryOperand(register_code, register_code, uint8_t, uint64_t, uint8_t, register_code);
@@ -74,9 +74,9 @@ public:
     void set_size(uint8_t);
     void set_segment(register_code);
 
-    void set_evaluatable_displacement(operand_ptr);
-    operand_ptr get_evaluatable_displacement();
-    bool get_use_evaluatable_displacement();
+    void set_object_displacement(operand_ptr);
+    operand_ptr get_object_displacement();
+    bool get_use_object_displacement();
 
     std::string to_string() const override;
 };
@@ -94,24 +94,24 @@ public:
     std::string to_string() const override;
 };
 
-class EvaluatableOperand : public Operand {
+class SymbolOperand : public Operand {
 private:
     std::string name;
 public:
-    EvaluatableOperand() = delete;
-    EvaluatableOperand(std::string const &);
+    SymbolOperand() = delete;
+    SymbolOperand(std::string const &);
 
     std::string get_name() const;
     uint8_t get_size() const override;
     std::string to_string() const override;
 };
 
-class LabelOperand : public EvaluatableOperand {
+class LabelOperand : public SymbolOperand {
 public:
     LabelOperand(std::string const &);
 };
 
-class ObjectOperand : public EvaluatableOperand {
+class ObjectOperand : public SymbolOperand {
 public:
     ObjectOperand() = delete;
     ObjectOperand(std::string const &);
