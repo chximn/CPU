@@ -41,8 +41,12 @@ private:
     bool use_base;
     bool use_index;
     bool use_segment;
-    uint8_t size;
 
+    operand_ptr evaluatable_displacement;
+    bool use_evaluatable_displacement;
+
+    uint8_t size;
+    
 public:
     MemoryOperand() = delete;
     MemoryOperand(register_code, register_code, uint8_t, uint64_t, uint8_t, register_code);
@@ -69,6 +73,10 @@ public:
 
     void set_size(uint8_t);
     void set_segment(register_code);
+
+    void set_evaluatable_displacement(operand_ptr);
+    operand_ptr get_evaluatable_displacement();
+    bool get_use_evaluatable_displacement();
 
     std::string to_string() const override;
 };

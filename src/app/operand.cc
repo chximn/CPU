@@ -30,42 +30,42 @@ std::string ImmediateOperand::to_string() const {
 MemoryOperand::MemoryOperand(register_code b, register_code i, uint8_t s, uint64_t d, uint8_t si, register_code seg):
     base(b), index(i), scale(s), displacement(d), segment(seg),
     use_base(true), use_index(true), use_segment(true),
-    size(si) {}
+    use_evaluatable_displacement(false), size(si) {}
 
 MemoryOperand::MemoryOperand(register_code i, uint8_t s, uint64_t d, uint8_t si, register_code seg):
     index(i), scale(s), displacement(d), segment(seg),
     use_base(false), use_index(true), use_segment(true),
-    size(si) {}
+    use_evaluatable_displacement(false), size(si) {}
 
 MemoryOperand::MemoryOperand(register_code b, uint64_t d, uint8_t si, register_code seg):
     base(b), displacement(d), segment(seg),
     use_base(true), use_index(false), use_segment(true),
-    size(si) {}
+    use_evaluatable_displacement(false), size(si) {}
 
 MemoryOperand::MemoryOperand(uint64_t d, uint8_t si, register_code seg):
     displacement(d), segment(seg),
     use_base(false), use_index(false), use_segment(true),
-    size(si) {}
+    use_evaluatable_displacement(false), size(si) {}
 
 MemoryOperand::MemoryOperand(register_code b, register_code i, uint8_t s, uint64_t d, uint8_t si):
     base(b), index(i), scale(s), displacement(d),
     use_base(true), use_index(true), use_segment(false),
-    size(si) {}
+    use_evaluatable_displacement(false), size(si) {}
 
 MemoryOperand::MemoryOperand(register_code i, uint8_t s, uint64_t d, uint8_t si):
     index(i), scale(s), displacement(d),
     use_base(false), use_index(true), use_segment(false),
-    size(si) {}
+    use_evaluatable_displacement(false), size(si) {}
 
 MemoryOperand::MemoryOperand(register_code b, uint64_t d, uint8_t si):
     base(b), displacement(d),
     use_base(true), use_index(false), use_segment(false),
-    size(si) {}
+    use_evaluatable_displacement(false), size(si) {}
 
 MemoryOperand::MemoryOperand(uint64_t d, uint8_t si):
     displacement(d),
     use_base(false), use_index(false), use_segment(false),
-    size(si) {}
+    use_evaluatable_displacement(false), size(si) {}
 
 register_code MemoryOperand::get_segment() const {
     return segment;
@@ -112,6 +112,19 @@ uint8_t MemoryOperand::get_size() const {
     return size;
 }
 
+void MemoryOperand::set_evaluatable_displacement(operand_ptr operand) {
+    evaluatable_displacement = operand;
+    use_evaluatable_displacement = true;
+}
+
+operand_ptr MemoryOperand::get_evaluatable_displacement() {
+    return evaluatable_displacement;
+}
+
+bool MemoryOperand::get_use_evaluatable_displacement() {
+    return use_evaluatable_displacement;
+}
+
 std::string MemoryOperand::to_string() const {
 
     std::string str;
@@ -135,6 +148,11 @@ std::string MemoryOperand::to_string() const {
     if (displacement != 0) {
         if (use_index || use_base) str += " + ";
         str += std::to_string(displacement);
+    }
+
+    else if (use_evaluatable_displacement) {
+        if (use_index || use_base) str += " + ";
+        str += evaluatable_displacement->to_string();
     }
 
     str += "]";

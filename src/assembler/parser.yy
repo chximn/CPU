@@ -38,7 +38,7 @@
 %token                  TIMES         "*"
 %token                  COLON         ":"
 
-%token <std::string>    LABEL
+%token <std::string>    SYMBOL
 %token <int>            NUMBER
 %token <std::string>    COMMENT
 %token <register_code>  REGISTER
@@ -62,6 +62,7 @@
 %type <operand_ptr> memory_op_without_segment
 %type <operand_ptr> memory_op_without_size
 %type <operand_ptr> label_op
+%type <operand_ptr> object_op
 %type <operand_ptr> imm_label_op
 %type <uint8_t>     scale
 %type <uint8_t>     size_specifier
@@ -85,7 +86,7 @@ program:
     }
 
 instructions:
-    LABEL ":" instructions {
+    SYMBOL ":" instructions {
         logger::info("found label " + $1 + " at line " + std::to_string(@1.begin.line) );
         driver.symbol_table.labels[$1] = $3.at(0);
         $$ = $3;
@@ -254,6 +255,8 @@ two_alu_operands:
         if ($1->get_size() < $3->get_size()) logger::error("size mismatch", @1.begin.line);
         $$ = std::vector<operand_ptr>{$1, $3}; } |
 
+    register_op "," label_op { $$ = std::vector<operand_ptr>{$1, $3}; } |
+
     register_op "," memory_op    {
         if ($3->get_size() == 0) std::dynamic_pointer_cast<MemoryOperand>($3)->set_size($1->get_size());
         else if ($1->get_size() != $3->get_size()) logger::error("size mismatch", @1.begin.line);
@@ -271,15 +274,21 @@ two_alu_operands:
     memory_op   "," immediate_op {
         if ($1->get_size() == 0) logger::error("memory operand size must be provided", @1.begin.line);
         if ($1->get_size() < $3->get_size()) logger::error("size mismatch", @1.begin.line);
+        $$ = std::vector<operand_ptr>{$1, $3}; } |
+
+    memory_op   "," label_op {
+        if ($1->get_size() == 0) logger::error("memory operand size must be provided", @1.begin.line);
         $$ = std::vector<operand_ptr>{$1, $3}; }
 
 comment: COMMENT
 
-
 imm_label_op: label_op | immediate_op
 
 label_op:
-    LABEL { $$ = std::make_shared<LabelOperand>($1); }
+    SYMBOL { $$ = std::make_shared<LabelOperand>($1); }
+
+object_op:
+    SYMBOL { $$ = std::make_shared<ObjectOperand>($1); }
 
 register_op:
     REGISTER { $$ = std::make_shared<RegisterOperand>($1); }
@@ -314,7 +323,31 @@ memory_op_without_segment:
     "[" REGISTER "*" scale "+" NUMBER "]"              { $$ = std::make_shared<MemoryOperand>($2, $4, $6, 0);     } |
     "[" REGISTER "]"                                   { $$ = std::make_shared<MemoryOperand>($2, 0, 0);          } |
     "[" REGISTER "+" NUMBER "]"                        { $$ = std::make_shared<MemoryOperand>($2, $4, 0);         } |
-    "[" NUMBER "]"                                     { $$ = std::make_shared<MemoryOperand>($2, 0);             }
+    "[" NUMBER "]"                                     { $$ = std::make_shared<MemoryOperand>($2, 0);             } |
+
+    "[" REGISTER "+" REGISTER "*" scale "+" SYMBOL "]" {
+        auto op = std::make_shared<MemoryOperand>($2, $4, $6, 0, 0);
+        op->set_evaluatable_displacement(std::make_shared<ObjectOperand>($8));
+        $$ = op;
+    } |
+
+    "[" REGISTER "*" scale "+" SYMBOL "]" {
+        auto op = std::make_shared<MemoryOperand>($2, $4, 0, 0);
+        op->set_evaluatable_displacement(std::make_shared<ObjectOperand>($6));
+        $$ = op;
+    } |
+
+    "[" REGISTER "+" SYMBOL "]" {
+        auto op = std::make_shared<MemoryOperand>($2, 0, 0);
+        op->set_evaluatable_displacement(std::make_shared<ObjectOperand>($4));
+        $$ = op;
+    } |
+
+    "[" SYMBOL "]" {
+        auto op = std::make_shared<MemoryOperand>(0, 0);
+        op->set_evaluatable_displacement(std::make_shared<ObjectOperand>($2));
+        $$ = op;
+    }
 
 scale:
     NUMBER {

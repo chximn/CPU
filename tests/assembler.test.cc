@@ -34,6 +34,8 @@ TEST_CASE("assembler") {
           "call 8\n"
           "ret\n"
           "nop\n"
+          "mov eax, x\n"
+          "mov eax, [x]\n"
           "hlt\n\n";
 
     Assembler assembler(code);

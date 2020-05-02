@@ -141,7 +141,7 @@ using token = yy::Parser::token;
 
 (\.?[a-zA-Z_][a-zA-Z0-9_]*) {
     yylval->build<std::string>(yytext);
-    return token::LABEL;
+    return token::SYMBOL;
 }
 
 "\n" {
