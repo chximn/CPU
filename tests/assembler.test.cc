@@ -4,7 +4,11 @@
 
 TEST_CASE("assembler") {
 
-    auto code = ""
+    auto code =
+          "section .data\n"
+          "x dw 1, 2, 3\n"
+          "y dw 4, 5, 6\n"
+          "section .text\n"
           "mov eax, 1000\n"
           "mov eax, [1000]\n"
           ".loop:\n"

@@ -35,6 +35,15 @@ using token = yy::Parser::token;
 "*"    return token::TIMES;
 ":"    return token::COLON;
 
+"section" return token::SECTION;
+".data"   return token::DATA;
+".text"   return token::TEXT;
+
+"db" return token::DB;
+"dw" return token::DW;
+"dd" return token::DD;
+"dq" return token::DQ;
+
 "byte"  return token::BYTE;
 "word"  return token::WORD;
 "dword" return token::DWORD;

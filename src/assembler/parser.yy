@@ -38,6 +38,8 @@
 %token                  TIMES         "*"
 %token                  COLON         ":"
 
+%token SECTION DATA TEXT
+
 %token <std::string>    SYMBOL
 %token <int>            NUMBER
 %token <std::string>    COMMENT
@@ -48,11 +50,20 @@
 
 /* size modifiers */
 %token BYTE WORD DWORD QWORD
+%token DB DW DD DQ
 
-%type <std::string>                  comment
 %type <std::vector<instruction_ptr>> instructions
 %type <instruction_ptr>              instruction
 %type <std::vector<instruction_ptr>> program
+
+%type <std::vector<instruction_ptr>> text_section
+%type <std::vector<std::vector<uint8_t>>> data_section
+
+%type <std::vector<std::vector<uint8_t>>> definitions
+%type <std::vector<uint8_t>> definition
+%type <uint8_t> definition_size_specifier;
+%type <std::vector<uint64_t>> data_list
+%type <uint64_t> data
 
 %type <std::vector<operand_ptr>> one_alu_operand two_alu_operands
 %type <operand_ptr> register_op
@@ -70,10 +81,20 @@
 %%
 
 program:
-    instructions {
+    data_section text_section {
+        logger::info("data: ");
+        for (auto const & definition : $1) {
+            for (auto const & byte : definition) {
+                std::cout << ((int) byte) << " ";
+            }
+
+            std::cout << "\n";
+        }
+
+        auto instructions = $2;
 
         logger::info("instructions: ");
-        for (auto const & i : $1) {
+        for (auto const & i : instructions) {
             logger::info(i->to_string());
         }
 
@@ -85,6 +106,93 @@ program:
         YYACCEPT;
     }
 
+data_section:
+    SECTION DATA NL definitions {
+        $$ = $4;
+    }
+
+text_section:
+    SECTION TEXT NL instructions {
+        $$ = $4;
+    }
+
+definitions:
+    COMMENT NL definitions {
+        $$ = $3;
+    } |
+
+    definition COMMENT NL definitions {
+        $4.insert($4.begin(), $1);
+        $$ = $4;
+    } |
+
+    definition NL definitions {
+        $3.insert($3.begin(), $1);
+        $$ = $3;
+    } |
+
+    comment_line {
+        $$ = std::vector<std::vector<uint8_t>>();
+    } |
+
+    definition COMMENT  NL {
+        auto v = std::vector<std::vector<uint8_t>>();
+        v.push_back($1);
+        $$ = v;
+    } |
+
+    definition NL {
+        auto v = std::vector<std::vector<uint8_t>>();
+        v.push_back($1);
+        $$ = v;
+    } |
+
+    NL definitions {
+
+        $$ = $2;
+    } |
+
+    empty_line {
+        $$ = std::vector<std::vector<uint8_t>>();
+    }
+
+definition:
+    SYMBOL definition_size_specifier data_list {
+        std::vector<uint8_t> data{};
+
+        for (auto const & item : $3) {
+            auto bytes = reinterpret_cast<const uint8_t *>(&item);
+
+            for (int i = 0, n_items = $2 / 8; i < n_items; i++) {
+                data.push_back(bytes[i]);
+            }
+        }
+
+        $$ = data;
+    }
+
+definition_size_specifier:
+    DB { $$ = 8; }  |
+    DW { $$ = 16; } |
+    DD { $$ = 32; } |
+    DQ { $$ = 64; }
+
+data_list:
+    data {
+        auto v = std::vector<uint64_t>();
+        v.push_back($1);
+        $$ = v;
+    } |
+
+    data "," data_list {
+        $3.insert($3.begin(), $1);
+        $$ = $3;
+    }
+
+data:
+    NUMBER { $$ = $1; }
+
+
 instructions:
     SYMBOL ":" instructions {
         logger::info("found label " + $1 + " at line " + std::to_string(@1.begin.line) );
@@ -92,11 +200,11 @@ instructions:
         $$ = $3;
     } |
 
-	comment NL instructions {
+	COMMENT  NL instructions {
 		$$ = $3;
 	} |
 
-	instruction comment NL instructions {
+	instruction COMMENT  NL instructions {
 		$4.insert($4.begin(), $1);
 		$$ = $4;
 	} |
@@ -106,11 +214,11 @@ instructions:
 		$$ = $3;
 	} |
 
-	comment NL {
+	comment_line {
 		$$ = std::vector<instruction_ptr>();
 	} |
 
-	instruction comment NL {
+	instruction COMMENT  NL {
 		auto v = std::vector<instruction_ptr>();
 		v.push_back($1);
 		$$ = v;
@@ -126,7 +234,7 @@ instructions:
 		$$ = $2;
 	} |
 
-	NL {
+	empty_line {
 		$$ = std::vector<instruction_ptr>();
 	}
 
@@ -248,7 +356,8 @@ instruction:
 one_alu_operand:
     register_op  { $$ = std::vector<operand_ptr>{$1}; } |
     memory_op    { $$ = std::vector<operand_ptr>{$1}; } |
-    immediate_op { $$ = std::vector<operand_ptr>{$1}; }
+    immediate_op { $$ = std::vector<operand_ptr>{$1}; } |
+    object_op    { $$ = std::vector<operand_ptr>{$1}; }
 
 two_alu_operands:
     register_op "," immediate_op {
@@ -279,8 +388,6 @@ two_alu_operands:
     memory_op   "," label_op {
         if ($1->get_size() == 0) logger::error("memory operand size must be provided", @1.begin.line);
         $$ = std::vector<operand_ptr>{$1, $3}; }
-
-comment: COMMENT
 
 imm_label_op: label_op | immediate_op
 
@@ -362,6 +469,10 @@ size_specifier:
     WORD  { $$ = 16; } |
     DWORD { $$ = 32; } |
     QWORD { $$ = 64; }
+
+
+empty_line: NL
+comment_line: COMMENT NL
 
 %%
 
