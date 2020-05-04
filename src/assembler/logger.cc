@@ -1,7 +1,5 @@
 #include "logger.hh"
 
-std::vector<std::string> logger::lines{};
-
 std::string format_line_number(int i) {
 	char buff[10];
 	snprintf(buff, sizeof(buff), "%5d", i);
@@ -9,13 +7,13 @@ std::string format_line_number(int i) {
 	return buffAsStdStr;
 }
 
-void logger::set_lines(std::vector<std::string> const & ls) {
+void Logger::set_lines(std::vector<std::string> const & ls) {
 	for (auto const & l : ls) {
 		lines.push_back(l);
 	}
 }
 
-void logger::error(std::string const & s, int line) {
+void Logger::error(std::string const & s, int line) {
 	std::cerr << "[\e[91mERROR\e[0m] " << s << "\n";
 
 	for (int i = std::max(1, line - LOGGER_PADDING); i < line; i++)
@@ -30,6 +28,6 @@ void logger::error(std::string const & s, int line) {
 	exit(-2);
 }
 
-void logger::info(std::string const & s) {
+void Logger::info(std::string const & s) {
 	std::cout << "\e[96m[INFO]\t\e[0m " << s << "\n";
 }

@@ -19,6 +19,12 @@ Instruction::Instruction(instruction_code c, std::vector<operand_ptr> const & op
 Instruction::Instruction(instruction_code c, std::vector<operand_ptr> const & ops, uint8_t s):
     code(c), operands(ops), size(s) {}
 
+Instruction::Instruction(Instruction const & i): code(i.get_code()), size(i.get_size()) {
+    for (auto const & op : i.get_operands()) {
+        operands.push_back(op);
+    }
+}
+
 uint8_t Instruction::get_size() const {
     return size;
 }
@@ -31,9 +37,14 @@ std::vector<operand_ptr> const & Instruction::get_operands() const {
     return operands;
 }
 
+void Instruction::set_operands(std::vector<operand_ptr> const & ops) {
+    operands = ops;
+}
+
 std::string Instruction::to_string() const {
     auto str = Instruction::to_string(code);
-    if (operands.size() >= 1) str += " "  + operands.at(0)->to_string();
+
+    if (operands.size() >= 1) str += " " + operands.at(0)->to_string();
     if (operands.size() >= 2) str += ", " + operands.at(1)->to_string();
     if (operands.size() == 3) str += ", " + operands.at(2)->to_string();
 

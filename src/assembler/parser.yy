@@ -9,14 +9,18 @@
 %locations
 
 %code requires{
+    #include <utility>
     #include "logger.hh"
     #include "instruction.hh"
+
     class Scanner;
     class Driver;
+    class Logger;
 }
 
-%parse-param { Scanner &scanner }
-%parse-param { Driver &driver }
+%parse-param { Scanner & scanner }
+%parse-param { Driver  & driver }
+%parse-param { Logger  & logger }
 
 %code{
     #include <iostream>
@@ -24,6 +28,7 @@
 
     #include <vector>
     #include "scanner.hh"
+    #include "program.hh"
     #include "driver.hh"
 
     #undef  yylex
@@ -54,13 +59,14 @@
 
 %type <std::vector<instruction_ptr>> instructions
 %type <instruction_ptr>              instruction
-%type <std::vector<instruction_ptr>> program
+%type program
+%type <std::pair<std::vector<std::pair<std::string, std::vector<uint8_t>>>, std::vector<instruction_ptr>>> sections
 
 %type <std::vector<instruction_ptr>> text_section
-%type <std::vector<std::vector<uint8_t>>> data_section
+%type <std::vector<std::pair<std::string, std::vector<uint8_t>>>> data_section
 
-%type <std::vector<std::vector<uint8_t>>> definitions
-%type <std::vector<uint8_t>> definition
+%type <std::vector<std::pair<std::string, std::vector<uint8_t>>>> definitions
+%type <std::pair<std::string, std::vector<uint8_t>>> definition
 %type <uint8_t> definition_size_specifier;
 %type <std::vector<uint64_t>> data_list
 %type <uint64_t> data
@@ -81,30 +87,78 @@
 %%
 
 program:
-    data_section text_section {
-        logger::info("data: ");
-        for (auto const & definition : $1) {
-            for (auto const & byte : definition) {
-                std::cout << ((int) byte) << " ";
+    sections {
+        auto definitions = $1.first;
+        auto instructions = $1.second;
+
+        Program program;
+
+        for (auto const & definition : definitions) {
+            driver.symbol_table.objects[definition.first] = program.add_data(definition.second);
+        }
+
+        for (auto & instruction : instructions) {
+            auto operands = instruction->get_operands();
+
+            int i = 0;
+            for (auto const & op : operands) {
+
+                auto object_operand = std::dynamic_pointer_cast<ObjectOperand>(op);
+                auto memory_operand = std::dynamic_pointer_cast<MemoryOperand>(op);
+                auto label_operand  = std::dynamic_pointer_cast<LabelOperand>(op);
+
+                if (object_operand != nullptr) {
+                    auto name = object_operand->get_name();
+                    if (driver.symbol_table.objects.find(name) == driver.symbol_table.objects.end())
+                        logger.error(name + " was not declared", object_operand->get_line());
+
+                    auto value = driver.symbol_table.objects[name];
+                    auto new_operand = std::make_shared<ImmediateOperand>(value);
+                    operands.at(i) = new_operand;
+                }
+
+                else if (memory_operand != nullptr && memory_operand->get_use_object_displacement()) {
+                    auto displacement = std::dynamic_pointer_cast<ObjectOperand>(memory_operand->get_object_displacement());
+
+                    auto name = displacement->get_name();
+                    if (driver.symbol_table.objects.find(name) == driver.symbol_table.objects.end())
+                        logger.error(name + " was not declared", displacement->get_line());
+
+                    auto value = driver.symbol_table.objects[name];
+                    memory_operand->set_displacement(value);
+                }
+
+                else if (label_operand != nullptr) {
+                    auto name = label_operand->get_name();
+                    if (driver.symbol_table.labels.find(name) == driver.symbol_table.labels.end())
+                        logger.error("label" + name + " was not found", label_operand->get_line());
+
+                    auto source = std::find(instructions.begin(), instructions.end(), instruction);
+                    auto destination = std::find(instructions.begin(), instructions.end(), driver.symbol_table.labels[name]);
+
+                    auto diff = destination - (source + 1);
+                    auto new_operand = std::make_shared<ImmediateOperand>(diff);
+                    operands.at(i) = new_operand;
+                }
+
+                instruction->set_operands(operands);
+                i++;
             }
 
-            std::cout << "\n";
+            program.add_instruction(instruction);
         }
 
-        auto instructions = $2;
-
-        logger::info("instructions: ");
-        for (auto const & i : instructions) {
-            logger::info(i->to_string());
-        }
-
-        logger::info("labels: ");
-        for (auto const & i : driver.symbol_table.labels) {
-            logger::info(i.first + " --> " + i.second->to_string());
-        }
+        driver.set_program(program);
 
         YYACCEPT;
     }
+
+sections:
+    NL sections { $$ = $2; } |
+    COMMENT NL sections { $$ = $3; } |
+    data_section text_section { $$ = std::pair<std::vector<std::pair<std::string, std::vector<uint8_t>>>, std::vector<instruction_ptr>>{$1, $2}; } |
+    text_section data_section { $$ = std::pair<std::vector<std::pair<std::string, std::vector<uint8_t>>>, std::vector<instruction_ptr>>{$2, $1}; } |
+    text_section { $$ = std::pair<std::vector<std::pair<std::string, std::vector<uint8_t>>>, std::vector<instruction_ptr>>{ std::vector<std::pair<std::string, std::vector<uint8_t>>>{}, $1}; }
 
 data_section:
     SECTION DATA NL definitions {
@@ -132,17 +186,17 @@ definitions:
     } |
 
     comment_line {
-        $$ = std::vector<std::vector<uint8_t>>();
+        $$ = std::vector<std::pair<std::string, std::vector<uint8_t>>>();
     } |
 
     definition COMMENT  NL {
-        auto v = std::vector<std::vector<uint8_t>>();
+        auto v = std::vector<std::pair<std::string, std::vector<uint8_t>>>();
         v.push_back($1);
         $$ = v;
     } |
 
     definition NL {
-        auto v = std::vector<std::vector<uint8_t>>();
+        auto v = std::vector<std::pair<std::string, std::vector<uint8_t>>>();
         v.push_back($1);
         $$ = v;
     } |
@@ -153,11 +207,13 @@ definitions:
     } |
 
     empty_line {
-        $$ = std::vector<std::vector<uint8_t>>();
+        $$ = std::vector<std::pair<std::string, std::vector<uint8_t>>>();
     }
 
 definition:
     SYMBOL definition_size_specifier data_list {
+        if ($1[0] == '.') logger.error("syntax error", @1.begin.line);
+
         std::vector<uint8_t> data{};
 
         for (auto const & item : $3) {
@@ -168,7 +224,7 @@ definition:
             }
         }
 
-        $$ = data;
+        $$ = std::pair<std::string, std::vector<uint8_t>>{$1, data};
     }
 
 definition_size_specifier:
@@ -195,7 +251,6 @@ data:
 
 instructions:
     SYMBOL ":" instructions {
-        logger::info("found label " + $1 + " at line " + std::to_string(@1.begin.line) );
         driver.symbol_table.labels[$1] = $3.at(0);
         $$ = $3;
     } |
@@ -245,20 +300,20 @@ instruction:
     LEA register_op "," memory_op {
         auto op = std::dynamic_pointer_cast<MemoryOperand>($4);
 
-        if (op->get_size() != 0) logger::error("invalid size specification", @1.begin.line);
-        if (op->get_use_segment()) logger::error("invalid segment specification", @1.begin.line);
+        if (op->get_size() != 0) logger.error("invalid size specification", @1.begin.line);
+        if (op->get_use_segment()) logger.error("invalid segment specification", @1.begin.line);
 
         $$ = std::make_shared<Instruction>(instruction_code::lea, std::vector<operand_ptr>{$2, $4}, $2->get_size());
     } |
 
     PUSH one_alu_operand {
-        if ($2.at(0)->get_size() == 0) logger::error("size must be specified", @1.begin.line);
+        if ($2.at(0)->get_size() == 0) logger.error("size must be specified", @1.begin.line);
         $$ = std::make_shared<Instruction>(instruction_code::push, $2, $2.at(0)->get_size());
     } |
 
     POP one_alu_operand  {
-        if ($2.at(0)->get_size() == 0) logger::error("size must be specified", @1.begin.line);
-        if (std::dynamic_pointer_cast<ImmediateOperand>($2.at(0)) != nullptr) logger::error("invalid operand", @1.begin.line);
+        if ($2.at(0)->get_size() == 0) logger.error("size must be specified", @1.begin.line);
+        if (std::dynamic_pointer_cast<ImmediateOperand>($2.at(0)) != nullptr) logger.error("invalid operand", @1.begin.line);
         $$ = std::make_shared<Instruction>(instruction_code::push, $2, $2.at(0)->get_size());
     } |
 
@@ -283,25 +338,25 @@ instruction:
 
     SHL register_op "," register_op {
         if (std::dynamic_pointer_cast<RegisterOperand>($4)->get_reg() != register_code::cl)
-            logger::error("only CL can be used as a register operand", @1.begin.line);
+            logger.error("only CL can be used as a register operand", @1.begin.line);
 
         $$ = std::make_shared<Instruction>(instruction_code::shl, std::vector<operand_ptr>{$2, $4}, $2->get_size());
     } |
 
     SHL memory_op {
-        if (std::dynamic_pointer_cast<MemoryOperand>($2)->get_size() == 0) logger::error("memory operand size must be specified", @1.begin.line);
+        if (std::dynamic_pointer_cast<MemoryOperand>($2)->get_size() == 0) logger.error("memory operand size must be specified", @1.begin.line);
         $$ = std::make_shared<Instruction>(instruction_code::shl, std::vector<operand_ptr>{$2}, $2->get_size());
     } |
 
     SHL memory_op "," immediate_op {
-        if (std::dynamic_pointer_cast<MemoryOperand>($2)->get_size() == 0) logger::error("memory operand size must be specified", @1.begin.line);
+        if (std::dynamic_pointer_cast<MemoryOperand>($2)->get_size() == 0) logger.error("memory operand size must be specified", @1.begin.line);
         $$ = std::make_shared<Instruction>(instruction_code::shl, std::vector<operand_ptr>{$2, $4}, $2->get_size());
     } |
 
     SHL memory_op "," register_op {
-        if (std::dynamic_pointer_cast<MemoryOperand>($2)->get_size() == 0) logger::error("memory operand size must be specified", @1.begin.line);
+        if (std::dynamic_pointer_cast<MemoryOperand>($2)->get_size() == 0) logger.error("memory operand size must be specified", @1.begin.line);
         if (std::dynamic_pointer_cast<RegisterOperand>($4)->get_reg() != register_code::cl)
-            logger::error("only CL can be used as a register operand", @1.begin.line);
+            logger.error("only CL can be used as a register operand", @1.begin.line);
 
         $$ = std::make_shared<Instruction>(instruction_code::shl, std::vector<operand_ptr>{$2, $4}, $2->get_size());
     } |
@@ -313,32 +368,32 @@ instruction:
 
     SHR register_op "," register_op {
         if (std::dynamic_pointer_cast<RegisterOperand>($4)->get_reg() != register_code::cl)
-            logger::error("only CL can be used as a register operand", @1.begin.line);
+            logger.error("only CL can be used as a register operand", @1.begin.line);
 
         $$ = std::make_shared<Instruction>(instruction_code::shr, std::vector<operand_ptr>{$2, $4}, $2->get_size());
     } |
 
     SHR memory_op {
-        if (std::dynamic_pointer_cast<MemoryOperand>($2)->get_size() == 0) logger::error("memory operand size must be specified", @1.begin.line);
+        if (std::dynamic_pointer_cast<MemoryOperand>($2)->get_size() == 0) logger.error("memory operand size must be specified", @1.begin.line);
         $$ = std::make_shared<Instruction>(instruction_code::shr, std::vector<operand_ptr>{$2}, $2->get_size());
     } |
 
     SHR memory_op "," immediate_op {
-        if (std::dynamic_pointer_cast<MemoryOperand>($2)->get_size() == 0) logger::error("memory operand size must be specified", @1.begin.line);
+        if (std::dynamic_pointer_cast<MemoryOperand>($2)->get_size() == 0) logger.error("memory operand size must be specified", @1.begin.line);
         $$ = std::make_shared<Instruction>(instruction_code::shr, std::vector<operand_ptr>{$2, $4}, $2->get_size());
     } |
 
     SHR memory_op "," register_op {
-        if (std::dynamic_pointer_cast<MemoryOperand>($2)->get_size() == 0) logger::error("memory operand size must be specified", @1.begin.line);
+        if (std::dynamic_pointer_cast<MemoryOperand>($2)->get_size() == 0) logger.error("memory operand size must be specified", @1.begin.line);
         if (std::dynamic_pointer_cast<RegisterOperand>($4)->get_reg() != register_code::cl)
-            logger::error("only CL can be used as a register operand", @1.begin.line);
+            logger.error("only CL can be used as a register operand", @1.begin.line);
 
         $$ = std::make_shared<Instruction>(instruction_code::shr, std::vector<operand_ptr>{$2, $4}, $2->get_size());
     } |
 
     CMP two_alu_operands { $$ = std::make_shared<Instruction>(instruction_code::cmp, $2, $2.at(0)->get_size()); } |
 
-    JMP { $$ = std::make_shared<Instruction>(instruction_code::jmp, std::vector<operand_ptr>{}, 0); } |
+    JMP imm_label_op { $$ = std::make_shared<Instruction>(instruction_code::jmp, std::vector<operand_ptr>{ $2 }, 0); } |
     JE  imm_label_op { $$ = std::make_shared<Instruction>(instruction_code::je,  std::vector<operand_ptr>{ $2 }, 0); } |
     JNE imm_label_op { $$ = std::make_shared<Instruction>(instruction_code::jne, std::vector<operand_ptr>{ $2 }, 0); } |
     JL  imm_label_op { $$ = std::make_shared<Instruction>(instruction_code::jl,  std::vector<operand_ptr>{ $2 }, 0); } |
@@ -361,41 +416,44 @@ one_alu_operand:
 
 two_alu_operands:
     register_op "," immediate_op {
-        if ($1->get_size() < $3->get_size()) logger::error("size mismatch", @1.begin.line);
+        if ($1->get_size() < $3->get_size()) logger.error("size mismatch", @1.begin.line);
         $$ = std::vector<operand_ptr>{$1, $3}; } |
 
-    register_op "," label_op { $$ = std::vector<operand_ptr>{$1, $3}; } |
+    register_op "," object_op { $$ = std::vector<operand_ptr>{$1, $3}; } |
 
     register_op "," memory_op    {
         if ($3->get_size() == 0) std::dynamic_pointer_cast<MemoryOperand>($3)->set_size($1->get_size());
-        else if ($1->get_size() != $3->get_size()) logger::error("size mismatch", @1.begin.line);
+        else if ($1->get_size() != $3->get_size()) logger.error("size mismatch", @1.begin.line);
         $$ = std::vector<operand_ptr>{$1, $3}; } |
 
     register_op "," register_op {
-        if ($1->get_size() != $3->get_size()) logger::error("size mismatch", @1.begin.line);
+        if ($1->get_size() != $3->get_size()) logger.error("size mismatch", @1.begin.line);
         $$ = std::vector<operand_ptr>{$1, $3}; } |
 
     memory_op   "," register_op  {
         if ($1->get_size() == 0) std::dynamic_pointer_cast<MemoryOperand>($1)->set_size($3->get_size());
-        if ($1->get_size() != $3->get_size()) logger::error("size mismatch", @1.begin.line);
+        if ($1->get_size() != $3->get_size()) logger.error("size mismatch", @1.begin.line);
         $$ = std::vector<operand_ptr>{$1, $3}; } |
 
     memory_op   "," immediate_op {
-        if ($1->get_size() == 0) logger::error("memory operand size must be provided", @1.begin.line);
-        if ($1->get_size() < $3->get_size()) logger::error("size mismatch", @1.begin.line);
+        if ($1->get_size() == 0) logger.error("memory operand size must be provided", @1.begin.line);
+        if ($1->get_size() < $3->get_size()) logger.error("size mismatch", @1.begin.line);
         $$ = std::vector<operand_ptr>{$1, $3}; } |
 
-    memory_op   "," label_op {
-        if ($1->get_size() == 0) logger::error("memory operand size must be provided", @1.begin.line);
+    memory_op   "," object_op {
+        if ($1->get_size() == 0) logger.error("memory operand size must be provided", @1.begin.line);
         $$ = std::vector<operand_ptr>{$1, $3}; }
 
 imm_label_op: label_op | immediate_op
 
 label_op:
-    SYMBOL { $$ = std::make_shared<LabelOperand>($1); }
+    SYMBOL { $$ = std::make_shared<LabelOperand>($1, @1.begin.line); }
 
 object_op:
-    SYMBOL { $$ = std::make_shared<ObjectOperand>($1); }
+    SYMBOL {
+        if ($1[0] == '.') logger.error("syntax error", @1.begin.line);
+        $$ = std::make_shared<ObjectOperand>($1, @1.begin.line);
+    }
 
 register_op:
     REGISTER { $$ = std::make_shared<RegisterOperand>($1); }
@@ -414,7 +472,7 @@ memory_op:
 memory_op_without_size:
     REGISTER ":" memory_op_without_segment {
         if ($1 != register_code::cs && $1 != register_code::ds && $1 != register_code::ss)
-            logger::error("invalid segment", @1.begin.line);
+            logger.error("invalid segment", @1.begin.line);
 
         std::dynamic_pointer_cast<MemoryOperand>($3)->set_segment($1);
         $$ = $3;
@@ -434,32 +492,32 @@ memory_op_without_segment:
 
     "[" REGISTER "+" REGISTER "*" scale "+" SYMBOL "]" {
         auto op = std::make_shared<MemoryOperand>($2, $4, $6, 0, 0);
-        op->set_object_displacement(std::make_shared<ObjectOperand>($8));
+        op->set_object_displacement(std::make_shared<ObjectOperand>($8, @8.begin.line));
         $$ = op;
     } |
 
     "[" REGISTER "*" scale "+" SYMBOL "]" {
         auto op = std::make_shared<MemoryOperand>($2, $4, 0, 0);
-        op->set_object_displacement(std::make_shared<ObjectOperand>($6));
+        op->set_object_displacement(std::make_shared<ObjectOperand>($6, @6.begin.line));
         $$ = op;
     } |
 
     "[" REGISTER "+" SYMBOL "]" {
         auto op = std::make_shared<MemoryOperand>($2, 0, 0);
-        op->set_object_displacement(std::make_shared<ObjectOperand>($4));
+        op->set_object_displacement(std::make_shared<ObjectOperand>($4, @4.begin.line));
         $$ = op;
     } |
 
     "[" SYMBOL "]" {
         auto op = std::make_shared<MemoryOperand>(0, 0);
-        op->set_object_displacement(std::make_shared<ObjectOperand>($2));
+        op->set_object_displacement(std::make_shared<ObjectOperand>($2, @2.begin.line));
         $$ = op;
     }
 
 scale:
     NUMBER {
         if ($1 != 1 && $1 != 2 && $1 != 4 && $1 != 8)
-            logger::error("invalid scale", @1.begin.line);
+            logger.error("invalid scale", @1.begin.line);
 
         $$ = $1;
     }
@@ -477,6 +535,6 @@ comment_line: COMMENT NL
 %%
 
 void yy::Parser::error(const location_type &l, const std::string & err_msg) {
-    logger::error(err_msg, l.begin.line);
+    logger.error(err_msg, l.begin.line);
     exit(-1);
 }

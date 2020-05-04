@@ -6,9 +6,12 @@
 class Driver {
 private:
     Program program;
+
 public:
     Driver() = default;
 
     SymbolTable symbol_table;
+
     Program const & get_program();
+    void set_program(Program const &);
 };

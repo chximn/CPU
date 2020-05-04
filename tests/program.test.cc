@@ -9,12 +9,12 @@ TEST_CASE("program") {
     Program program;
 
     SECTION("add and get instructions") {
-        Instruction i1(instruction_code::mov, std::vector<operand_ptr>{
+        auto i1 = std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr>{
             std::make_shared<RegisterOperand>(register_code::eax),
             std::make_shared<ImmediateOperand>(2647)
         });
 
-        Instruction i2(instruction_code::mov, std::vector<operand_ptr>{
+        auto i2 = std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr>{
             std::make_shared<RegisterOperand>(register_code::ebx),
             std::make_shared<RegisterOperand>(register_code::eax)
         });

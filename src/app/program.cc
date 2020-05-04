@@ -1,7 +1,7 @@
 #include "program.hh"
 
-void Program::add_instruction(Instruction const & instruction) {
-    instructions.push_back(&instruction);
+void Program::add_instruction(instruction_ptr instruction) {
+    instructions.push_back(instruction);
 }
 
 uint64_t Program::add_data(std::vector<uint8_t> const & new_data) {
@@ -10,10 +10,29 @@ uint64_t Program::add_data(std::vector<uint8_t> const & new_data) {
     return address;
 }
 
-std::vector<const Instruction *> const & Program::get_instructions() const {
+std::vector<instruction_ptr> const & Program::get_instructions() const {
     return instructions;
 }
 
 std::vector<uint8_t> const & Program::get_data() const {
     return data;
+}
+
+void Program::print(std::ostream & os) const {
+    os << "data:\n";
+
+    int i = 0;
+    for (auto const & byte : data) {
+        os << helpers::to_hex(byte, "") << " ";
+
+        if (i && (i % 16 == 0)) os << "\n";
+        i++;
+    }
+
+    os << "\n";
+
+    os << "instructions:\n";
+    for (auto const & instruction : instructions) {
+        os << instruction->to_string() << "\n";
+    }
 }

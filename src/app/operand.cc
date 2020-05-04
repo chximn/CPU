@@ -24,7 +24,7 @@ void ImmediateOperand::set_size(uint8_t s) {
 
 
 std::string ImmediateOperand::to_string() const {
-    return std::to_string(value);
+    return helpers::to_hex(value);
 }
 
 MemoryOperand::MemoryOperand(register_code b, register_code i, uint8_t s, uint64_t d, uint8_t si, register_code seg):
@@ -117,6 +117,10 @@ void MemoryOperand::set_object_displacement(operand_ptr operand) {
     use_object_displacement = true;
 }
 
+void MemoryOperand::set_displacement(uint64_t v) {
+    displacement = v;
+    use_object_displacement = false;
+}
 operand_ptr MemoryOperand::get_object_displacement() {
     return object_displacement;
 }
@@ -126,7 +130,6 @@ bool MemoryOperand::get_use_object_displacement() {
 }
 
 std::string MemoryOperand::to_string() const {
-
     std::string str;
 
     if (size == 8)  str += "byte";
@@ -142,13 +145,15 @@ std::string MemoryOperand::to_string() const {
     if (use_base) str += Register::to_string(base);
     if (use_index) {
         if (use_base) str += " + ";
-        str += Register::to_string(index) + " * " + std::to_string(scale);
+        str += Register::to_string(index) + " * " + helpers::to_hex(scale);
     }
 
     if (displacement != 0) {
         if (use_index || use_base) str += " + ";
-        str += std::to_string(displacement);
+        str += helpers::to_hex(displacement);
     }
+
+    else if (!use_index && !use_base) str += "0";
 
     else if (use_object_displacement) {
         if (use_index || use_base) str += " + ";
@@ -174,11 +179,12 @@ std::string RegisterOperand::to_string() const {
     return Register::to_string(reg);
 }
 
-SymbolOperand::SymbolOperand(std::string const & s): name(s) {}
+SymbolOperand::SymbolOperand(std::string const & s, int l): name(s), line(l) {}
 
 std::string SymbolOperand::get_name() const { return name; }
+int SymbolOperand::get_line() const { return line; }
 uint8_t SymbolOperand::get_size() const { return 0; }
 std::string SymbolOperand::to_string() const { return name; }
 
-LabelOperand::LabelOperand(std::string const & s): SymbolOperand(s) {}
-ObjectOperand::ObjectOperand(std::string const & s): SymbolOperand(s) {}
+LabelOperand::LabelOperand(std::string const & s, int l): SymbolOperand(s, l) {}
+ObjectOperand::ObjectOperand(std::string const & s, int l): SymbolOperand(s, l) {}

@@ -19,11 +19,13 @@ private:
 
     std::string code;
 
-    Driver driver;
+    Logger logger;
+
     Scanner scanner;
     yy::Parser parser;
 
 public:
+    Driver driver;
     Assembler() = delete;
     Assembler(std::string const &);
 

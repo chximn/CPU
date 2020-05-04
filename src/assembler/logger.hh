@@ -4,17 +4,17 @@
 #include <vector>
 #include <algorithm>
 
-#define LOGGER_PADDING 5
+#define LOGGER_PADDING 50
 
-class logger {
+class Logger {
 private:
-	static std::vector<std::string> lines;
+	std::vector<std::string> lines;
 
 public:
-	logger() = delete;
+	Logger() = default;
 
-	static void set_lines(std::vector<std::string> const &);
+	void set_lines(std::vector<std::string> const &);
 
-	static void error(std::string const &, int);
-	static void info(std::string const &);
+	void error(std::string const &, int);
+	void info(std::string const &);
 };

@@ -6,19 +6,19 @@
 #include "cpu.hh"
 
 TEST_CASE("loader") {
-    Instruction i1(instruction_code::mov, std::vector<operand_ptr> {
+    auto i1 = std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
         std::make_shared<RegisterOperand>(register_code::eax),
         std::make_shared<ImmediateOperand>(2647)
     });
 
-    auto i1p = reinterpret_cast<uint64_t>(const_cast<void*>(reinterpret_cast<void const *>(&i1)));
+    auto i1p = reinterpret_cast<uint64_t>(const_cast<void*>(reinterpret_cast<void const *>(i1.get())));
 
-    Instruction i2(instruction_code::mov, std::vector<operand_ptr> {
+    auto i2 = std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
         std::make_shared<RegisterOperand>(register_code::ebx),
         std::make_shared<RegisterOperand>(register_code::eax)
     });
 
-    auto i2p = reinterpret_cast<uint64_t>(const_cast<void*>(reinterpret_cast<void const *>(&i2)));
+    auto i2p = reinterpret_cast<uint64_t>(const_cast<void*>(reinterpret_cast<void const *>(i2.get())));
 
     Program program;
     program.add_instruction(i1);

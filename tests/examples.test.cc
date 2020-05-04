@@ -12,36 +12,36 @@ TEST_CASE("examples") {
 
     Loader loader(cpu, ram);
 
-    Instruction halt(instruction_code::hlt, std::vector<operand_ptr>{});
+    auto halt = std::make_shared<Instruction>(instruction_code::hlt, std::vector<operand_ptr>{});
 
     SECTION("example 01: mov, add, mov") {
         // mov al, [0x5]
-        Instruction i1(instruction_code::mov, std::vector<operand_ptr> {
+        auto i1 = std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
             std::make_shared<RegisterOperand>(register_code::al),
             std::make_shared<MemoryOperand>(5, 8, register_code::ds)
         }, 8);
 
 
         // mov dl, [0x3]
-        Instruction i2(instruction_code::mov, std::vector<operand_ptr> {
+        auto i2 = std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
             std::make_shared<RegisterOperand>(register_code::dl),
             std::make_shared<MemoryOperand>(3, 8, register_code::ds)
         }, 8);
 
         // add dl, al
-        Instruction i3(instruction_code::add, std::vector<operand_ptr> {
+        auto i3 = std::make_shared<Instruction>(instruction_code::add, std::vector<operand_ptr> {
             std::make_shared<RegisterOperand>(register_code::dl),
             std::make_shared<RegisterOperand>(register_code::al)
         }, 8);
 
         // add [0x8], dl
-        Instruction i4(instruction_code::add, std::vector<operand_ptr> {
+        auto i4 = std::make_shared<Instruction>(instruction_code::add, std::vector<operand_ptr> {
             std::make_shared<MemoryOperand>(8, 8, register_code::ds),
             std::make_shared<RegisterOperand>(register_code::dl)
         }, 8);
 
         // mov bh, [0x8]
-        Instruction i5(instruction_code::mov, std::vector<operand_ptr> {
+        auto i5 = std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
             std::make_shared<RegisterOperand>(register_code::bh),
             std::make_shared<MemoryOperand>(8, 8, register_code::ds)
         }, 8);
@@ -69,20 +69,20 @@ TEST_CASE("examples") {
     SECTION("example 02: lea") {
 
         // mov bx, 1
-        Instruction i1(instruction_code::mov, std::vector<operand_ptr> {
+        auto i1 = std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
             std::make_shared<RegisterOperand>(register_code::bx),
             std::make_shared<ImmediateOperand>(1)
         }, 16);
 
 
         // lea ax, [bx * 4 + 1]
-        Instruction i2(instruction_code::lea, std::vector<operand_ptr>{
+        auto i2 = std::make_shared<Instruction>(instruction_code::lea, std::vector<operand_ptr>{
             std::make_shared<RegisterOperand>(register_code::ax),
             std::make_shared<MemoryOperand>(register_code::bx, 4, 1, 16)
         }, 16);
 
         // mov cl, byte [ax]
-        Instruction i3(instruction_code::mov, std::vector<operand_ptr> {
+        auto i3 = std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
             std::make_shared<RegisterOperand>(register_code::cl),
             std::make_shared<MemoryOperand>(register_code::ax, 0, 8, register_code::ds)
         }, 8);
@@ -102,16 +102,16 @@ TEST_CASE("examples") {
     }
 
     SECTION("example 03: push") {
-        Instruction i1(instruction_code::mov, std::vector<operand_ptr> {
+        auto i1 = std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
             std::make_shared<RegisterOperand>(register_code::bx),
             std::make_shared<ImmediateOperand>(0x2647)
         }, 16);
 
-        Instruction i2(instruction_code::push, std::vector<operand_ptr> {
+        auto i2 = std::make_shared<Instruction>(instruction_code::push, std::vector<operand_ptr> {
             std::make_shared<RegisterOperand>(register_code::bx)
         }, 16);
 
-        Instruction i3(instruction_code::mov, std::vector<operand_ptr> {
+        auto i3 = std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
             std::make_shared<RegisterOperand>(register_code::cx),
             std::make_shared<MemoryOperand>(register_code::rsp, 0, 16, register_code::ss)
         }, 16);
@@ -133,16 +133,16 @@ TEST_CASE("examples") {
 
     SECTION("example 04: pop") {
 
-        Instruction i1(instruction_code::mov, std::vector<operand_ptr> {
+        auto i1 = std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
             std::make_shared<RegisterOperand>(register_code::rbx),
             std::make_shared<ImmediateOperand>(0x2647)
         }, 64);
 
-        Instruction i2(instruction_code::push, std::vector<operand_ptr> {
+        auto i2 = std::make_shared<Instruction>(instruction_code::push, std::vector<operand_ptr> {
             std::make_shared<RegisterOperand>(register_code::rbx)
         }, 64);
 
-        Instruction i3(instruction_code::pop, std::vector<operand_ptr> {
+        auto i3 = std::make_shared<Instruction>(instruction_code::pop, std::vector<operand_ptr> {
             std::make_shared<RegisterOperand>(register_code::rax)
         }, 64);
 
@@ -163,16 +163,16 @@ TEST_CASE("examples") {
     }
 
     SECTION("example 05: jmp") {
-        Instruction i1(instruction_code::mov, std::vector<operand_ptr> {
+        auto i1 = std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
             std::make_shared<RegisterOperand>(register_code::ebx),
             std::make_shared<ImmediateOperand>(2647)
         }, 32);
 
-        Instruction i2(instruction_code::jmp, std::vector<operand_ptr> {
+        auto i2 = std::make_shared<Instruction>(instruction_code::jmp, std::vector<operand_ptr> {
             std::make_shared<ImmediateOperand>(8)
         });
 
-        Instruction i3(instruction_code::mov, std::vector<operand_ptr> {
+        auto i3 = std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
             std::make_shared<RegisterOperand>(register_code::ebx),
             std::make_shared<ImmediateOperand>(1000)
         }, 32);
@@ -193,92 +193,92 @@ TEST_CASE("examples") {
     SECTION("example 06: je, jne, jg, gl, jge, jle") {
 
 
-        std::vector<Instruction> instructions {
-            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+        std::vector<instruction_ptr> instructions {
+            std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
                 std::make_shared<RegisterOperand>(register_code::ebx),
                 std::make_shared<ImmediateOperand>(2647)
             }, 32),
 
-            Instruction(instruction_code::cmp, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::cmp, std::vector<operand_ptr> {
                 std::make_shared<RegisterOperand>(register_code::ebx),
                 std::make_shared<ImmediateOperand>(2647)
             }, 32),
 
-            Instruction(instruction_code::je, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::je, std::vector<operand_ptr> {
                 std::make_shared<ImmediateOperand>(8)
             }),
 
-            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
                 std::make_shared<RegisterOperand>(register_code::ebx),
                 std::make_shared<ImmediateOperand>(1000)
             }, 32),
 
-            Instruction(instruction_code::cmp, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::cmp, std::vector<operand_ptr> {
                 std::make_shared<RegisterOperand>(register_code::ebx),
                 std::make_shared<ImmediateOperand>(1000)
             }, 32),
 
-            Instruction(instruction_code::jne, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::jne, std::vector<operand_ptr> {
                 std::make_shared<ImmediateOperand>(8)
             }),
 
-            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
                 std::make_shared<RegisterOperand>(register_code::ebx),
                 std::make_shared<ImmediateOperand>(1000)
             }, 32),
 
-            Instruction(instruction_code::cmp, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::cmp, std::vector<operand_ptr> {
                 std::make_shared<RegisterOperand>(register_code::ebx),
                 std::make_shared<ImmediateOperand>(2000)
             }, 32),
 
-            Instruction(instruction_code::jg, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::jg, std::vector<operand_ptr> {
                 std::make_shared<ImmediateOperand>(8)
             }),
 
-            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
                 std::make_shared<RegisterOperand>(register_code::ebx),
                 std::make_shared<ImmediateOperand>(1000)
             }, 32),
 
-            Instruction(instruction_code::cmp, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::cmp, std::vector<operand_ptr> {
                 std::make_shared<RegisterOperand>(register_code::ebx),
                 std::make_shared<ImmediateOperand>(3000)
             }, 32),
 
-            Instruction(instruction_code::jl, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::jl, std::vector<operand_ptr> {
                 std::make_shared<ImmediateOperand>(8)
             }),
 
-            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
                 std::make_shared<RegisterOperand>(register_code::ebx),
                 std::make_shared<ImmediateOperand>(1000)
             }, 32),
 
-            Instruction(instruction_code::cmp, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::cmp, std::vector<operand_ptr> {
                 std::make_shared<RegisterOperand>(register_code::ebx),
                 std::make_shared<ImmediateOperand>(2647)
             }, 32),
 
-            Instruction(instruction_code::jle, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::jle, std::vector<operand_ptr> {
                 std::make_shared<ImmediateOperand>(8)
             }),
 
-            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
                 std::make_shared<RegisterOperand>(register_code::ebx),
                 std::make_shared<ImmediateOperand>(1000)
             }, 32),
 
-            Instruction(instruction_code::cmp, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::cmp, std::vector<operand_ptr> {
                 std::make_shared<RegisterOperand>(register_code::ebx),
                 std::make_shared<ImmediateOperand>(2647)
             }, 32),
 
-            Instruction(instruction_code::jge, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::jge, std::vector<operand_ptr> {
                 std::make_shared<ImmediateOperand>(8)
             }),
 
-            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
                 std::make_shared<RegisterOperand>(register_code::ebx),
                 std::make_shared<ImmediateOperand>(1000)
             }, 32)
@@ -298,33 +298,33 @@ TEST_CASE("examples") {
     }
 
     SECTION("example 07: factorial of 5") {
-        std::vector<Instruction> instructions {
+        std::vector<instruction_ptr> instructions {
 
-            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
                 std::make_shared<RegisterOperand>(register_code::eax),
                 std::make_shared<ImmediateOperand>(1)
             }, 32),
 
-            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
                 std::make_shared<RegisterOperand>(register_code::ecx),
                 std::make_shared<ImmediateOperand>(1)
             }, 32),
 
-            Instruction(instruction_code::mul, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::mul, std::vector<operand_ptr> {
                 std::make_shared<RegisterOperand>(register_code::ecx)
             }, 32),
 
-            Instruction(instruction_code::add, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::add, std::vector<operand_ptr> {
                 std::make_shared<RegisterOperand>(register_code::ecx),
                 std::make_shared<ImmediateOperand>(1)
             }, 32),
 
-            Instruction(instruction_code::cmp, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::cmp, std::vector<operand_ptr> {
                 std::make_shared<RegisterOperand>(register_code::ecx),
                 std::make_shared<ImmediateOperand>(6)
             }, 32),
 
-            Instruction(instruction_code::jne, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::jne, std::vector<operand_ptr> {
                 std::make_shared<ImmediateOperand>(-32)
             }, 32),
         };
@@ -343,27 +343,27 @@ TEST_CASE("examples") {
     }
 
     SECTION("example 08: call") {
-        std::vector<Instruction> instructions {
-            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+        std::vector<instruction_ptr> instructions {
+            std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
                 std::make_shared<RegisterOperand>(register_code::rax),
                 std::make_shared<ImmediateOperand>(0)
             }, 64),
 
-            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
                 std::make_shared<RegisterOperand>(register_code::eax),
                 std::make_shared<ImmediateOperand>(2647)
             }, 32),
 
-            Instruction(instruction_code::call, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::call, std::vector<operand_ptr> {
                 std::make_shared<ImmediateOperand>(8)
             }, 64),
 
-            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
                 std::make_shared<RegisterOperand>(register_code::eax),
                 std::make_shared<ImmediateOperand>(1000)
             }, 32),
 
-            Instruction(instruction_code::pop, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::pop, std::vector<operand_ptr> {
                 std::make_shared<RegisterOperand>(register_code::rbx)
             }, 64)
         };
@@ -383,24 +383,24 @@ TEST_CASE("examples") {
     }
 
     SECTION("example 08: call + ret") {
-        std::vector<Instruction> instructions {
-            Instruction(instruction_code::jmp, std::vector<operand_ptr> {
+        std::vector<instruction_ptr> instructions {
+            std::make_shared<Instruction>(instruction_code::jmp, std::vector<operand_ptr> {
                 std::make_shared<ImmediateOperand>(16)
             }, 64),
 
-            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
                 std::make_shared<RegisterOperand>(register_code::eax),
                 std::make_shared<ImmediateOperand>(2647)
             }, 32),
 
-            Instruction(instruction_code::ret, std::vector<operand_ptr> {}, 64),
+            std::make_shared<Instruction>(instruction_code::ret, std::vector<operand_ptr> {}, 64),
 
-            Instruction(instruction_code::mov, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr> {
                 std::make_shared<RegisterOperand>(register_code::eax),
                 std::make_shared<ImmediateOperand>(1000)
             }, 32),
 
-            Instruction(instruction_code::call, std::vector<operand_ptr> {
+            std::make_shared<Instruction>(instruction_code::call, std::vector<operand_ptr> {
                 std::make_shared<ImmediateOperand>(-32),
             }, 64)
         };

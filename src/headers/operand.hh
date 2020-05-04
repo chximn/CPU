@@ -3,13 +3,16 @@
 #include "helpers.hh"
 #include <cstdint>
 #include <memory>
+#include <iostream>
 
 // abstract class
 class Operand {
 public:
     virtual ~Operand() = default;
     virtual uint8_t get_size() const = 0;
-    virtual std::string to_string() const = 0;
+    virtual std::string to_string() const {
+        return "hello";
+    }
 };
 
 using operand_ptr = std::shared_ptr<Operand>;
@@ -75,6 +78,7 @@ public:
     void set_segment(register_code);
 
     void set_object_displacement(operand_ptr);
+    void set_displacement(uint64_t);
     operand_ptr get_object_displacement();
     bool get_use_object_displacement();
 
@@ -97,22 +101,25 @@ public:
 class SymbolOperand : public Operand {
 private:
     std::string name;
+    int line;
 public:
     SymbolOperand() = delete;
-    SymbolOperand(std::string const &);
+    SymbolOperand(std::string const &, int);
 
     std::string get_name() const;
+    int get_line() const;
     uint8_t get_size() const override;
     std::string to_string() const override;
 };
 
 class LabelOperand : public SymbolOperand {
 public:
-    LabelOperand(std::string const &);
+    LabelOperand() = delete;
+    LabelOperand(std::string const &, int);
 };
 
 class ObjectOperand : public SymbolOperand {
 public:
     ObjectOperand() = delete;
-    ObjectOperand(std::string const &);
+    ObjectOperand(std::string const &, int);
 };

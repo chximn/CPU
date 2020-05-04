@@ -39,3 +39,16 @@ void helpers::devide(uint64_t a, uint64_t b, uint64_t & q, uint64_t & r, uint8_t
     r = (a % b) & mask;
     q = (a / b) & mask;
 }
+
+std::string helpers::to_hex(uint64_t value) {
+    return helpers::to_hex(value, "0x");
+}
+
+std::string helpers::to_hex(uint64_t value, std::string const & prefix) {
+    std::stringstream stream;
+    stream << std::hex << value;
+    auto result = prefix;
+    if (value < 16) result += "0";
+    result += stream.str();
+    return result;
+}

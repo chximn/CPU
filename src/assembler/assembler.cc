@@ -3,8 +3,9 @@
 Assembler::Assembler(std::string const & input):
     code(input),
     driver(),
+    logger(),
     scanner(in, out),
-    parser(scanner, driver) {
+    parser(scanner, driver, logger) {
 
     std::vector<std::string> lines;
     std::stringstream ss(input);
@@ -12,7 +13,7 @@ Assembler::Assembler(std::string const & input):
 
     while(std::getline(ss, line, '\n')) lines.push_back(line);
 
-    logger::set_lines(lines);
+    logger.set_lines(lines);
 }
 
 Program const & Assembler::assemble() {

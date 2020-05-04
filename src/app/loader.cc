@@ -12,7 +12,7 @@ void Loader::load(Program const & program) {
     ram.size = 64;
     address = LOADER_DEFAULT_CODE_SEGMENT;
     for (auto const & i : program.get_instructions()) {
-        uint64_t pointer = reinterpret_cast<uint64_t>(const_cast<void*>(reinterpret_cast<void const *>(i)));
+        uint64_t pointer = reinterpret_cast<uint64_t>(const_cast<void*>(reinterpret_cast<void const *>(i.get())));
         ram.data_register->set_value(pointer);
         ram.address_register->set_value(address);
         ram.write();
