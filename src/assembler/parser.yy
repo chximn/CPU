@@ -137,7 +137,7 @@ program:
                     auto destination = std::find(instructions.begin(), instructions.end(), driver.symbol_table.labels[name]);
 
                     auto diff = destination - (source + 1);
-                    auto new_operand = std::make_shared<ImmediateOperand>(diff);
+                    auto new_operand = std::make_shared<ImmediateOperand>(diff * 8);
                     operands.at(i) = new_operand;
                 }
 
@@ -422,26 +422,36 @@ two_alu_operands:
     register_op "," object_op { $$ = std::vector<operand_ptr>{$1, $3}; } |
 
     register_op "," memory_op    {
-        if ($3->get_size() == 0) std::dynamic_pointer_cast<MemoryOperand>($3)->set_size($1->get_size());
+        auto mem_op = std::dynamic_pointer_cast<MemoryOperand>($3);
+        if ($3->get_size() == 0) mem_op->set_size($1->get_size());
         else if ($1->get_size() != $3->get_size()) logger.error("size mismatch", @1.begin.line);
-        $$ = std::vector<operand_ptr>{$1, $3}; } |
+        if (!mem_op->get_use_segment()) mem_op->set_segment(register_code::ds);
+        $$ = std::vector<operand_ptr>{$1, $3};
+    } |
 
     register_op "," register_op {
         if ($1->get_size() != $3->get_size()) logger.error("size mismatch", @1.begin.line);
         $$ = std::vector<operand_ptr>{$1, $3}; } |
 
     memory_op   "," register_op  {
-        if ($1->get_size() == 0) std::dynamic_pointer_cast<MemoryOperand>($1)->set_size($3->get_size());
+        auto mem_op = std::dynamic_pointer_cast<MemoryOperand>($1);
+        if ($1->get_size() == 0) mem_op->set_size($3->get_size());
         if ($1->get_size() != $3->get_size()) logger.error("size mismatch", @1.begin.line);
-        $$ = std::vector<operand_ptr>{$1, $3}; } |
+        if (!mem_op->get_use_segment()) mem_op->set_segment(register_code::ds);
+        $$ = std::vector<operand_ptr>{$1, $3};
+    } |
 
     memory_op   "," immediate_op {
+        auto mem_op = std::dynamic_pointer_cast<MemoryOperand>($1);
         if ($1->get_size() == 0) logger.error("memory operand size must be provided", @1.begin.line);
         if ($1->get_size() < $3->get_size()) logger.error("size mismatch", @1.begin.line);
+        if (!mem_op->get_use_segment()) mem_op->set_segment(register_code::ds);
         $$ = std::vector<operand_ptr>{$1, $3}; } |
 
     memory_op   "," object_op {
+        auto mem_op = std::dynamic_pointer_cast<MemoryOperand>($1);
         if ($1->get_size() == 0) logger.error("memory operand size must be provided", @1.begin.line);
+        if (!mem_op->get_use_segment()) mem_op->set_segment(register_code::ds);
         $$ = std::vector<operand_ptr>{$1, $3}; }
 
 imm_label_op: label_op | immediate_op

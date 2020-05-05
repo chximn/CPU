@@ -46,6 +46,8 @@ uint64_t ControlUnit::evaluate_address(MemoryOperand operand)  {
         address += registers[operand.get_segment()]->get_value();
     }
 
+    std::cout << "evaluated address = " << helpers::to_hex(address) << "\n";
+
     return address;
 }
 

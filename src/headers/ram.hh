@@ -3,6 +3,8 @@
 #include <vector>
 #include <memory>
 #include "register.hh"
+#include <iostream>
+#include "helpers.hh"
 
 #define MEMORY_SIZE 1048576 // 1 megabyte
 
