@@ -21,10 +21,10 @@ TEST_CASE("assembler") {
 
         std::string output =
         "data:\n"
-        "01 00 02 00 03 00 04 00 05 00 06 00 \n"
+        "01 00 02 00 03 00 04 00 \n05 00 06 00 \n"
         "instructions:\n"
         "mov eax, 0x3e8\n"
-        "mov eax, dword [0x06]\n"
+        "mov eax, dword ds:[0x06]\n"
         "hlt\n";
 
         std::stringstream sstream;

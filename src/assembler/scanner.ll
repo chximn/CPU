@@ -148,6 +148,17 @@ using token = yy::Parser::token;
     return token::NUMBER;
 }
 
+\'(\.|[ ])\' {
+    yylval->build<int>(yytext[1]);
+    return token::NUMBER;
+}
+
+(\"(\\.|[^"\\])*\") {
+    std::string str(yytext);
+    yylval->build<std::string>(str.substr(1, str.length() - 1));
+    return token::STRING;
+}
+
 (\.?[a-zA-Z_][a-zA-Z0-9_]*) {
     yylval->build<std::string>(yytext);
     return token::SYMBOL;

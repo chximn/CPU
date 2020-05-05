@@ -9,8 +9,8 @@
 int main() {
     std::string code =
         "section .data\n"
-        "   x dd 1, 2, 3, 4\n"
-        "   y dd 5, 6, 7, 8\n"
+        "   x db 1, 2, 3, 4\n"
+        "   y db \"abde\", 10, 0\n"
         "   z dd 0, 0, 0, 0\n"
         "section .text\n"
         "main:\n"
@@ -20,12 +20,12 @@ int main() {
         "   mov ecx, 4\n"
         "   loop:\n"
         "       sub ecx, 1\n"
-        "       mov edx, [eax]\n"
-        "       add edx, [ebx]\n"
-        "       mov [esp], edx\n"
-        "       add eax, 4\n"
-        "       add ebx, 4\n"
-        "       add esp, 4\n"
+        "       mov dl, [eax]\n"
+        "       add dl, [ebx]\n"
+        "       mov [esp], dl\n"
+        "       add eax, 1\n"
+        "       add ebx, 1\n"
+        "       add esp, 1\n"
         "       cmp ecx, 0\n"
         "       jne loop\n"
         "       hlt\n";
@@ -41,8 +41,8 @@ int main() {
     loader.load(program);
     cpu.start();
 
-    ram.address_register->set_value(0x20 + LOADER_DEFAULT_DATA_SEGMENT);
-    ram.size = 32;
+    ram.address_register->set_value(0x7 + LOADER_DEFAULT_DATA_SEGMENT);
+    ram.size = 8;
     ram.load();
 
     auto registers = cpu.get_registers();

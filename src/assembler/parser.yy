@@ -47,6 +47,7 @@
 
 %token <std::string>    SYMBOL
 %token <int>            NUMBER
+%token <std::string>    STRING
 %token <std::string>    COMMENT
 %token <register_code>  REGISTER
 
@@ -69,7 +70,7 @@
 %type <std::pair<std::string, std::vector<uint8_t>>> definition
 %type <uint8_t> definition_size_specifier;
 %type <std::vector<uint64_t>> data_list
-%type <uint64_t> data
+%type <std::vector<uint64_t>> data
 
 %type <std::vector<operand_ptr>> one_alu_operand two_alu_operands
 %type <operand_ptr> register_op
@@ -189,7 +190,7 @@ definitions:
         $$ = std::vector<std::pair<std::string, std::vector<uint8_t>>>();
     } |
 
-    definition COMMENT  NL {
+    definition COMMENT NL {
         auto v = std::vector<std::pair<std::string, std::vector<uint8_t>>>();
         v.push_back($1);
         $$ = v;
@@ -234,19 +235,24 @@ definition_size_specifier:
     DQ { $$ = 64; }
 
 data_list:
-    data {
-        auto v = std::vector<uint64_t>();
-        v.push_back($1);
-        $$ = v;
-    } |
+    data { $$ = $1; } |
 
     data "," data_list {
-        $3.insert($3.begin(), $1);
+        $3.insert($3.begin(), $1.begin(), $1.end());
         $$ = $3;
     }
 
 data:
-    NUMBER { $$ = $1; }
+    NUMBER { $$ = std::vector<uint64_t>{static_cast<uint64_t>($1)}; } |
+    STRING {
+        auto v = std::vector<uint64_t>();
+
+        for (char c : $1) {
+            v.push_back(static_cast<uint64_t>(c));
+        }
+
+        $$ = v;
+    };
 
 
 instructions:
