@@ -16,6 +16,11 @@
     class Scanner;
     class Driver;
     class Logger;
+
+    struct data_item {
+        uint64_t value;
+        bool is_real;
+    };
 }
 
 %parse-param { Scanner & scanner }
@@ -33,6 +38,7 @@
 
     #undef  yylex
     #define yylex scanner.yylex
+
 }
 
 %token                  NL
@@ -46,7 +52,8 @@
 %token SECTION DATA TEXT
 
 %token <std::string>    SYMBOL
-%token <int>            NUMBER
+%token <double>         FLOAT
+%token <int>            INTEGER
 %token <std::string>    STRING
 %token <std::string>    COMMENT
 %token <register_code>  REGISTER
@@ -69,8 +76,8 @@
 %type <std::vector<std::pair<std::string, std::vector<uint8_t>>>> definitions
 %type <std::pair<std::string, std::vector<uint8_t>>> definition
 %type <uint8_t> definition_size_specifier;
-%type <std::vector<uint64_t>> data_list
-%type <std::vector<uint64_t>> data
+%type <std::vector<data_item>> data_list
+%type <std::vector<data_item>> data
 
 %type <std::vector<operand_ptr>> one_alu_operand two_alu_operands
 %type <operand_ptr> register_op
@@ -218,11 +225,23 @@ definition:
         std::vector<uint8_t> data{};
 
         for (auto const & item : $3) {
-            auto bytes = reinterpret_cast<const uint8_t *>(&item);
+            const uint8_t * bytes;
+
+            if (item.is_real) {
+                double value = *reinterpret_cast<const double*>(&(item.value));
+                float f_value = (float) value;
+
+                if ($2 == 32) bytes = reinterpret_cast<const uint8_t *>(&f_value);
+                else if ($2 == 64) bytes = reinterpret_cast<const uint8_t *>(&value);
+                else logger.error("floating point numbers need at least 32bits to be represented", @1.begin.line);
+            }
+
+            else bytes = reinterpret_cast<const uint8_t *>(&(item.value));
 
             for (int i = 0, n_items = $2 / 8; i < n_items; i++) {
                 data.push_back(bytes[i]);
             }
+
         }
 
         $$ = std::pair<std::string, std::vector<uint8_t>>{$1, data};
@@ -243,12 +262,23 @@ data_list:
     }
 
 data:
-    NUMBER { $$ = std::vector<uint64_t>{static_cast<uint64_t>($1)}; } |
+    FLOAT {
+        $$ = std::vector<data_item>{
+            data_item{ *reinterpret_cast<uint64_t *>(&$1), true }
+        };
+    } |
+
+    INTEGER {
+        $$ = std::vector<data_item>{
+            data_item{ static_cast<uint64_t>($1), false}
+        };
+    } |
+
     STRING {
-        auto v = std::vector<uint64_t>();
+        auto v = std::vector<data_item>();
 
         for (char c : $1) {
-            v.push_back(static_cast<uint64_t>(c));
+            v.push_back(data_item{static_cast<uint64_t>(c), false});
         }
 
         $$ = v;
@@ -479,7 +509,7 @@ immediate_op:
     immediate_op_without_size
 
 immediate_op_without_size:
-    NUMBER { $$ = std::make_shared<ImmediateOperand>($1); }
+    INTEGER { $$ = std::make_shared<ImmediateOperand>($1); }
 
 memory_op:
     size_specifier memory_op_without_size { std::dynamic_pointer_cast<MemoryOperand>($2)->set_size($1);  $$ = $2; } |
@@ -499,12 +529,12 @@ memory_op_without_size:
 memory_op_without_segment:
     "[" REGISTER "+" REGISTER "]"                      { $$ = std::make_shared<MemoryOperand>($2, $4, 1, 0, 0);   } |
     "[" REGISTER "+" REGISTER "*" scale "]"            { $$ = std::make_shared<MemoryOperand>($2, $4, $6, 0, 0);  } |
-    "[" REGISTER "+" REGISTER "*" scale "+" NUMBER "]" { $$ = std::make_shared<MemoryOperand>($2, $4, $6, $8, 0); } |
+    "[" REGISTER "+" REGISTER "*" scale "+" INTEGER "]" { $$ = std::make_shared<MemoryOperand>($2, $4, $6, $8, 0); } |
     "[" REGISTER "*" scale "]"                         { $$ = std::make_shared<MemoryOperand>($2, $4, 0, 0);      } |
-    "[" REGISTER "*" scale "+" NUMBER "]"              { $$ = std::make_shared<MemoryOperand>($2, $4, $6, 0);     } |
+    "[" REGISTER "*" scale "+" INTEGER "]"              { $$ = std::make_shared<MemoryOperand>($2, $4, $6, 0);     } |
     "[" REGISTER "]"                                   { $$ = std::make_shared<MemoryOperand>($2, 0, 0);          } |
-    "[" REGISTER "+" NUMBER "]"                        { $$ = std::make_shared<MemoryOperand>($2, $4, 0);         } |
-    "[" NUMBER "]"                                     { $$ = std::make_shared<MemoryOperand>($2, 0);             } |
+    "[" REGISTER "+" INTEGER "]"                        { $$ = std::make_shared<MemoryOperand>($2, $4, 0);         } |
+    "[" INTEGER "]"                                     { $$ = std::make_shared<MemoryOperand>($2, 0);             } |
 
     "[" REGISTER "+" REGISTER "*" scale "+" SYMBOL "]" {
         auto op = std::make_shared<MemoryOperand>($2, $4, $6, 0, 0);
@@ -531,7 +561,7 @@ memory_op_without_segment:
     }
 
 scale:
-    NUMBER {
+    INTEGER {
         if ($1 != 1 && $1 != 2 && $1 != 4 && $1 != 8)
             logger.error("invalid scale", @1.begin.line);
 

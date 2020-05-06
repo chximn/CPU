@@ -12,6 +12,7 @@ int main() {
         "   x db 1, 2, 3, 4\n"
         "   y db \"abde\", 10, 0\n"
         "   z dd 0, 0, 0, 0\n"
+        "   f dd 1.75\n"
         "section .text\n"
         "main:\n"
         "   mov eax, x\n"
@@ -49,6 +50,5 @@ int main() {
 
     std::cout << helpers::to_hex(ram.data_register->get_value()) << "\n";
     std::cout << helpers::to_hex(registers[register_code::edx]->get_value()) << "\n";
-
     return 0;
 }

@@ -128,29 +128,34 @@ using token = yy::Parser::token;
 	return token::COMMENT;
 }
 
+([0-9]*\.[0-9]+) {
+    yylval->build<double>(std::stod(yytext));
+    return token::FLOAT;
+}
+
 [0-9]+ {
     yylval->build<int>(std::atoi(yytext));
-    return token::NUMBER;
+    return token::INTEGER;
 }
 
 ([0-1]+b) {
     yylval->build<int>(std::stoi(yytext, nullptr, 2));
-    return token::NUMBER;
+    return token::INTEGER;
 }
 
 ([0-7]+o) {
     yylval->build<int>(std::stoi(yytext, nullptr, 8));
-    return token::NUMBER;
+    return token::INTEGER;
 }
 
 ([0-9A-F]+h) {
     yylval->build<int>(std::stoi(yytext, nullptr, 16));
-    return token::NUMBER;
+    return token::INTEGER;
 }
 
 \'(\.|[ ])\' {
     yylval->build<int>(yytext[1]);
-    return token::NUMBER;
+    return token::INTEGER;
 }
 
 (\"(\\.|[^"\\])*\") {
