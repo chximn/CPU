@@ -5,7 +5,7 @@ CentralProcessingUnit::CentralProcessingUnit(RandomAccessMemory & r):
     flags(std::make_shared<FullRegister>(register_code::rflags)),
     arithmetic_logic_unit(flags),
     vector_unit(ram),
-    control_unit(registers, arithmetic_logic_unit, ram) {
+    control_unit(registers, arithmetic_logic_unit, floating_point_unit, ram) {
 
 
     registers[register_code::rax] = std::make_shared<FullRegister>(register_code::rax);

@@ -18,7 +18,9 @@ enum instruction_code {
 
     jmp, je, jne, jl, jg, jle, jge, call, ret,
 
-    nop, hlt
+    nop, hlt,
+
+    fld, fldz, fld1, fst, fstp, _fadd, faddp
 };
 
 class Instruction {

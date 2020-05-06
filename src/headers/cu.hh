@@ -5,6 +5,7 @@
 #include "ram.hh"
 #include <map>
 #include "alu.hh"
+#include "fpu.hh"
 
 class CentralProcessingUnit;
 
@@ -26,13 +27,14 @@ private:
 
     std::map<register_code, register_ptr> & registers;
     ArithemeticLogicUnit & alu;
+    FloatingPointUnit & fpu;
     RandomAccessMemory & ram;
 
     void evaluate_destination(operand_ptr);
     void evaluate_source(operand_ptr);
 public:
     ControlUnit() = delete;
-    ControlUnit(std::map<register_code, register_ptr> &, ArithemeticLogicUnit &, RandomAccessMemory &);
+    ControlUnit(std::map<register_code, register_ptr> &, ArithemeticLogicUnit &, FloatingPointUnit &, RandomAccessMemory &);
 
     void fetch(register_ptr cs);
     void decode();

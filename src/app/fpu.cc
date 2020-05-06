@@ -23,6 +23,27 @@ uint64_t FloatingPointUnit::convert_uint64(double v) {
     return *reinterpret_cast<uint64_t *>(&v);
 }
 
+uint64_t FloatingPointUnit::convert_uint64(float v) {
+    uint64_t result = 0;
+    auto pointer = reinterpret_cast<float *>(&result);
+    *pointer = v;
+    return result;
+}
+
+register_ptr FloatingPointUnit::get_register(register_code code) {
+    switch (code) {
+        case register_code::st0: return stages[0];
+        case register_code::st1: return stages[1];
+        case register_code::st2: return stages[2];
+        case register_code::st3: return stages[3];
+        case register_code::st4: return stages[4];
+        case register_code::st5: return stages[5];
+        case register_code::st6: return stages[6];
+        case register_code::st7: return stages[7];
+        default: throw "provided register code does not belong to the floating point unit";
+    }
+}
+
 void FloatingPointUnit::push(uint64_t v) {
     // shift values
     for (int i = 7; i > 0; i--) {
@@ -42,12 +63,27 @@ void FloatingPointUnit::execute() {
     switch(operation) {
         case fpu_operation::fld: {
             perform_pop = false;
-            push(src_dest->get_value());
+            auto value = src_dest->get_value();
+
+            if (!is_double) {
+                double d = convert_float(value);
+                value = convert_uint64(d);
+            }
+
+            push(value);
             break;
         }
 
         case fpu_operation::fst: {
-            src_dest->set_value(stages[0]->get_value());
+            auto value = stages[0]->get_value();
+
+            if (!is_double) {
+                double d = convert_double(value);
+                float f = static_cast<float>(d);
+                value = convert_uint64(f);
+            }
+
+            src_dest->set_value(value);
             break;
         }
 

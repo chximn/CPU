@@ -7,7 +7,9 @@ std::string Instruction::to_string(instruction_code code) {
         "neg", "_and", "_or", "_xor", "_not", "shl", "shr",
         "cmp", "jmp", "je", "jne", "jl", "jg", "jle", "jge",
         "call", "ret",
-        "nop", "hlt"
+        "nop", "hlt",
+
+        "fld", "fldz", "fld1", "fst", "fstp", "fadd", "faddp"
     };
 
     return names[code];

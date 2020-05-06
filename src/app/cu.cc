@@ -2,13 +2,14 @@
 
 #include <iostream>
 
-ControlUnit::ControlUnit(std::map<register_code, register_ptr> & r, ArithemeticLogicUnit & a, RandomAccessMemory & mem):
+ControlUnit::ControlUnit(std::map<register_code, register_ptr> & r, ArithemeticLogicUnit & a, FloatingPointUnit & f, RandomAccessMemory & mem):
     instruction_pointer_register(std::make_shared<FullRegister>(register_code::rip)),
     instruction_register(std::make_shared<FullRegister>(register_code::ir)),
     immediate_register(std::make_shared<FullRegister>(register_code::_immediate)),
     halt(false),
     registers(r),
     alu(a),
+    fpu(f),
     ram(mem) {}
 
 register_ptr ControlUnit::get_instruction_pointer_register() const {
@@ -529,6 +530,87 @@ void ControlUnit::decode() {
             halt = true;
             load_from_memory = false;
             write_to_memory = false;
+            break;
+
+        case instruction_code::fld:
+            load_from_memory = true;
+            write_to_memory = false;
+            execute_fpu = true;
+
+            ram.address_register->set_value(evaluate_address(*std::dynamic_pointer_cast<MemoryOperand>(operands.at(0))));
+            fpu.operation = fpu_operation::fld;
+            fpu.src_dest = ram.data_register;
+            fpu.is_double = operands.at(0)->get_size() == 64;
+            break;
+
+        case instruction_code::fldz:
+            load_from_memory = true;
+            write_to_memory = false;
+            execute_fpu = true;
+
+            immediate_register->set_value(0);
+            fpu.operation = fpu_operation::fld;
+            fpu.src_dest = immediate_register;
+            fpu.is_double = true;
+            break;
+
+        case instruction_code::fld1:
+            load_from_memory = true;
+            write_to_memory = false;
+            execute_fpu = true;
+
+            immediate_register->set_value(0x3FF0000000000000);
+            fpu.operation = fpu_operation::fld;
+            fpu.src_dest = immediate_register;
+            fpu.is_double = true;
+            break;
+
+        case instruction_code::_fadd:
+            write_to_memory = false;
+            execute_fpu = true;
+            fpu.perform_pop = false;
+            fpu.operation = fpu_operation::fadd;
+
+            if (operands.size() == 1) {
+                auto memory_operand_pointer = std::dynamic_pointer_cast<MemoryOperand>(operands.at(0));
+                fpu.is_double = memory_operand_pointer->get_size() == 64;
+                load_from_memory = true;
+                ram.address_register->set_value(evaluate_address(*memory_operand_pointer));
+                fpu.src_dest = ram.data_register;
+                fpu.is_destination = false;
+            }
+
+            else if (operands.size() == 2) {
+                auto op1 = std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
+                auto op2 = std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
+
+                if (op1->get_reg() == register_code::st0) {
+                    fpu.is_destination = false;
+                    fpu.src_dest = fpu.get_register(op2->get_reg());
+                }
+
+                else {
+                    fpu.is_destination = true;
+                    fpu.src_dest = fpu.get_register(op1->get_reg());
+                }
+
+                fpu.is_double = true;
+                load_from_memory = false;
+            }
+
+            break;
+
+        case instruction_code::faddp:
+            write_to_memory = false;
+            load_from_memory = false;
+            execute_fpu = true;
+            fpu.perform_pop = true;
+            fpu.operation = fpu_operation::fadd;
+            fpu.is_double = true;
+            fpu.is_destination = true;
+
+            if (operands.size() == 0) fpu.src_dest = fpu.stages[1];
+            else if (operands.size() == 2) fpu.src_dest = fpu.get_register(std::dynamic_pointer_cast<RegisterOperand>(operands.at(0))->get_reg());
             break;
 
         default:

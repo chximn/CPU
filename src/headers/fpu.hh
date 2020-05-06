@@ -22,6 +22,9 @@ public:
     double convert_float(uint64_t);
     double convert_double(uint64_t);
     uint64_t convert_uint64(double);
+    uint64_t convert_uint64(float);
+
+    register_ptr get_register(register_code);
 
     void push(uint64_t);
     void pop();

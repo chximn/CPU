@@ -36,31 +36,34 @@ TEST_CASE("fpu") {
     }
 
     SECTION("fld") {
+        reg->set_value(0x3fe00000);
         fpu.operation = fpu_operation::fld;
         fpu.src_dest = reg;
+        fpu.is_double = false;
         fpu.execute();
 
-        REQUIRE(fpu.stages[0]->get_value() == 0xdeadbeef);
+        REQUIRE(fpu.stages[0]->get_value() == 0x3ffc000000000000);
     }
 
     SECTION("fst") {
-        fpu.push(0x12345678);
+        fpu.push(0x3ffc000000000000);
 
         fpu.operation = fpu_operation::fst;
         fpu.src_dest = reg;
+        fpu.is_double = false;
 
         SECTION("with pop") {
             fpu.perform_pop = true;
             fpu.execute();
-            REQUIRE(reg->get_value() == 0x12345678);
+            REQUIRE(reg->get_value() == 0x3fe00000);
             REQUIRE(fpu.stages[0]->get_value() == 0);
         }
 
         SECTION("without pop") {
             fpu.perform_pop = false;
             fpu.execute();
-            REQUIRE(reg->get_value() == 0x12345678);
-            REQUIRE(fpu.stages[0]->get_value() == 0x12345678);
+            REQUIRE(reg->get_value() == 0x3fe00000);
+            REQUIRE(fpu.stages[0]->get_value() == 0x3ffc000000000000);
         }
     }
 
