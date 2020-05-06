@@ -139,7 +139,7 @@ program:
                 else if (label_operand != nullptr) {
                     auto name = label_operand->get_name();
                     if (driver.symbol_table.labels.find(name) == driver.symbol_table.labels.end())
-                        logger.error("label" + name + " was not found", label_operand->get_line());
+                        logger.error("label " + name + " was not found", label_operand->get_line());
 
                     auto source = std::find(instructions.begin(), instructions.end(), instruction);
                     auto destination = std::find(instructions.begin(), instructions.end(), driver.symbol_table.labels[name]);
@@ -287,6 +287,8 @@ data:
 
 instructions:
     SYMBOL ":" instructions {
+        if ($1[0] != '.' && driver.symbol_table.labels.find($1) != driver.symbol_table.labels.end())
+            logger.error("global label " + $1 + " cannot be defined more than once", @1.begin.line);
         driver.symbol_table.labels[$1] = $3.at(0);
         $$ = $3;
     } |
