@@ -18,6 +18,7 @@ int main() {
         "   fld dword [y]\n"
         "   faddp\n"
         "   fst dword [z]\n"
+        "   mov eax, [ebp + 8]\n"
         "   hlt\n";
 
     Assembler assembler(code);

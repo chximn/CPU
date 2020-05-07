@@ -17,6 +17,7 @@ enum register_code {
      ah,  bh,  ch,  dh,
 
     rsp, esp, sp,
+    rbp, ebp, bp,
 
     // TODO: add r8.. registers
 

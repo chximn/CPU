@@ -43,6 +43,10 @@ CentralProcessingUnit::CentralProcessingUnit(RandomAccessMemory & r):
     registers[register_code::rsp] = std::make_shared<FullRegister>(register_code::rsp);
     registers[register_code::esp] = std::make_shared<PartRegister>(register_code::esp, registers[register_code::rsp], 32, 0);
     registers[register_code::sp]  = std::make_shared<PartRegister>(register_code::sp,  registers[register_code::rsp], 16, 0);
+
+    registers[register_code::rbp] = std::make_shared<FullRegister>(register_code::rbp);
+    registers[register_code::ebp] = std::make_shared<PartRegister>(register_code::ebp, registers[register_code::rbp], 32, 0);
+    registers[register_code::bp]  = std::make_shared<PartRegister>(register_code::bp,  registers[register_code::rbp], 16, 0);
 }
 
 void CentralProcessingUnit::start() {

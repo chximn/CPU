@@ -586,15 +586,28 @@ memory_op_without_size:
         $$ = $3;
     } |
 
-    memory_op_without_segment
+    memory_op_without_segment {
+        auto op = std::dynamic_pointer_cast<MemoryOperand>($1);
+        if (op->get_use_base()) {
+            auto code = op->get_base();
+
+            if (code == register_code::rsp || code == register_code::esp || code == register_code::sp
+             || code == register_code::rbp || code == register_code::ebp || code == register_code::bp) {
+                op->set_segment(register_code::ss);
+            }
+
+        }
+
+        $$ = $1;
+    }
 
 memory_op_without_segment:
-    "[" REGISTER "+" REGISTER "]"                      { $$ = std::make_shared<MemoryOperand>($2, $4, 1, 0, 0);   } |
-    "[" REGISTER "+" REGISTER "*" scale "]"            { $$ = std::make_shared<MemoryOperand>($2, $4, $6, 0, 0);  } |
+    "[" REGISTER "+" REGISTER "]"                       { $$ = std::make_shared<MemoryOperand>($2, $4, 1, 0, 0);   } |
+    "[" REGISTER "+" REGISTER "*" scale "]"             { $$ = std::make_shared<MemoryOperand>($2, $4, $6, 0, 0);  } |
     "[" REGISTER "+" REGISTER "*" scale "+" INTEGER "]" { $$ = std::make_shared<MemoryOperand>($2, $4, $6, $8, 0); } |
-    "[" REGISTER "*" scale "]"                         { $$ = std::make_shared<MemoryOperand>($2, $4, 0, 0);      } |
+    "[" REGISTER "*" scale "]"                          { $$ = std::make_shared<MemoryOperand>($2, $4, 0, 0);      } |
     "[" REGISTER "*" scale "+" INTEGER "]"              { $$ = std::make_shared<MemoryOperand>($2, $4, $6, 0);     } |
-    "[" REGISTER "]"                                   { $$ = std::make_shared<MemoryOperand>($2, 0, 0);          } |
+    "[" REGISTER "]"                                    { $$ = std::make_shared<MemoryOperand>($2, 0, 0);          } |
     "[" REGISTER "+" INTEGER "]"                        { $$ = std::make_shared<MemoryOperand>($2, $4, 0);         } |
     "[" INTEGER "]"                                     { $$ = std::make_shared<MemoryOperand>($2, 0);             } |
 

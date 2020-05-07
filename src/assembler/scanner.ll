@@ -112,6 +112,9 @@ using token = yy::Parser::token;
 "rsp"        { yylval->build<register_code>(register_code::rsp);    return token::REGISTER; }
 "esp"        { yylval->build<register_code>(register_code::esp);    return token::REGISTER; }
 "sp"         { yylval->build<register_code>(register_code::sp);     return token::REGISTER; }
+"rbp"        { yylval->build<register_code>(register_code::rbp);    return token::REGISTER; }
+"ebp"        { yylval->build<register_code>(register_code::ebp);    return token::REGISTER; }
+"bp"         { yylval->build<register_code>(register_code::bp);     return token::REGISTER; }
 "rflags"     { yylval->build<register_code>(register_code::rflags); return token::REGISTER; }
 "eflags"     { yylval->build<register_code>(register_code::eflags); return token::REGISTER; }
 "flags"      { yylval->build<register_code>(register_code::flags);  return token::REGISTER; }

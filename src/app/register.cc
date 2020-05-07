@@ -9,6 +9,7 @@ std::string Register::to_string(register_code code) {
         "al", "bl", "cl", "dl",
         "ah", "bh", "ch", "dh",
         "rsp", "esp", "sp",
+        "bsp", "ebp", "bp",
         "rflags", "eflags", "flags",
         "st0", "st1", "st2", "st3",
         "st4", "st5", "st6", "st7",
