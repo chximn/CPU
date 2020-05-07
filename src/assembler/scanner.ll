@@ -93,6 +93,7 @@ using token = yy::Parser::token;
 "paddq"  return token::PADDQ;
 "addps"  return token::ADDPS;
 "addpd"  return token::ADDPD;
+"pand"   return token::PAND;
 
 
 "cs"         { yylval->build<register_code>(register_code::cs);     return token::REGISTER; }

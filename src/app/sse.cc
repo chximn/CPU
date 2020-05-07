@@ -85,9 +85,16 @@ void VectorUnit::execute() {
         }
 
         case vector_operation::addpd: {
-            auto s1 = _mm_load_ps(source->value_float());
-            auto s2 = _mm_load_ps(source2->value_float());
-            _mm_store_ps(destination->value_float(), _mm_add_ps(s1, s2));
+            auto s1 = _mm_load_pd(source->value_double());
+            auto s2 = _mm_load_pd(source2->value_double());
+            _mm_store_pd(destination->value_double(), _mm_add_pd(s1, s2));
+            break;
+        }
+
+        case vector_operation::pand: {
+            auto s1 = _mm_loadu_si128(source->value_dq());
+            auto s2 = _mm_loadu_si128(source2->value_dq());
+            _mm_storeu_si128(destination->value_dq(), _mm_and_si128(s1, s2));
             break;
         }
 

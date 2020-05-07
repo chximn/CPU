@@ -10,7 +10,8 @@ enum class vector_operation {
     paddd,
     paddq,
     addps,
-    addpd
+    addpd,
+    pand
 };
 
 class VectorUnit {

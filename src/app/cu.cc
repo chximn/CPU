@@ -843,6 +843,33 @@ void ControlUnit::decode() {
             break;
         }
 
+        case instruction_code::pand: {
+            sse.operation = vector_operation::pand;
+            sse.write_to_memory = false;
+
+            auto op1reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
+            sse.destination = sse.get_register(op1reg->get_reg());
+            sse.source      = sse.get_register(op1reg->get_reg());
+
+
+            auto op2mem = std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
+            auto op2reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
+
+            if (op2mem != nullptr) {
+                sse.source2 = sse.temp_register;
+                ram.address_register->set_value(evaluate_address(*op2mem));
+                sse.load_from_memory = true;
+            }
+
+            else {
+                sse.load_from_memory = false;
+                sse.source2 = sse.get_register(op2reg->get_reg());
+            }
+
+            execute_sse = true;
+            break;
+        }
+
         default:
             throw "unknown or unimplemented instruction";
             break;
