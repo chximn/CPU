@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-ControlUnit::ControlUnit(std::map<register_code, register_ptr> & r, ArithemeticLogicUnit & a, FloatingPointUnit & f, RandomAccessMemory & mem):
+ControlUnit::ControlUnit(std::map<register_code, register_ptr> & r, ArithemeticLogicUnit & a, FloatingPointUnit & f, VectorUnit & s, RandomAccessMemory & mem):
     instruction_pointer_register(std::make_shared<FullRegister>(register_code::rip)),
     instruction_register(std::make_shared<FullRegister>(register_code::ir)),
     immediate_register(std::make_shared<FullRegister>(register_code::_immediate)),
@@ -10,6 +10,7 @@ ControlUnit::ControlUnit(std::map<register_code, register_ptr> & r, ArithemeticL
     registers(r),
     alu(a),
     fpu(f),
+    sse(s),
     ram(mem) {}
 
 register_ptr ControlUnit::get_instruction_pointer_register() const {
@@ -637,6 +638,42 @@ void ControlUnit::decode() {
             else if (operands.size() == 2) fpu.src_dest = fpu.get_register(std::dynamic_pointer_cast<RegisterOperand>(operands.at(0))->get_reg());
             break;
 
+        case instruction_code::movdqu:
+        case instruction_code::movdqa: {
+            load_from_memory = false;
+            write_to_memory = false;
+
+            auto op1mem = std::dynamic_pointer_cast<MemoryOperand>(operands.at(0));
+            auto op1reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
+            if (op1mem != nullptr) {
+                sse.operation = vector_operation::write;
+                ram.address_register->set_value(evaluate_address(*op1mem));
+
+                auto op2reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
+                sse.source = sse.get_register(op2reg->get_reg());
+            }
+
+            else {
+                sse.destination = sse.get_register(op1reg->get_reg());
+
+                auto op2mem = std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
+                auto op2reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
+
+                if (op2mem != nullptr) {
+                    sse.operation = vector_operation::load;
+                    ram.address_register->set_value(evaluate_address(*op2mem));
+                }
+
+                else {
+                    sse.operation = vector_operation::mov;
+                    sse.source = sse.get_register(op2reg->get_reg());
+                }
+            }
+
+            execute_sse = true;
+            break;
+        }
+
         default:
             throw "unknown or unimplemented instruction";
             break;
@@ -670,6 +707,7 @@ void ControlUnit::execute() {
     if (halt) return;
     if (execute_alu) alu.execute();
     else if (execute_fpu) fpu.execute();
+    else if (execute_sse) sse.execute();
 }
 
 void ControlUnit::write() {

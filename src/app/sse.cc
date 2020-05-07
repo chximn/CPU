@@ -13,7 +13,19 @@ VectorUnit::VectorUnit(RandomAccessMemory & r): ram(r) {
     registers[7] = std::make_shared<VectorRegister>(register_code::xmm7);
 }
 
-
+vector_register_ptr VectorUnit::get_register(register_code code) {
+    switch (code) {
+        case register_code::xmm0: return registers[0];
+        case register_code::xmm1: return registers[1];
+        case register_code::xmm2: return registers[2];
+        case register_code::xmm3: return registers[3];
+        case register_code::xmm4: return registers[4];
+        case register_code::xmm5: return registers[5];
+        case register_code::xmm6: return registers[6];
+        case register_code::xmm7: return registers[7];
+        default: throw "provided register code does not belong to the vector unit";
+    }
+}
 
 void VectorUnit::execute() {
     switch (operation) {
@@ -41,6 +53,12 @@ void VectorUnit::execute() {
             ram.address_register->set_value(ram.address_register->get_value() + 8);
             ram.data_register->set_value(source->get_high());
             ram.write();
+            break;
+        }
+
+        case vector_operation::mov: {
+            destination->set_low(source->get_low());
+            destination->set_high(source->get_high());
             break;
         }
 

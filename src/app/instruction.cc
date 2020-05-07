@@ -9,7 +9,9 @@ std::string Instruction::to_string(instruction_code code) {
         "call", "ret",
         "nop", "hlt",
 
-        "fld", "fldz", "fld1", "fst", "fstp", "fadd", "faddp"
+        "fld", "fldz", "fld1", "fst", "fstp", "fadd", "faddp",
+
+        "movdqu", "movdqa"
     };
 
     return names[code];

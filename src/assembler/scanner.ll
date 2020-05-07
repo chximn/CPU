@@ -85,6 +85,9 @@ using token = yy::Parser::token;
 "fadd"  return token::FADD;
 "faddp" return token::FADDP;
 
+"movdqu" return token::MOVDQU;
+"movdqa" return token::MOVDQA;
+
 
 "cs"         { yylval->build<register_code>(register_code::cs);     return token::REGISTER; }
 "ds"         { yylval->build<register_code>(register_code::ds);     return token::REGISTER; }
@@ -126,14 +129,14 @@ using token = yy::Parser::token;
 "st5"        { yylval->build<register_code>(register_code::st5);    return token::FPU_REGISTER; }
 "st6"        { yylval->build<register_code>(register_code::st6);    return token::FPU_REGISTER; }
 "st7"        { yylval->build<register_code>(register_code::st7);    return token::FPU_REGISTER; }
-"xmm0"       { yylval->build<register_code>(register_code::xmm0);   return token::REGISTER; }
-"xmm1"       { yylval->build<register_code>(register_code::xmm1);   return token::REGISTER; }
-"xmm2"       { yylval->build<register_code>(register_code::xmm2);   return token::REGISTER; }
-"xmm3"       { yylval->build<register_code>(register_code::xmm3);   return token::REGISTER; }
-"xmm4"       { yylval->build<register_code>(register_code::xmm4);   return token::REGISTER; }
-"xmm5"       { yylval->build<register_code>(register_code::xmm5);   return token::REGISTER; }
-"xmm6"       { yylval->build<register_code>(register_code::xmm6);   return token::REGISTER; }
-"xmm7"       { yylval->build<register_code>(register_code::xmm7);   return token::REGISTER; }
+"xmm0"       { yylval->build<register_code>(register_code::xmm0);   return token::SSE_REGISTER; }
+"xmm1"       { yylval->build<register_code>(register_code::xmm1);   return token::SSE_REGISTER; }
+"xmm2"       { yylval->build<register_code>(register_code::xmm2);   return token::SSE_REGISTER; }
+"xmm3"       { yylval->build<register_code>(register_code::xmm3);   return token::SSE_REGISTER; }
+"xmm4"       { yylval->build<register_code>(register_code::xmm4);   return token::SSE_REGISTER; }
+"xmm5"       { yylval->build<register_code>(register_code::xmm5);   return token::SSE_REGISTER; }
+"xmm6"       { yylval->build<register_code>(register_code::xmm6);   return token::SSE_REGISTER; }
+"xmm7"       { yylval->build<register_code>(register_code::xmm7);   return token::SSE_REGISTER; }
 
 (;(.|[ ])*) {
 	yylval->build<std::string>(YYText());

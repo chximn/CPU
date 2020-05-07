@@ -58,9 +58,10 @@
 %token <std::string>    COMMENT
 %token <register_code>  REGISTER
 %token <register_code>  FPU_REGISTER
+%token <register_code>  SSE_REGISTER
 
 /* instructions */
-%token MOV LEA PUSH POP ADD SUB MUL DIV NEG AND OR XOR NOT SHL SHR CMP JMP JE JNE JL JG JLE JGE CALL RET NOP HLT FLD FLDZ FLD1 FST FSTP FADD FADDP
+%token MOV LEA PUSH POP ADD SUB MUL DIV NEG AND OR XOR NOT SHL SHR CMP JMP JE JNE JL JG JLE JGE CALL RET NOP HLT FLD FLDZ FLD1 FST FSTP FADD FADDP MOVDQA MOVDQU
 
 /* size modifiers */
 %token BYTE WORD DWORD QWORD
@@ -68,6 +69,9 @@
 
 %type <std::vector<instruction_ptr>> instructions
 %type <instruction_ptr>              instruction
+%type <instruction_ptr>              core_instruction
+%type <instruction_ptr>              fpu_instruction
+%type <instruction_ptr>              sse_instruction
 %type program
 %type <std::pair<std::vector<std::pair<std::string, std::vector<uint8_t>>>, std::vector<instruction_ptr>>> sections
 
@@ -83,6 +87,7 @@
 %type <std::vector<operand_ptr>> one_alu_operand two_alu_operands
 %type <operand_ptr> register_op
 %type <operand_ptr> fpu_register_op
+%type <operand_ptr> sse_register_op
 %type <operand_ptr> immediate_op
 %type <operand_ptr> immediate_op_without_size
 %type <operand_ptr> memory_op
@@ -334,7 +339,11 @@ instructions:
 	}
 
 instruction:
+    core_instruction |
+    fpu_instruction  |
+    sse_instruction
 
+core_instruction:
     MOV two_alu_operands { $$ = std::make_shared<Instruction>(instruction_code::mov, $2, $2.at(0)->get_size()); } |
 
     LEA register_op "," memory_op {
@@ -446,8 +455,9 @@ instruction:
     RET  { $$ = std::make_shared<Instruction>(instruction_code::ret, std::vector<operand_ptr>{}, 0); } |
 
     NOP { $$ = std::make_shared<Instruction>(instruction_code::nop, std::vector<operand_ptr>{}, 0); } |
-    HLT { $$ = std::make_shared<Instruction>(instruction_code::hlt, std::vector<operand_ptr>{}, 0); } |
+    HLT { $$ = std::make_shared<Instruction>(instruction_code::hlt, std::vector<operand_ptr>{}, 0); }
 
+fpu_instruction:
     FLDZ { $$ = std::make_shared<Instruction>(instruction_code::fldz, std::vector<operand_ptr>{}, 0); } |
     FLD1 { $$ = std::make_shared<Instruction>(instruction_code::fld1, std::vector<operand_ptr>{}, 0); } |
 
@@ -501,6 +511,40 @@ instruction:
     FADDP {
         $$ = std::make_shared<Instruction>(instruction_code::faddp, std::vector<operand_ptr>{}, 64);
     }
+
+sse_instruction:
+    MOVDQU sse_register_op "," sse_register_op {
+        $$ = std::make_shared<Instruction>(instruction_code::movdqu, std::vector<operand_ptr>{$2, $4}, 128);
+    } |
+
+    MOVDQU sse_register_op "," memory_op {
+        auto mem_op = std::dynamic_pointer_cast<MemoryOperand>($4);
+        if (!mem_op->get_use_segment()) mem_op->set_segment(register_code::ds);
+        $$ = std::make_shared<Instruction>(instruction_code::movdqu, std::vector<operand_ptr>{$2, $4}, 128);
+    } |
+
+    MOVDQU memory_op "," sse_register_op {
+        auto mem_op = std::dynamic_pointer_cast<MemoryOperand>($2);
+        if (!mem_op->get_use_segment()) mem_op->set_segment(register_code::ds);
+        $$ = std::make_shared<Instruction>(instruction_code::movdqu, std::vector<operand_ptr>{$2, $4}, 128);
+    } |
+
+    MOVDQA sse_register_op "," sse_register_op {
+        $$ = std::make_shared<Instruction>(instruction_code::movdqu, std::vector<operand_ptr>{$2, $4}, 128);
+    } |
+
+    MOVDQA sse_register_op "," memory_op {
+        auto mem_op = std::dynamic_pointer_cast<MemoryOperand>($4);
+        if (!mem_op->get_use_segment()) mem_op->set_segment(register_code::ds);
+        $$ = std::make_shared<Instruction>(instruction_code::movdqu, std::vector<operand_ptr>{$2, $4}, 128);
+    } |
+
+    MOVDQA memory_op "," sse_register_op {
+        auto mem_op = std::dynamic_pointer_cast<MemoryOperand>($2);
+        if (!mem_op->get_use_segment()) mem_op->set_segment(register_code::ds);
+        $$ = std::make_shared<Instruction>(instruction_code::movdqu, std::vector<operand_ptr>{$2, $4}, 128);
+    }
+
 
 one_alu_operand:
     register_op  { $$ = std::vector<operand_ptr>{$1}; } |
@@ -565,6 +609,8 @@ register_op:
 fpu_register_op:
     FPU_REGISTER { $$ = std::make_shared<RegisterOperand>($1); }
 
+sse_register_op:
+    SSE_REGISTER { $$ = std::make_shared<RegisterOperand>($1); }
 
 immediate_op:
     size_specifier immediate_op_without_size { std::dynamic_pointer_cast<ImmediateOperand>($2)->set_size($1);  $$ = $2; } |

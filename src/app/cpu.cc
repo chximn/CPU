@@ -5,7 +5,7 @@ CentralProcessingUnit::CentralProcessingUnit(RandomAccessMemory & r):
     flags(std::make_shared<FullRegister>(register_code::rflags)),
     arithmetic_logic_unit(flags),
     vector_unit(ram),
-    control_unit(registers, arithmetic_logic_unit, floating_point_unit, ram) {
+    control_unit(registers, arithmetic_logic_unit, floating_point_unit, vector_unit, ram) {
 
 
     registers[register_code::rax] = std::make_shared<FullRegister>(register_code::rax);
@@ -71,6 +71,10 @@ ControlUnit & CentralProcessingUnit::get_control_unit() {
 
 FloatingPointUnit & CentralProcessingUnit::get_floating_point_unit() {
     return floating_point_unit;
+}
+
+VectorUnit & CentralProcessingUnit::get_vector_unit() {
+    return vector_unit;
 }
 
 std::map<register_code, register_ptr> const & CentralProcessingUnit::get_registers() const {

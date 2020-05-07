@@ -6,7 +6,8 @@
 enum class vector_operation {
     load,
     write,
-    add
+    add,
+    mov
 };
 
 enum class vector_operation_type {
@@ -33,6 +34,9 @@ public:
     vector_register_ptr registers[8];
     vector_operation operation;
     vector_operation_type operation_type;
+
+    vector_register_ptr get_register(register_code);
+
 
     void execute();
 };

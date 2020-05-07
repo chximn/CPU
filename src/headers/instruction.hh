@@ -20,7 +20,9 @@ enum instruction_code {
 
     nop, hlt,
 
-    fld, fldz, fld1, fst, fstp, _fadd, faddp
+    fld, fldz, fld1, fst, fstp, _fadd, faddp,
+
+    movdqu, movdqa
 };
 
 class Instruction {
