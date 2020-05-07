@@ -57,9 +57,10 @@
 %token <std::string>    STRING
 %token <std::string>    COMMENT
 %token <register_code>  REGISTER
+%token <register_code>  FPU_REGISTER
 
 /* instructions */
-%token MOV LEA PUSH POP ADD SUB MUL DIV NEG AND OR XOR NOT SHL SHR CMP JMP JE JNE JL JG JLE JGE CALL RET NOP HLT
+%token MOV LEA PUSH POP ADD SUB MUL DIV NEG AND OR XOR NOT SHL SHR CMP JMP JE JNE JL JG JLE JGE CALL RET NOP HLT FLD FLDZ FLD1 FST FSTP FADD FADDP
 
 /* size modifiers */
 %token BYTE WORD DWORD QWORD
@@ -81,6 +82,7 @@
 
 %type <std::vector<operand_ptr>> one_alu_operand two_alu_operands
 %type <operand_ptr> register_op
+%type <operand_ptr> fpu_register_op
 %type <operand_ptr> immediate_op
 %type <operand_ptr> immediate_op_without_size
 %type <operand_ptr> memory_op
@@ -444,7 +446,61 @@ instruction:
     RET  { $$ = std::make_shared<Instruction>(instruction_code::ret, std::vector<operand_ptr>{}, 0); } |
 
     NOP { $$ = std::make_shared<Instruction>(instruction_code::nop, std::vector<operand_ptr>{}, 0); } |
-    HLT { $$ = std::make_shared<Instruction>(instruction_code::hlt, std::vector<operand_ptr>{}, 0); }
+    HLT { $$ = std::make_shared<Instruction>(instruction_code::hlt, std::vector<operand_ptr>{}, 0); } |
+
+    FLDZ { $$ = std::make_shared<Instruction>(instruction_code::fldz, std::vector<operand_ptr>{}, 0); } |
+    FLD1 { $$ = std::make_shared<Instruction>(instruction_code::fld1, std::vector<operand_ptr>{}, 0); } |
+
+    FLD memory_op {
+        auto op = std::dynamic_pointer_cast<MemoryOperand>($2);
+        if (op->get_size() == 0) logger.error("memory operand size must be specified", @1.begin.line);
+        if (op->get_size() != 32 && op->get_size() != 64) logger.error("invalid size specifier", @1.begin.line);
+        if (!op->get_use_segment()) op->set_segment(register_code::ds);
+        $$ = std::make_shared<Instruction>(instruction_code::fld, std::vector<operand_ptr>{ $2 }, $2->get_size());
+    } |
+
+    FST memory_op {
+        auto op = std::dynamic_pointer_cast<MemoryOperand>($2);
+        if (op->get_size() == 0) logger.error("memory operand size must be specified", @1.begin.line);
+        if (op->get_size() != 32 && op->get_size() != 64) logger.error("invalid size specifier", @1.begin.line);
+        if (!op->get_use_segment()) op->set_segment(register_code::ds);
+        $$ = std::make_shared<Instruction>(instruction_code::fst, std::vector<operand_ptr>{ $2 }, $2->get_size());
+    } |
+
+    FSTP memory_op {
+        auto op = std::dynamic_pointer_cast<MemoryOperand>($2);
+        if (op->get_size() == 0) logger.error("memory operand size must be specified", @1.begin.line);
+        if (op->get_size() != 32 && op->get_size() != 64) logger.error("invalid size specifier", @1.begin.line);
+        if (!op->get_use_segment()) op->set_segment(register_code::ds);
+        $$ = std::make_shared<Instruction>(instruction_code::fstp, std::vector<operand_ptr>{ $2 }, $2->get_size());
+    } |
+
+    FADD memory_op {
+        auto op = std::dynamic_pointer_cast<MemoryOperand>($2);
+        if (op->get_size() == 0) logger.error("memory operand size must be specified", @1.begin.line);
+        if (op->get_size() != 32 && op->get_size() != 64) logger.error("invalid size specifier", @1.begin.line);
+        if (!op->get_use_segment()) op->set_segment(register_code::ds);
+        $$ = std::make_shared<Instruction>(instruction_code::_fadd, std::vector<operand_ptr>{ $2 }, $2->get_size());
+    } |
+
+    FADD fpu_register_op "," fpu_register_op {
+        auto op1 = std::dynamic_pointer_cast<RegisterOperand>($2);
+        auto op2 = std::dynamic_pointer_cast<RegisterOperand>($4);
+        if (op1->get_reg() != register_code::st0 && op2->get_reg() != register_code::st0)
+            logger.error("st0 must be present in a two operand fpu instruction", @1.begin.line);
+        $$ = std::make_shared<Instruction>(instruction_code::_fadd, std::vector<operand_ptr>{ $2, $4 }, 64);
+    } |
+
+    FADDP fpu_register_op "," fpu_register_op {
+        auto op2 = std::dynamic_pointer_cast<RegisterOperand>($4);
+        if (op2->get_reg() != register_code::st0)
+            logger.error("second operand must be st0", @1.begin.line);
+        $$ = std::make_shared<Instruction>(instruction_code::faddp, std::vector<operand_ptr>{ $2, $4 }, 64);
+    } |
+
+    FADDP {
+        $$ = std::make_shared<Instruction>(instruction_code::faddp, std::vector<operand_ptr>{}, 64);
+    }
 
 one_alu_operand:
     register_op  { $$ = std::vector<operand_ptr>{$1}; } |
@@ -505,6 +561,10 @@ object_op:
 
 register_op:
     REGISTER { $$ = std::make_shared<RegisterOperand>($1); }
+
+fpu_register_op:
+    FPU_REGISTER { $$ = std::make_shared<RegisterOperand>($1); }
+
 
 immediate_op:
     size_specifier immediate_op_without_size { std::dynamic_pointer_cast<ImmediateOperand>($2)->set_size($1);  $$ = $2; } |

@@ -72,6 +72,10 @@ TEST_CASE("assembler") {
         "nop\n"
         "mov eax, x\n"
         "mov eax, [x]\n"
+        "faddp\n"
+        "fld dword [eax]\n"
+        "fadd st0, st1\n"
+        "fst qword [eax]\n"
         "hlt\n\n";
 
         Assembler assembler(code);

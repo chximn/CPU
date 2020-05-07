@@ -29,6 +29,7 @@ public:
 
     ControlUnit & get_control_unit();
     ArithemeticLogicUnit & get_arithemetic_logic_unit();
+    FloatingPointUnit & get_floating_point_unit();
     std::map<register_code, register_ptr> const & get_registers() const;
 
     friend Loader;

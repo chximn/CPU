@@ -65,6 +65,10 @@ ControlUnit & CentralProcessingUnit::get_control_unit() {
     return control_unit;
 }
 
+FloatingPointUnit & CentralProcessingUnit::get_floating_point_unit() {
+    return floating_point_unit;
+}
+
 std::map<register_code, register_ptr> const & CentralProcessingUnit::get_registers() const {
     return registers;
 }

@@ -543,6 +543,30 @@ void ControlUnit::decode() {
             fpu.is_double = operands.at(0)->get_size() == 64;
             break;
 
+        case instruction_code::fst:
+            load_from_memory = true;
+            write_to_memory = false;
+            execute_fpu = true;
+            fpu.perform_pop = false;
+
+            ram.address_register->set_value(evaluate_address(*std::dynamic_pointer_cast<MemoryOperand>(operands.at(0))));
+            fpu.operation = fpu_operation::fst;
+            fpu.src_dest = ram.data_register;
+            fpu.is_double = operands.at(0)->get_size() == 64;
+            break;
+
+        case instruction_code::fstp:
+            load_from_memory = true;
+            write_to_memory = false;
+            execute_fpu = true;
+            fpu.perform_pop = true;
+
+            ram.address_register->set_value(evaluate_address(*std::dynamic_pointer_cast<MemoryOperand>(operands.at(0))));
+            fpu.operation = fpu_operation::fst;
+            fpu.src_dest = ram.data_register;
+            fpu.is_double = operands.at(0)->get_size() == 64;
+            break;
+
         case instruction_code::fldz:
             load_from_memory = true;
             write_to_memory = false;
@@ -645,6 +669,7 @@ void ControlUnit::load() {
 void ControlUnit::execute() {
     if (halt) return;
     if (execute_alu) alu.execute();
+    else if (execute_fpu) fpu.execute();
 }
 
 void ControlUnit::write() {

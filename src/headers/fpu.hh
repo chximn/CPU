@@ -2,6 +2,9 @@
 #include "register.hh"
 #include <memory>
 
+#include <iostream>
+#include "helpers.hh"
+
 enum class fpu_operation {
     fld, fst,
     fadd, fsub, fmul, fsqrt

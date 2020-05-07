@@ -77,6 +77,15 @@ using token = yy::Parser::token;
 "nop"  return token::NOP;
 "hlt"  return token::HLT;
 
+"fld"   return token::FLD;
+"fldz"  return token::FLDZ;
+"fld1"  return token::FLD1;
+"fst"   return token::FST;
+"fstp"  return token::FSTP;
+"fadd"  return token::FADD;
+"faddp" return token::FADDP;
+
+
 "cs"         { yylval->build<register_code>(register_code::cs);     return token::REGISTER; }
 "ds"         { yylval->build<register_code>(register_code::ds);     return token::REGISTER; }
 "ss"         { yylval->build<register_code>(register_code::ss);     return token::REGISTER; }
@@ -106,14 +115,14 @@ using token = yy::Parser::token;
 "rflags"     { yylval->build<register_code>(register_code::rflags); return token::REGISTER; }
 "eflags"     { yylval->build<register_code>(register_code::eflags); return token::REGISTER; }
 "flags"      { yylval->build<register_code>(register_code::flags);  return token::REGISTER; }
-"st0"        { yylval->build<register_code>(register_code::st0);    return token::REGISTER; }
-"st1"        { yylval->build<register_code>(register_code::st1);    return token::REGISTER; }
-"st2"        { yylval->build<register_code>(register_code::st2);    return token::REGISTER; }
-"st3"        { yylval->build<register_code>(register_code::st3);    return token::REGISTER; }
-"st4"        { yylval->build<register_code>(register_code::st4);    return token::REGISTER; }
-"st5"        { yylval->build<register_code>(register_code::st5);    return token::REGISTER; }
-"st6"        { yylval->build<register_code>(register_code::st6);    return token::REGISTER; }
-"st7"        { yylval->build<register_code>(register_code::st7);    return token::REGISTER; }
+"st0"        { yylval->build<register_code>(register_code::st0);    return token::FPU_REGISTER; }
+"st1"        { yylval->build<register_code>(register_code::st1);    return token::FPU_REGISTER; }
+"st2"        { yylval->build<register_code>(register_code::st2);    return token::FPU_REGISTER; }
+"st3"        { yylval->build<register_code>(register_code::st3);    return token::FPU_REGISTER; }
+"st4"        { yylval->build<register_code>(register_code::st4);    return token::FPU_REGISTER; }
+"st5"        { yylval->build<register_code>(register_code::st5);    return token::FPU_REGISTER; }
+"st6"        { yylval->build<register_code>(register_code::st6);    return token::FPU_REGISTER; }
+"st7"        { yylval->build<register_code>(register_code::st7);    return token::FPU_REGISTER; }
 "xmm0"       { yylval->build<register_code>(register_code::xmm0);   return token::REGISTER; }
 "xmm1"       { yylval->build<register_code>(register_code::xmm1);   return token::REGISTER; }
 "xmm2"       { yylval->build<register_code>(register_code::xmm2);   return token::REGISTER; }
