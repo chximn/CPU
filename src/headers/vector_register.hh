@@ -2,6 +2,7 @@
 #include "register.hh"
 #include <stdlib.h>
 #include <memory>
+#include <emmintrin.h>
 
 class VectorRegister {
 private:
@@ -21,6 +22,8 @@ public:
     void set_high(uint64_t);
 
     float * value_float();
+    double * value_double();
+    __m128i_u * value_dq();
 };
 
 using vector_register_ptr = std::shared_ptr<VectorRegister>;

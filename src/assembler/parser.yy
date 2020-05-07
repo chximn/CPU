@@ -61,7 +61,7 @@
 %token <register_code>  SSE_REGISTER
 
 /* instructions */
-%token MOV LEA PUSH POP ADD SUB MUL DIV NEG AND OR XOR NOT SHL SHR CMP JMP JE JNE JL JG JLE JGE CALL RET NOP HLT FLD FLDZ FLD1 FST FSTP FADD FADDP MOVDQA MOVDQU
+%token MOV LEA PUSH POP ADD SUB MUL DIV NEG AND OR XOR NOT SHL SHR CMP JMP JE JNE JL JG JLE JGE CALL RET NOP HLT FLD FLDZ FLD1 FST FSTP FADD FADDP MOVDQA MOVDQU PADDB PADDW PADDD PADDQ ADDPS ADDPD
 
 /* size modifiers */
 %token BYTE WORD DWORD QWORD
@@ -543,8 +543,67 @@ sse_instruction:
         auto mem_op = std::dynamic_pointer_cast<MemoryOperand>($2);
         if (!mem_op->get_use_segment()) mem_op->set_segment(register_code::ds);
         $$ = std::make_shared<Instruction>(instruction_code::movdqu, std::vector<operand_ptr>{$2, $4}, 128);
-    }
+    } |
 
+    PADDB sse_register_op "," sse_register_op {
+        $$ = std::make_shared<Instruction>(instruction_code::paddb, std::vector<operand_ptr>{$2, $4}, 128);
+    } |
+
+    PADDB sse_register_op "," memory_op {
+        auto mem_op = std::dynamic_pointer_cast<MemoryOperand>($4);
+        if (!mem_op->get_use_segment()) mem_op->set_segment(register_code::ds);
+        $$ = std::make_shared<Instruction>(instruction_code::paddb, std::vector<operand_ptr>{$2, $4}, 128);
+    } |
+
+    PADDW sse_register_op "," sse_register_op {
+        $$ = std::make_shared<Instruction>(instruction_code::paddw, std::vector<operand_ptr>{$2, $4}, 128);
+    } |
+
+    PADDW sse_register_op "," memory_op {
+        auto mem_op = std::dynamic_pointer_cast<MemoryOperand>($4);
+        if (!mem_op->get_use_segment()) mem_op->set_segment(register_code::ds);
+        $$ = std::make_shared<Instruction>(instruction_code::paddw, std::vector<operand_ptr>{$2, $4}, 128);
+    } |
+
+    PADDD sse_register_op "," sse_register_op {
+        $$ = std::make_shared<Instruction>(instruction_code::paddd, std::vector<operand_ptr>{$2, $4}, 128);
+    } |
+
+    PADDD sse_register_op "," memory_op {
+        auto mem_op = std::dynamic_pointer_cast<MemoryOperand>($4);
+        if (!mem_op->get_use_segment()) mem_op->set_segment(register_code::ds);
+        $$ = std::make_shared<Instruction>(instruction_code::paddd, std::vector<operand_ptr>{$2, $4}, 128);
+    } |
+
+    PADDQ sse_register_op "," sse_register_op {
+        $$ = std::make_shared<Instruction>(instruction_code::paddq, std::vector<operand_ptr>{$2, $4}, 128);
+    } |
+
+    PADDQ sse_register_op "," memory_op {
+        auto mem_op = std::dynamic_pointer_cast<MemoryOperand>($4);
+        if (!mem_op->get_use_segment()) mem_op->set_segment(register_code::ds);
+        $$ = std::make_shared<Instruction>(instruction_code::paddq, std::vector<operand_ptr>{$2, $4}, 128);
+    } |
+
+    ADDPS sse_register_op "," sse_register_op {
+        $$ = std::make_shared<Instruction>(instruction_code::addps, std::vector<operand_ptr>{$2, $4}, 128);
+    } |
+
+    ADDPS sse_register_op "," memory_op {
+        auto mem_op = std::dynamic_pointer_cast<MemoryOperand>($4);
+        if (!mem_op->get_use_segment()) mem_op->set_segment(register_code::ds);
+        $$ = std::make_shared<Instruction>(instruction_code::addps, std::vector<operand_ptr>{$2, $4}, 128);
+    } |
+
+    ADDPD sse_register_op "," sse_register_op {
+        $$ = std::make_shared<Instruction>(instruction_code::addpd, std::vector<operand_ptr>{$2, $4}, 128);
+    } |
+
+    ADDPD sse_register_op "," memory_op {
+        auto mem_op = std::dynamic_pointer_cast<MemoryOperand>($4);
+        if (!mem_op->get_use_segment()) mem_op->set_segment(register_code::ds);
+        $$ = std::make_shared<Instruction>(instruction_code::addpd, std::vector<operand_ptr>{$2, $4}, 128);
+    }
 
 one_alu_operand:
     register_op  { $$ = std::vector<operand_ptr>{$1}; } |

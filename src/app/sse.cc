@@ -3,6 +3,7 @@
 #include <iostream>
 
 VectorUnit::VectorUnit(RandomAccessMemory & r): ram(r) {
+    temp_register = std::make_shared<VectorRegister>(register_code::_temp_sse);
     registers[0] = std::make_shared<VectorRegister>(register_code::xmm0);
     registers[1] = std::make_shared<VectorRegister>(register_code::xmm1);
     registers[2] = std::make_shared<VectorRegister>(register_code::xmm2);
@@ -28,33 +29,19 @@ vector_register_ptr VectorUnit::get_register(register_code code) {
 }
 
 void VectorUnit::execute() {
+    if (load_from_memory) {
+        // load low half
+        ram.size = 64;
+        ram.load();
+        temp_register->set_low(ram.data_register->get_value());
+
+        // load high half
+        ram.address_register->set_value(ram.address_register->get_value() + 8);
+        ram.load();
+        temp_register->set_high(ram.data_register->get_value());
+    }
+
     switch (operation) {
-        case vector_operation::load: {
-            // load low half
-            ram.size = 64;
-            ram.load();
-            destination->set_low(ram.data_register->get_value());
-
-            // load high half
-            ram.address_register->set_value(ram.address_register->get_value() + 8);
-            ram.load();
-            destination->set_high(ram.data_register->get_value());
-
-            break;
-        }
-
-        case vector_operation::write: {
-            // write low half
-            ram.size = 64;
-            ram.data_register->set_value(source->get_low());
-            ram.write();
-
-            // write high half
-            ram.address_register->set_value(ram.address_register->get_value() + 8);
-            ram.data_register->set_value(source->get_high());
-            ram.write();
-            break;
-        }
 
         case vector_operation::mov: {
             destination->set_low(source->get_low());
@@ -62,17 +49,62 @@ void VectorUnit::execute() {
             break;
         }
 
-        case vector_operation::add: {
-            if (operation_type == vector_operation_type::_float) {
-                auto s1 = _mm_load_ps(source->value_float());
-                auto s2 = _mm_load_ps(source2->value_float());
-                _mm_store_ps(destination->value_float(), _mm_add_ps(s1, s2));
-            }
+        case vector_operation::paddb: {
+            auto s1 = _mm_loadu_si128(source->value_dq());
+            auto s2 = _mm_loadu_si128(source2->value_dq());
+            _mm_storeu_si128(destination->value_dq(), _mm_add_epi8(s1, s2));
+            break;
+        }
+
+        case vector_operation::paddw: {
+            auto s1 = _mm_loadu_si128(source->value_dq());
+            auto s2 = _mm_loadu_si128(source2->value_dq());
+            _mm_storeu_si128(destination->value_dq(), _mm_add_epi16(s1, s2));
+            break;
+        }
+
+        case vector_operation::paddd: {
+            auto s1 = _mm_loadu_si128(source->value_dq());
+            auto s2 = _mm_loadu_si128(source2->value_dq());
+            _mm_storeu_si128(destination->value_dq(), _mm_add_epi32(s1, s2));
+            break;
+        }
+
+        case vector_operation::paddq: {
+            auto s1 = _mm_loadu_si128(source->value_dq());
+            auto s2 = _mm_loadu_si128(source2->value_dq());
+            _mm_storeu_si128(destination->value_dq(), _mm_add_epi64(s1, s2));
+            break;
+        }
+
+        case vector_operation::addps: {
+            auto s1 = _mm_load_ps(source->value_float());
+            auto s2 = _mm_load_ps(source2->value_float());
+            _mm_store_ps(destination->value_float(), _mm_add_ps(s1, s2));
+            break;
+        }
+
+        case vector_operation::addpd: {
+            auto s1 = _mm_load_ps(source->value_float());
+            auto s2 = _mm_load_ps(source2->value_float());
+            _mm_store_ps(destination->value_float(), _mm_add_ps(s1, s2));
             break;
         }
 
         default:
             throw "unknown or unimplemented vector operation";
             break;
+    }
+
+    if (write_to_memory) {
+        // write low half
+        ram.size = 64;
+        ram.data_register->set_value(temp_register->get_low());
+        ram.write();
+
+        // write high half
+        ram.address_register->set_value(ram.address_register->get_value() + 8);
+        ram.data_register->set_value(temp_register->get_high());
+        ram.write();
     }
 }

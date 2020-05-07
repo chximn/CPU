@@ -4,19 +4,13 @@
 #include <emmintrin.h>
 
 enum class vector_operation {
-    load,
-    write,
-    add,
-    mov
-};
-
-enum class vector_operation_type {
-    _float,
-    _double,
-    byte,
-    word,
-    dword,
-    qword
+    mov,
+    paddb,
+    paddw,
+    paddd,
+    paddq,
+    addps,
+    addpd
 };
 
 class VectorUnit {
@@ -30,13 +24,14 @@ public:
     vector_register_ptr source;
     vector_register_ptr source2;
     vector_register_ptr destination;
+    vector_register_ptr temp_register;
 
     vector_register_ptr registers[8];
     vector_operation operation;
-    vector_operation_type operation_type;
+
+    bool load_from_memory;
+    bool write_to_memory;
 
     vector_register_ptr get_register(register_code);
-
-
     void execute();
 };

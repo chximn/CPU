@@ -10,9 +10,12 @@ int main() {
     std::string code =
         "section .data\n"
         "   x dd 1, 2, 3, 4\n"
+        "   y dd 5, 6, 7, 8\n"
         "section .text\n"
         "main:\n"
         "   movdqu xmm0, [x]\n"
+        "   movdqa xmm1, [y]\n"
+        "   paddd xmm0, xmm1\n"
         "   hlt\n";
 
     Assembler assembler(code);

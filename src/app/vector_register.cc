@@ -28,3 +28,11 @@ void VectorRegister::set_high(uint64_t v) {
 float * VectorRegister::value_float() {
     return reinterpret_cast<float *>(value);
 }
+
+double * VectorRegister::value_double() {
+    return reinterpret_cast<double *>(value);
+}
+
+__m128i_u * VectorRegister::value_dq() {
+    return reinterpret_cast<__m128i_u *>(value);
+}

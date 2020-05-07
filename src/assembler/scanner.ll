@@ -87,6 +87,12 @@ using token = yy::Parser::token;
 
 "movdqu" return token::MOVDQU;
 "movdqa" return token::MOVDQA;
+"paddb"  return token::PADDB;
+"paddw"  return token::PADDW;
+"paddd"  return token::PADDD;
+"paddq"  return token::PADDQ;
+"addps"  return token::ADDPS;
+"addpd"  return token::ADDPD;
 
 
 "cs"         { yylval->build<register_code>(register_code::cs);     return token::REGISTER; }

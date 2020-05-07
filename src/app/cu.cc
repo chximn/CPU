@@ -103,6 +103,8 @@ void ControlUnit::evaluate_source(operand_ptr operand) {
 }
 
 void ControlUnit::decode() {
+    load_from_memory = false;
+    write_to_memory = false;
     execute_alu = false;
     execute_sse = false;
     execute_fpu = false;
@@ -640,14 +642,18 @@ void ControlUnit::decode() {
 
         case instruction_code::movdqu:
         case instruction_code::movdqa: {
+            sse.operation = vector_operation::mov;
             load_from_memory = false;
             write_to_memory = false;
+            sse.load_from_memory = false;
+            sse.write_to_memory = false;
 
             auto op1mem = std::dynamic_pointer_cast<MemoryOperand>(operands.at(0));
             auto op1reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
             if (op1mem != nullptr) {
-                sse.operation = vector_operation::write;
                 ram.address_register->set_value(evaluate_address(*op1mem));
+                sse.destination = sse.temp_register;
+                sse.write_to_memory = true;
 
                 auto op2reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
                 sse.source = sse.get_register(op2reg->get_reg());
@@ -660,7 +666,8 @@ void ControlUnit::decode() {
                 auto op2reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
 
                 if (op2mem != nullptr) {
-                    sse.operation = vector_operation::load;
+                    sse.source = sse.temp_register;
+                    sse.load_from_memory = true;
                     ram.address_register->set_value(evaluate_address(*op2mem));
                 }
 
@@ -668,6 +675,168 @@ void ControlUnit::decode() {
                     sse.operation = vector_operation::mov;
                     sse.source = sse.get_register(op2reg->get_reg());
                 }
+
+            }
+
+            execute_sse = true;
+            break;
+        }
+
+        case instruction_code::paddb: {
+            sse.operation = vector_operation::paddb;
+            sse.write_to_memory = false;
+
+            auto op1reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
+            sse.destination = sse.get_register(op1reg->get_reg());
+            sse.source      = sse.get_register(op1reg->get_reg());
+
+
+            auto op2mem = std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
+            auto op2reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
+
+            if (op2mem != nullptr) {
+                sse.source2 = sse.temp_register;
+                ram.address_register->set_value(evaluate_address(*op2mem));
+                sse.load_from_memory = true;
+            }
+
+            else {
+                sse.load_from_memory = false;
+                sse.source2 = sse.get_register(op2reg->get_reg());
+            }
+
+            execute_sse = true;
+            break;
+        }
+
+        case instruction_code::paddw: {
+            sse.operation = vector_operation::paddw;
+            sse.write_to_memory = false;
+
+            auto op1reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
+            sse.destination = sse.get_register(op1reg->get_reg());
+            sse.source      = sse.get_register(op1reg->get_reg());
+
+
+            auto op2mem = std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
+            auto op2reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
+
+            if (op2mem != nullptr) {
+                sse.source2 = sse.temp_register;
+                ram.address_register->set_value(evaluate_address(*op2mem));
+                sse.load_from_memory = true;
+            }
+
+            else {
+                sse.load_from_memory = false;
+                sse.source2 = sse.get_register(op2reg->get_reg());
+            }
+
+            execute_sse = true;
+            break;
+        }
+
+        case instruction_code::paddd: {
+            sse.operation = vector_operation::paddd;
+            sse.write_to_memory = false;
+
+            auto op1reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
+            sse.destination = sse.get_register(op1reg->get_reg());
+            sse.source      = sse.get_register(op1reg->get_reg());
+
+            auto op2mem = std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
+            auto op2reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
+
+            if (op2mem != nullptr) {
+                sse.source2 = sse.temp_register;
+                ram.address_register->set_value(evaluate_address(*op2mem));
+                sse.load_from_memory = true;
+            }
+
+            else {
+                sse.load_from_memory = false;
+                sse.source2 = sse.get_register(op2reg->get_reg());
+            }
+
+            execute_sse = true;
+            break;
+        }
+
+        case instruction_code::paddq: {
+            sse.operation = vector_operation::paddq;
+            sse.write_to_memory = false;
+
+            auto op1reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
+            sse.destination = sse.get_register(op1reg->get_reg());
+            sse.source      = sse.get_register(op1reg->get_reg());
+
+
+            auto op2mem = std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
+            auto op2reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
+
+            if (op2mem != nullptr) {
+                sse.source2 = sse.temp_register;
+                ram.address_register->set_value(evaluate_address(*op2mem));
+                sse.load_from_memory = true;
+            }
+
+            else {
+                sse.load_from_memory = false;
+                sse.source2 = sse.get_register(op2reg->get_reg());
+            }
+
+            execute_sse = true;
+            break;
+        }
+
+        case instruction_code::addps: {
+            sse.operation = vector_operation::addps;
+            sse.write_to_memory = false;
+
+            auto op1reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
+            sse.destination = sse.get_register(op1reg->get_reg());
+            sse.source      = sse.get_register(op1reg->get_reg());
+
+
+            auto op2mem = std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
+            auto op2reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
+
+            if (op2mem != nullptr) {
+                sse.source2 = sse.temp_register;
+                ram.address_register->set_value(evaluate_address(*op2mem));
+                sse.load_from_memory = true;
+            }
+
+            else {
+                sse.load_from_memory = false;
+                sse.source2 = sse.get_register(op2reg->get_reg());
+            }
+
+            execute_sse = true;
+            break;
+        }
+
+        case instruction_code::addpd: {
+            sse.operation = vector_operation::addpd;
+            sse.write_to_memory = false;
+
+            auto op1reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
+            sse.destination = sse.get_register(op1reg->get_reg());
+            sse.source      = sse.get_register(op1reg->get_reg());
+
+
+            auto op2mem = std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
+            auto op2reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
+
+            if (op2mem != nullptr) {
+                sse.source2 = sse.temp_register;
+                ram.address_register->set_value(evaluate_address(*op2mem));
+                sse.load_from_memory = true;
+            }
+
+            else {
+                sse.load_from_memory = false;
+                sse.source2 = sse.get_register(op2reg->get_reg());
             }
 
             execute_sse = true;

@@ -43,9 +43,13 @@ TEST_CASE("sse") {
         ram.address_register->set_value(131);
         ram.write();
 
+
         ram.address_register->set_value(123);
+        sse.load_from_memory = true;
+        sse.write_to_memory = false;
         sse.destination = sse.registers[0];
-        sse.operation = vector_operation::load;
+        sse.source = sse.temp_register;
+        sse.operation = vector_operation::mov;
         sse.execute();
 
         REQUIRE(sse.registers[0]->get_low()   == 0xabcd1234deadbeef);
@@ -57,8 +61,11 @@ TEST_CASE("sse") {
         sse.registers[0]->set_low(0x1122334455667788);
         sse.registers[0]->set_high(0x9900aabbccddeeff);
 
+        sse.load_from_memory = false;
+        sse.write_to_memory = true;
         sse.source = sse.registers[0];
-        sse.operation = vector_operation::write;
+        sse.destination = sse.temp_register;
+        sse.operation = vector_operation::mov;
         sse.execute();
 
 
@@ -85,8 +92,7 @@ TEST_CASE("sse") {
         sse.registers[5]->set_low(0);
         sse.registers[5]->set_high(0);
 
-        sse.operation = vector_operation::add;
-        sse.operation_type = vector_operation_type::_float;
+        sse.operation = vector_operation::addps;
         sse.source = sse.registers[0];
         sse.source2 = sse.registers[1];
         sse.destination = sse.registers[5];

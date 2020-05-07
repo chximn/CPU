@@ -15,7 +15,8 @@ std::string Register::to_string(register_code code) {
         "st4", "st5", "st6", "st7",
         "rip", "ir", "_immediate",
         "xmm0", "xmm1", "xmm2", "xmm3",
-        "xmm4", "xmm5", "xmm6", "xmm7"
+        "xmm4", "xmm5", "xmm6", "xmm7",
+        "_temp_sse"
     };
 
     return names[code];
