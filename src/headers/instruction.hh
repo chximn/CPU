@@ -22,7 +22,7 @@ enum instruction_code {
 
     fld, fldz, fld1, fst, fstp, _fadd, faddp,
 
-    movdqu, movdqa, paddb, paddw, paddd, paddq, addps, addpd, pand
+    movdqu, movdqa, paddb, paddw, paddd, paddq, addps, addpd, pand, pshufd
 };
 
 class Instruction {

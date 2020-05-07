@@ -94,7 +94,7 @@ using token = yy::Parser::token;
 "addps"  return token::ADDPS;
 "addpd"  return token::ADDPD;
 "pand"   return token::PAND;
-
+"pshufd" return token::PSHUFD;
 
 "cs"         { yylval->build<register_code>(register_code::cs);     return token::REGISTER; }
 "ds"         { yylval->build<register_code>(register_code::ds);     return token::REGISTER; }

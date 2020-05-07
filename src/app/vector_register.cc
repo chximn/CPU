@@ -25,6 +25,10 @@ void VectorRegister::set_high(uint64_t v) {
     (reinterpret_cast<uint64_t *>(value))[1] = v;
 }
 
+int * VectorRegister::value_int() {
+    return reinterpret_cast<int *>(value);
+}
+
 float * VectorRegister::value_float() {
     return reinterpret_cast<float *>(value);
 }

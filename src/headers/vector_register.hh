@@ -21,6 +21,7 @@ public:
     uint64_t get_high();
     void set_high(uint64_t);
 
+    int * value_int();
     float * value_float();
     double * value_double();
     __m128i_u * value_dq();

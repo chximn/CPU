@@ -61,7 +61,7 @@
 %token <register_code>  SSE_REGISTER
 
 /* instructions */
-%token MOV LEA PUSH POP ADD SUB MUL DIV NEG AND OR XOR NOT SHL SHR CMP JMP JE JNE JL JG JLE JGE CALL RET NOP HLT FLD FLDZ FLD1 FST FSTP FADD FADDP MOVDQA MOVDQU PADDB PADDW PADDD PADDQ ADDPS ADDPD PAND
+%token MOV LEA PUSH POP ADD SUB MUL DIV NEG AND OR XOR NOT SHL SHR CMP JMP JE JNE JL JG JLE JGE CALL RET NOP HLT FLD FLDZ FLD1 FST FSTP FADD FADDP MOVDQA MOVDQU PADDB PADDW PADDD PADDQ ADDPS ADDPD PAND PSHUFD
 
 /* size modifiers */
 %token BYTE WORD DWORD QWORD
@@ -613,6 +613,18 @@ sse_instruction:
         auto mem_op = std::dynamic_pointer_cast<MemoryOperand>($4);
         if (!mem_op->get_use_segment()) mem_op->set_segment(register_code::ds);
         $$ = std::make_shared<Instruction>(instruction_code::pand, std::vector<operand_ptr>{$2, $4}, 128);
+    } |
+
+    PSHUFD sse_register_op "," sse_register_op "," immediate_op {
+        if (std::dynamic_pointer_cast<ImmediateOperand>($6)->get_value() >> 8) logger.error("immediate value must be representable in 8 bits", @1.begin.line);
+        $$ = std::make_shared<Instruction>(instruction_code::pshufd, std::vector<operand_ptr>{$2, $4, $6}, 128);
+    } |
+
+    PSHUFD sse_register_op "," memory_op "," immediate_op {
+        if (std::dynamic_pointer_cast<ImmediateOperand>($6)->get_value() >> 8) logger.error("immediate value must be representable in 8 bits", @1.begin.line);
+        auto mem_op = std::dynamic_pointer_cast<MemoryOperand>($4);
+        if (!mem_op->get_use_segment()) mem_op->set_segment(register_code::ds);
+        $$ = std::make_shared<Instruction>(instruction_code::pshufd, std::vector<operand_ptr>{$2, $4, $6}, 128);
     }
 
 one_alu_operand:

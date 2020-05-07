@@ -98,6 +98,20 @@ void VectorUnit::execute() {
             break;
         }
 
+        case vector_operation::pshufd: {
+            auto src  = source->value_int();
+            auto dest = destination->value_int();
+
+            for (int i = 0; i < 4; i++) {
+                int mask = 0b11;
+                mask = mask << (i * 2);
+                int part = (control_byte & mask) >> (i * 2);
+
+                dest[i] = src[part];
+            }
+            break;
+        }
+
         default:
             throw "unknown or unimplemented vector operation";
             break;

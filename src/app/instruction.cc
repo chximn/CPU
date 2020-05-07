@@ -11,7 +11,7 @@ std::string Instruction::to_string(instruction_code code) {
 
         "fld", "fldz", "fld1", "fst", "fstp", "fadd", "faddp",
 
-        "movdqu", "movdqa", "paddb", "paddw", "paddd", "paddd", "addps", "addpd", "pand"
+        "movdqu", "movdqa", "paddb", "paddw", "paddd", "paddd", "addps", "addpd", "pand", "pshufd"
     };
 
     return names[code];

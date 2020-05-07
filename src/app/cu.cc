@@ -870,6 +870,34 @@ void ControlUnit::decode() {
             break;
         }
 
+        case instruction_code::pshufd: {
+            sse.operation = vector_operation::pshufd;
+            sse.write_to_memory = false;
+
+            auto op1reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
+            sse.destination = sse.get_register(op1reg->get_reg());
+
+            auto op2mem = std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
+            auto op2reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
+
+            if (op2mem != nullptr) {
+                sse.source = sse.temp_register;
+                ram.address_register->set_value(evaluate_address(*op2mem));
+                sse.load_from_memory = true;
+            }
+
+            else {
+                sse.load_from_memory = false;
+                sse.source = sse.get_register(op2reg->get_reg());
+            }
+
+            auto value = std::dynamic_pointer_cast<ImmediateOperand>(operands.at(2))->get_value();
+            sse.control_byte = *reinterpret_cast<uint8_t *>(&value);
+
+            execute_sse = true;
+            break;
+        }
+
         default:
             throw "unknown or unimplemented instruction";
             break;

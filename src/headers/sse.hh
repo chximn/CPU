@@ -11,7 +11,8 @@ enum class vector_operation {
     paddq,
     addps,
     addpd,
-    pand
+    pand,
+    pshufd
 };
 
 class VectorUnit {
@@ -26,6 +27,7 @@ public:
     vector_register_ptr source2;
     vector_register_ptr destination;
     vector_register_ptr temp_register;
+    uint8_t control_byte;
 
     vector_register_ptr registers[8];
     vector_operation operation;
