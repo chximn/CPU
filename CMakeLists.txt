@@ -23,24 +23,39 @@ include(Colors)
 find_package(BISON)
 find_package(FLEX)
 
+# Include ftxui
+include(FetchContent)
+
+set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
+FetchContent_Declare(ftxui
+  GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
+)
+
+FetchContent_GetProperties(ftxui)
+if(NOT ftxui_POPULATED)
+  FetchContent_Populate(ftxui)
+  add_subdirectory(${ftxui_SOURCE_DIR} ${ftxui_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+
+
 
 # --------------------------------------------------------------------------------
 #                         Locate files (change as needed).
 # --------------------------------------------------------------------------------
 set(SOURCES
-    src/app/helpers.cc
-    src/app/register.cc
-    src/app/operand.cc
-    src/app/instruction.cc
-    src/app/program.cc
-    src/app/ram.cc
-    src/app/alu.cc
-    src/app/cu.cc
-    src/app/cpu.cc
-    src/app/fpu.cc
-    src/app/vector_register.cc
-    src/app/sse.cc
-    src/app/loader.cc
+    src/core/helpers.cc
+    src/core/register.cc
+    src/core/operand.cc
+    src/core/instruction.cc
+    src/core/program.cc
+    src/core/ram.cc
+    src/core/alu.cc
+    src/core/cu.cc
+    src/core/cpu.cc
+    src/core/fpu.cc
+    src/core/vector_register.cc
+    src/core/sse.cc
+    src/core/loader.cc
 )
 
 set(TESTFILES
@@ -59,6 +74,22 @@ set(TESTFILES
 )
 
 #---------------------------------------------------------------------------------
+#                                       UI
+#---------------------------------------------------------------------------------
+
+add_library(ui
+    src/ui/ui.cc
+)
+
+target_include_directories(ui
+    PUBLIC ${ftxui_SOURCE_DIR}/include
+    PUBLIC ${PROJECT_SOURCE_DIR}/src/ui/headers
+    PUBLIC ${PROJECT_SOURCE_DIR}/src/assembler/headers
+    PUBLIC ${PROJECT_SOURCE_DIR}/src/core/headers
+    PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+#---------------------------------------------------------------------------------
 #                                  Bison and Flex
 #---------------------------------------------------------------------------------
 BISON_TARGET(parser src/assembler/parser.yy  ${CMAKE_CURRENT_BINARY_DIR}/parser.cpp)
@@ -66,7 +97,6 @@ FLEX_TARGET(scanner src/assembler/scanner.ll ${CMAKE_CURRENT_BINARY_DIR}/scanner
 ADD_FLEX_BISON_DEPENDENCY(scanner parser)
 add_library(assembler
     src/assembler/assembler.cc
-    src/assembler/scanner.hh
     src/assembler/scanner.ll
     src/assembler/parser.yy
     src/assembler/driver.cc
@@ -76,31 +106,39 @@ add_library(assembler
 )
 
 target_include_directories(assembler
-    PUBLIC ${PROJECT_SOURCE_DIR}/src/assembler
-    PUBLIC ${PROJECT_SOURCE_DIR}/src/headers
+    PUBLIC ${PROJECT_SOURCE_DIR}/src/assembler/headers
+    PUBLIC ${PROJECT_SOURCE_DIR}/src/core/headers
     PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
 )
+
 
 # --------------------------------------------------------------------------------
 #                            Build! (Change as needed)
 # --------------------------------------------------------------------------------
-# Compile all sources into a library. Called engine here (change if you wish).
-add_library(engine ${SOURCES})
+# Compile all sources into a library. Called core here (change if you wish).
+add_library(core ${SOURCES})
 
 # Engine needs its header files, and users of the library must also see these (PUBLIC). (No change needed)
-target_include_directories(engine
-    PUBLIC ${PROJECT_SOURCE_DIR}/src/headers
+target_include_directories(core
+    PUBLIC ${PROJECT_SOURCE_DIR}/src/core/headers
 )
 
 # Add an executable for the file main.cpp, here called app.
 # If you add more executables, copy these lines accordingly.
 add_executable(app src/main.cc)   # Name of exec. and location of file.
-target_link_libraries(app PRIVATE engine) # Link the executable to `engine` (if it uses it).
-target_link_libraries(app PRIVATE assembler) # Link the executable to `engine` (if it uses it).
+
+target_link_libraries(assembler PRIVATE core)
+target_link_libraries(ui PRIVATE assembler)
+target_link_libraries(ui PRIVATE ftxui::screen)
+target_link_libraries(ui PRIVATE ftxui::dom)
+
+target_link_libraries(app PRIVATE core) # Link the executable to `core` (if it uses it).
+target_link_libraries(app PRIVATE assembler)
+target_link_libraries(app PRIVATE ui)
 
 # Set the compile options you want, possibly depending on compiler (change as needed).
 # Do similar for the executables if you wish to set options for them as well.
-target_compile_options(engine PRIVATE
+target_compile_options(core PRIVATE
     # clang/GCC warnings
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:GNU>>:
     -Wall
@@ -135,7 +173,7 @@ target_compile_options(engine PRIVATE
     )
 
 # Set the properties you require, e.g. what C++ standard to use (change as needed).
-set_target_properties(engine app PROPERTIES
+set_target_properties(core app PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO
@@ -151,7 +189,7 @@ add_library(Catch2 INTERFACE)
 target_include_directories(Catch2 INTERFACE lib/)
 
 add_executable(${TEST_MAIN} ${TESTFILES})
-target_link_libraries(${TEST_MAIN} Catch2 engine assembler pthread)
+target_link_libraries(${TEST_MAIN} Catch2 core assembler pthread)
 add_custom_target(catch
     COMMAND "${PROJECT_BINARY_DIR}/${TEST_MAIN}"
     DEPENDS ${TEST_MAIN})

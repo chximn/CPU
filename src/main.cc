@@ -1,10 +1,6 @@
 #include <iostream>
 
-#include "assembler.hh"
-#include "ram.hh"
-#include "cpu.hh"
-#include "loader.hh"
-#include "helpers.hh"
+#include "ui.hh"
 
 int main() {
     std::string code =
@@ -23,28 +19,9 @@ int main() {
         "   pshufd xmm2, xmm3, 00110111b\n"
         "   hlt\n";
 
-    Assembler assembler(code);
-    Program program = assembler.assemble();
+    UserInterface ui(code, false, 30);
 
-    program.print(std::cout);
+    ui.render();
 
-    RandomAccessMemory ram;
-    CentralProcessingUnit cpu(ram);
-    Loader loader(cpu, ram);
-    loader.load(program);
-
-    try {
-        cpu.start();
-    }
-
-    catch (const char * s) {
-        std::cout << std::string(s) << "\n";
-    }
-
-    std::cout << helpers::to_hex(cpu.get_vector_unit().get_register(register_code::xmm0)->get_low()) << "\n";
-    std::cout << helpers::to_hex(cpu.get_vector_unit().get_register(register_code::xmm0)->get_high()) << "\n";
-
-    std::cout << helpers::to_hex(cpu.get_vector_unit().get_register(register_code::xmm2)->get_low()) << "\n";
-    std::cout << helpers::to_hex(cpu.get_vector_unit().get_register(register_code::xmm2)->get_high()) << "\n";
     return 0;
 }
