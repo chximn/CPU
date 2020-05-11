@@ -2,7 +2,14 @@
 
 VectorRegister::VectorRegister(register_code c):
     code(c),
-    value(aligned_alloc(16, 16)) {}
+    value(aligned_alloc(16, 16)) {
+
+    auto bytes = value_byte();
+
+    for (int i = 0; i < 16; i++) {
+        bytes[i] = 0;
+    }
+}
 
 
 register_code VectorRegister::get_code() const {
@@ -23,6 +30,11 @@ uint64_t VectorRegister::get_high() {
 
 void VectorRegister::set_high(uint64_t v) {
     (reinterpret_cast<uint64_t *>(value))[1] = v;
+}
+
+
+uint8_t * VectorRegister::value_byte() {
+    return reinterpret_cast<uint8_t *>(value);
 }
 
 int * VectorRegister::value_int() {

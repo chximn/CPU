@@ -17,11 +17,16 @@ int main() {
         "   pand  xmm0, [m]\n"
         "   movdqa xmm3, [a]\n"
         "   pshufd xmm2, xmm3, 00110111b\n"
+        "   mov cl, 100\n"
+        "   loop:\n"
+        "   sub cl, 1\n"
+        "   push cl\n"
+        "   cmp cl, 0\n"
+        "   jne loop\n";
         "   hlt\n";
 
-    UserInterface ui(code, false, 30);
-
-    ui.render();
+    UserInterface ui(code, false, 100);
+    ui.start();
 
     return 0;
 }

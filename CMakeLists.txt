@@ -38,7 +38,6 @@ if(NOT ftxui_POPULATED)
 endif()
 
 
-
 # --------------------------------------------------------------------------------
 #                         Locate files (change as needed).
 # --------------------------------------------------------------------------------
@@ -79,6 +78,7 @@ set(TESTFILES
 
 add_library(ui
     src/ui/ui.cc
+    src/ui/padding.cc
 )
 
 target_include_directories(ui

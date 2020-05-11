@@ -26,6 +26,7 @@ public:
     CentralProcessingUnit(RandomAccessMemory &);
 
     void start();
+    void step();
 
     ControlUnit & get_control_unit();
     ArithemeticLogicUnit & get_arithemetic_logic_unit();

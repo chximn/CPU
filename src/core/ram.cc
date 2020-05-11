@@ -1,6 +1,7 @@
 #include "ram.hh"
 
 RandomAccessMemory::RandomAccessMemory():
+    data{0},
     address_register(std::make_shared<FullRegister>(register_code::mar)),
     data_register(std::make_shared<FullRegister>(register_code::mdr)) {}
 
@@ -27,4 +28,36 @@ void RandomAccessMemory::write() {
     *pointer = value;
 
     // std::cout << "write operation on memory: address=" << helpers::to_hex(offset) << " value=" << helpers::to_hex(new_value) << " size=" << std::to_string(size) << "\n";
+}
+
+std::vector<uint8_t> RandomAccessMemory::get_data(int from, int s) {
+    std::vector<uint8_t> bytes;
+
+    for (int address = from; address < from + s; address++) {
+        bytes.push_back(data[address]);
+    }
+
+    return bytes;
+}
+
+std::vector<std::pair<uint64_t, std::string>> RandomAccessMemory::get_instructions(int from, int n) {
+    std::vector<std::pair<uint64_t, std::string>> pairs;
+
+    int address = from;
+    for (int i = 0; i < n; i++) {
+        uint64_t instruction_pointer = *reinterpret_cast<uint64_t *>(data + address);
+
+        if (instruction_pointer != 0) {
+            Instruction instruction = *reinterpret_cast<Instruction *>(instruction_pointer);
+            pairs.push_back(std::pair<uint64_t, std::string>{
+                address,
+                instruction.to_string()
+            });
+        }
+
+        else break;
+        address += 8;
+    }
+
+    return pairs;
 }

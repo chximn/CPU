@@ -52,3 +52,22 @@ std::string helpers::to_hex(uint64_t value, std::string const & prefix) {
     result += stream.str();
     return result;
 }
+
+std::wstring helpers::to_wstring(std::string const & s) {
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    return converter.from_bytes(s);
+}
+
+std::string helpers::to_string(std::wstring const & ws) {
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    return converter.to_bytes(ws);
+}
+
+std::string helpers::zero_extend(std::string const & s, int length) {
+    std::string ex;
+    for (long unsigned int i = 0, l = s.length(); i < length - l; i++) {
+        ex += "0";
+    }
+
+    return ex + s;
+}

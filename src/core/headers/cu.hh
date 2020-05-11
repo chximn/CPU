@@ -9,6 +9,7 @@
 #include "sse.hh"
 
 class CentralProcessingUnit;
+class UserInterface;
 
 class ControlUnit {
 private:
@@ -52,4 +53,5 @@ public:
     bool get_write_to_memory() const;
 
     friend CentralProcessingUnit;
+    friend UserInterface;
 };

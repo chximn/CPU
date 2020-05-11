@@ -1,6 +1,9 @@
 #pragma once
 #include <cstdint>
 #include <sstream>
+#include <string>
+#include <locale>
+#include <codecvt>
 
 namespace helpers {
     uint64_t hi(uint64_t x, uint8_t size);
@@ -10,4 +13,7 @@ namespace helpers {
 
     std::string to_hex(uint64_t);
     std::string to_hex(uint64_t, std::string const &);
+    std::string zero_extend(std::string const &, int);
+    std::wstring to_wstring(std::string const &);
+    std::string to_string(std::wstring const &);
 }

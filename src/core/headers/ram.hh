@@ -4,6 +4,7 @@
 #include <memory>
 #include "register.hh"
 #include <iostream>
+#include "instruction.hh"
 #include "helpers.hh"
 
 #define MEMORY_SIZE 1048576 // 1 megabyte
@@ -20,4 +21,7 @@ public:
 
     void load() const;
     void write();
+
+    std::vector<uint8_t> get_data(int from, int size);
+    std::vector<std::pair<uint64_t, std::string>> get_instructions(int from, int n);
 };
