@@ -10,7 +10,8 @@ UserInterface::UserInterface(std::string const & c, bool i, int s):
     loader(cpu, ram),
     program(assembler.assemble())
 {
-    loader.load(program);
+    // loader.load(program);
+    program.print(std::cout);
 }
 
 std::unique_ptr<ftxui::Node> UserInterface::render_data_segment() {

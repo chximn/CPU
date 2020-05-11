@@ -28,6 +28,8 @@ using token = yy::Parser::token;
     yylval = lval;
 %}
 
+<<EOF>> return token::END;
+
 ","    return token::COMMA;
 "["    return token::LEFT_BRACKET;
 "]"    return token::RIGHT_BRACKET;

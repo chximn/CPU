@@ -22,11 +22,20 @@ int main() {
         "   sub cl, 1\n"
         "   push cl\n"
         "   cmp cl, 0\n"
-        "   jne loop\n";
+        "   jne loop\n"
+        "   hlt\n"
+        "   nop\n"
+        "   nop\n"
+        "   nop\n"
+        "   nop\n"
+        "   nop\n"
+        "   nop\n"
+        "   nop\n"
+        "   nop\n"
         "   hlt\n";
 
     UserInterface ui(code, false, 100);
-    ui.start();
+    // ui.start();
 
     return 0;
 }

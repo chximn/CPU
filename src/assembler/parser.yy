@@ -41,6 +41,7 @@
 
 }
 
+%token                  END
 %token                  NL
 %token                  COMMA         ","
 %token                  LEFT_BRACKET  "["
@@ -102,7 +103,7 @@
 %%
 
 program:
-    sections {
+    sections END {
         auto definitions = $1.first;
         auto instructions = $1.second;
 
