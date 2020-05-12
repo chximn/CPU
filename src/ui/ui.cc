@@ -83,10 +83,10 @@ std::unique_ptr<ftxui::Node> UserInterface::render_instructions() {
     auto cs = registers[register_code::cs];
     auto cs_value = static_cast<int>(cs->get_value());
 
-    auto start_address = std::max(cs_value, reg_value - INSTRUCTIONS_RANGE);
-    auto instructions = ram.get_instructions(start_address, INSTRUCTIONS_RANGE * 2);
-
     auto current_instruction = reg_value + cs_value;
+
+    auto start_address = std::max(cs_value, current_instruction - INSTRUCTIONS_RANGE * 8);
+    auto instructions = ram.get_instructions(start_address, INSTRUCTIONS_RANGE * 2);
 
     Elements addresses_elements, instructions_elements;
     for (auto const & p : instructions) {

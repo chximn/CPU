@@ -21,7 +21,7 @@
 #define MEMORY_BYTES_PER_LINE 18
 #define REGISTERS_PER_LINE 5
 #define ADDRESS_WIDTH 8
-#define INSTRUCTIONS_RANGE 10
+#define INSTRUCTIONS_RANGE 15
 
 class UserInterface {
 private:
