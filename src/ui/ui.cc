@@ -10,6 +10,19 @@ UserInterface::UserInterface(std::string const & c, bool i, int s):
     loader(cpu, ram),
     program(assembler.assemble())
 {
+
+    bool found_hlt = false;
+    for (auto const & instruction : program.get_instructions()) {
+        if (instruction->get_code() == instruction_code::hlt) {
+            found_hlt = true;
+            break;
+        }
+    }
+
+    if (!found_hlt) {
+        std::cout << "[\e[95mWARNING\e[0m] program does not include a halt instruction, this will might cause a segmentation fault.\n";
+    }
+
     loader.load(program);
 }
 
