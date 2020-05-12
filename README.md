@@ -1,4 +1,6 @@
 # x86-64 CPU Architecture Simulation
+![Example](https://github.com/AnisBdz/CPU/blob/docs/docs/example.jpg?raw=true)
+
 ## Getting Started
 
 ### Prerequisites
