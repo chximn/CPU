@@ -25,3 +25,15 @@ $ ./unit_tests
 ===============================================================================
 All tests passed (18 assertions in 3 test cases)
 ```
+
+## Usage
+```
+Intel's x86-64 Architecture Simulation
+Usage:
+    ./app [OPTION...] filename
+
+    -f, --filename arg  Input filename
+    -i, --interactive   Enable interactive execution
+    -s, --speed arg     Execution speed (instruction per minute) (default: 100)
+    -h, --help          Print usage
+```

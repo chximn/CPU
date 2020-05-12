@@ -117,7 +117,7 @@ std::unique_ptr<ftxui::Node> UserInterface::render_instructions() {
 
     return vbox(
         hbox(
-            text(L"instructions") | padding(1),
+            text(L"instructions") | padding(1) | flex,
             separator(),
             hbox(text(L"rip"), text(L" "), text(rip) | color(Color::GrayDark)) | padding(1) | notflex
         ),
