@@ -216,7 +216,7 @@ Element UserInterface::render_fpu() {
         }
 
         elements.push_back(text(helpers::to_wstring(s)));
-        values.push_back(text(helpers::to_wstring(std::to_string(d))));
+        values.push_back(text(L" = " + helpers::to_wstring(std::to_string(d))));
     }
 
     return vbox(
@@ -232,15 +232,10 @@ Element UserInterface::render_fpu() {
                 text(L"st5"),
                 text(L"st6"),
                 text(L"st7")
-            ) | padding(1) | notflex,
+            ) | padding(0, 2, 0, 1) | notflex,
 
-            separator(),
-
-            vbox(std::move(elements))  | padding(1) | color(Color::GrayDark) | notflex,
-
-            separator(),
-
-            vbox(std::move(values)) | padding(1)
+            vbox(std::move(elements)) | color(Color::GrayDark) | notflex,
+            vbox(std::move(values)) | color(Color::GrayDark)
         )
     ) | border | size(WIDTH, EQUAL, 55);
 }
