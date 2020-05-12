@@ -37,6 +37,7 @@ private:
     Program program;
 
     std::string reset_position;
+    int n_lines;
 
     std::unique_ptr<ftxui::Node> render_stack();
     std::unique_ptr<ftxui::Node> render_data_segment();
@@ -45,10 +46,14 @@ private:
     std::unique_ptr<ftxui::Node> render_fpu();
     std::unique_ptr<ftxui::Node> render_sse();
 
+    void render();
+    void print(std::string const &);
+    std::string getline();
+    void cleanup();
+
 public:
     UserInterface() = delete;
     UserInterface(std::string const & code, bool interactive, int speed);
 
     void start();
-    void render();
 };

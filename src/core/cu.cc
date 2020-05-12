@@ -154,6 +154,7 @@ void ControlUnit::decode() {
             execute_alu = true;
             alu.size = instruction.get_size();
             ram.size = instruction.get_size();
+
             break;
         }
 

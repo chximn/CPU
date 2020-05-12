@@ -20,7 +20,7 @@ int main() {
         "   mov cl, 100\n"
         "   loop:\n"
         "   sub cl, 1\n"
-        "   push cl\n"
+        "   push ecx\n"
         "   cmp cl, 0\n"
         "   jne loop\n"
         "   hlt\n"
@@ -34,8 +34,8 @@ int main() {
         "   nop\n"
         "   hlt\n";
 
-    UserInterface ui(code, false, 100);
-    // ui.start();
+    UserInterface ui(code, true, 500);
+    ui.start();
 
     return 0;
 }

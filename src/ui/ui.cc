@@ -10,8 +10,7 @@ UserInterface::UserInterface(std::string const & c, bool i, int s):
     loader(cpu, ram),
     program(assembler.assemble())
 {
-    // loader.load(program);
-    program.print(std::cout);
+    loader.load(program);
 }
 
 std::unique_ptr<ftxui::Node> UserInterface::render_data_segment() {
@@ -127,21 +126,24 @@ std::unique_ptr<ftxui::Node> UserInterface::render_instructions() {
 Element UserInterface::render_stack() {
     auto registers = cpu.get_registers();
 
-    auto stack_bottom = LOADER_DEFAULT_STACK_SEGMENT + LOADER_DEFAULT_STACK_SIZE;
     auto sp = registers[register_code::rsp]->get_value();
+    auto ss = registers[register_code::ss]->get_value();
+    auto stack_bottom = static_cast<int>(ss + LOADER_DEFAULT_STACK_SIZE);
+    auto stack_top = static_cast<int>(ss + sp);
 
-    std::vector<uint8_t> stack(ram.get_data(sp, stack_bottom - sp));
-    std::list<std::wstring> lines;
+    std::vector<uint8_t> stack(ram.get_data(stack_top, std::min(stack_bottom - stack_top, 30 * 4)));
+    std::vector<std::wstring> lines;
 
-    int i = 0;
+    int ii = STACK_BYTES_PER_LINE - (stack.size() % STACK_BYTES_PER_LINE);
+    int i = ii;
     std::wstring current_line;
     for (auto const & byte : stack) {
-        if (i > 0 && i % STACK_BYTES_PER_LINE == 0) {
-            lines.push_front(current_line);
+        if (i > ii && i % STACK_BYTES_PER_LINE == 0) {
+            lines.push_back(current_line);
             current_line = L"";
         }
-        else if (i) current_line += L" ";
-        current_line += helpers::to_wstring(helpers::to_hex(byte, ""));
+        else if (i > ii) current_line = L" " + current_line;
+        current_line = helpers::to_wstring(helpers::to_hex(byte, "")) + current_line;
         i++;
     }
     if (current_line != L"") lines.push_back(current_line);
@@ -267,7 +269,9 @@ void UserInterface::render() {
 
     auto screen = Screen::Create(Dimension::Full(), Dimension::Fit(document));
     Render(screen, document.get());
-    std::cout << reset_position << screen.ToString();
+
+    cleanup();
+    std::cout << screen.ToString() << std::flush;
     reset_position = screen.ResetPosition();
 }
 
@@ -276,8 +280,46 @@ void UserInterface::start() {
 
     while(!cu.halt) {
         render();
-        auto wait_time = static_cast<int>((60.0 / static_cast<float>(speed)) * 1000);
-        std::this_thread::sleep_for(std::chrono::milliseconds(wait_time));
+        if (interactive) {
+            print("> press enter to step, type quit, exit or q to close\n");
+            auto s = getline();
+            if (s == "q" || s == "quit" || s == "exit") {
+                break;
+            }
+        }
+
+        else {
+            auto wait_time = static_cast<int>((60.0 / static_cast<float>(speed)) * 1000);
+            std::this_thread::sleep_for(std::chrono::milliseconds(wait_time));
+        }
+
         cpu.step();
     }
+}
+
+void UserInterface::print(std::string const & s) {
+    std::cout << s;
+
+    for (auto const & c : s) {
+        if (c == '\n') n_lines++;
+    }
+
+}
+
+std::string UserInterface::getline() {
+    std::string s;
+    std::getline(std::cin, s);
+    n_lines++;
+    return s;
+}
+
+void UserInterface::cleanup() {
+    std::cout << reset_position;
+
+    std::cout << "\r" << "\x1B[2K";
+    for (int i = 0; i < n_lines + 1; i ++) {
+        std::cout << "\x1B[1A" << "\x1B[2K";
+    }
+
+    n_lines = 0;
 }
