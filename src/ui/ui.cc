@@ -316,9 +316,11 @@ std::string UserInterface::getline() {
 void UserInterface::cleanup() {
     std::cout << reset_position;
 
-    std::cout << "\r" << "\x1B[2K";
-    for (int i = 0; i < n_lines + 1; i ++) {
-        std::cout << "\x1B[1A" << "\x1B[2K";
+    if (n_lines) {
+        std::cout << "\r" << "\x1B[2K";
+        for (int i = 0; i < n_lines + 1; i ++) {
+            std::cout << "\x1B[1A" << "\x1B[2K";
+        }
     }
 
     n_lines = 0;

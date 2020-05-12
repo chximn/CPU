@@ -34,7 +34,7 @@ int main() {
         "   nop\n"
         "   hlt\n";
 
-    UserInterface ui(code, true, 500);
+    UserInterface ui(code, false, 30);
     ui.start();
 
     return 0;
