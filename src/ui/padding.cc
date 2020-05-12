@@ -7,9 +7,7 @@ padding::padding(int h): top(0), bottom(0), right(h), left(h) {}
 std::unique_ptr<ftxui::Node> padding::apply(std::unique_ptr<ftxui::Node> e) const {
     using namespace ftxui;
 
-    std::wstring padding_top    = top    ? std::wstring(top, L' ')    : L"";
     std::wstring padding_right  = right  ? std::wstring(right, L' ')  : L"";
-    std::wstring padding_bottom = bottom ? std::wstring(bottom, L' ') : L"";
     std::wstring padding_left   = left   ? std::wstring(left, L' ')   : L"";
 
     auto h = hbox(
@@ -18,25 +16,19 @@ std::unique_ptr<ftxui::Node> padding::apply(std::unique_ptr<ftxui::Node> e) cons
         text(padding_right)
     );
 
-    if (top && bottom)
-        return vbox(
-            text(padding_top),
-            std::move(h),
-            text(padding_bottom)
-        );
+    Elements lines;
 
-    else if (top)
-        return vbox(
-            text(padding_top),
-            std::move(h)
-        );
-    else if (bottom)
-        return vbox(
-            std::move(h),
-            text(padding_bottom)
-        );
-    else
-        return std::move(h);
+    for (int i = 0; i < top; i++) {
+        lines.push_back(text(L" "));
+    }
+
+    lines.push_back(std::move(h));
+
+    for (int i = 0; i < bottom; i++) {
+        lines.push_back(text(L" "));
+    }
+
+    return vbox(std::move(lines));
 }
 
 std::unique_ptr<ftxui::Node> operator|(std::unique_ptr<ftxui::Node> e, padding const & d) {
