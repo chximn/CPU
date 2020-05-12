@@ -121,6 +121,7 @@ add_library(core ${SOURCES})
 # Engine needs its header files, and users of the library must also see these (PUBLIC). (No change needed)
 target_include_directories(core
     PUBLIC ${PROJECT_SOURCE_DIR}/src/core/headers
+    PUBLIC ${PROJECT_SOURCE_DIR}/lib
 )
 
 # Add an executable for the file main.cpp, here called app.
