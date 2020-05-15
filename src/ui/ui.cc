@@ -301,7 +301,14 @@ void UserInterface::start() {
             std::this_thread::sleep_for(std::chrono::milliseconds(wait_time));
         }
 
-        cpu.step();
+        try {
+            cpu.step();
+        }
+
+        catch (const char * s) {
+            std::cout << (std::string(s)) << "\n";
+            exit(0);
+        }
     }
 }
 
