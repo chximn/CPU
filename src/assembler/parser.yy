@@ -364,7 +364,7 @@ core_instruction:
     POP one_alu_operand  {
         if ($2.at(0)->get_size() == 0) logger.error("size must be specified", @1.begin.line);
         if (std::dynamic_pointer_cast<ImmediateOperand>($2.at(0)) != nullptr) logger.error("invalid operand", @1.begin.line);
-        $$ = std::make_shared<Instruction>(instruction_code::push, $2, $2.at(0)->get_size());
+        $$ = std::make_shared<Instruction>(instruction_code::pop, $2, $2.at(0)->get_size());
     } |
 
     ADD two_alu_operands { $$ = std::make_shared<Instruction>(instruction_code::add, $2, $2.at(0)->get_size()); } |
