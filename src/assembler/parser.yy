@@ -451,9 +451,9 @@ core_instruction:
     JG  imm_label_op { $$ = std::make_shared<Instruction>(instruction_code::jg,  std::vector<operand_ptr>{ $2 }, 0); } |
     JGE imm_label_op { $$ = std::make_shared<Instruction>(instruction_code::jge, std::vector<operand_ptr>{ $2 }, 0); } |
 
-    CALL imm_label_op { $$ = std::make_shared<Instruction>(instruction_code::call, std::vector<operand_ptr>{ $2 }, 0); } |
+    CALL imm_label_op { $$ = std::make_shared<Instruction>(instruction_code::call, std::vector<operand_ptr>{ $2 }, 32); } |
 
-    RET  { $$ = std::make_shared<Instruction>(instruction_code::ret, std::vector<operand_ptr>{}, 0); } |
+    RET  { $$ = std::make_shared<Instruction>(instruction_code::ret, std::vector<operand_ptr>{}, 32); } |
 
     NOP { $$ = std::make_shared<Instruction>(instruction_code::nop, std::vector<operand_ptr>{}, 0); } |
     HLT { $$ = std::make_shared<Instruction>(instruction_code::hlt, std::vector<operand_ptr>{}, 0); }

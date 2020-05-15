@@ -154,7 +154,6 @@ void ControlUnit::decode() {
             execute_alu = true;
             alu.size = instruction.get_size();
             ram.size = instruction.get_size();
-
             break;
         }
 
@@ -503,8 +502,8 @@ void ControlUnit::decode() {
 
             evaluate_source(operands.at(0));
             alu.destination = instruction_pointer_register;
-            alu.size = 64;
-            ram.size = 64;
+            alu.size = 32;
+            ram.size = 32;
             ram.data_register->set_value(instruction_pointer_register->get_value());
             write_to_memory = true;
             execute_alu = true;
@@ -514,12 +513,12 @@ void ControlUnit::decode() {
         case instruction_code::ret: {
             load_from_memory = true;
             write_to_memory = false;
-            ram.size = 64;
+            ram.size = 32;
 
             alu.operation = alu_operation::mov;
             alu.destination = instruction_pointer_register;
             alu.source = ram.data_register;
-            alu.size = 64;
+            alu.size = 32;
             execute_alu = true;
             break;
         }
@@ -914,12 +913,19 @@ void ControlUnit::load() {
         ram.address_register->set_value(registers[register_code::rsp]->get_value() + registers[register_code::ss]->get_value());
     }
 
-    else if (instruction.get_code() == instruction_code::push || instruction.get_code() == instruction_code::call)
+    else if (instruction.get_code() == instruction_code::push || instruction.get_code() == instruction_code::call) {
         registers[register_code::rsp]->set_value(registers[register_code::rsp]->get_value() - instruction.get_size() / 8);
+    }
+
+    // if (instruction.get_code() == instruction_code::call) {
+    //     std::cout << std::to_string(registers[register_code::rsp]->get_value()) << "\n";
+    //     exit(0);
+    //
+    // }
 
     if (load_from_memory) ram.load();
 
-    if (instruction.get_code() == instruction_code::pop || instruction.get_code() == instruction_code::call) {
+    if (instruction.get_code() == instruction_code::pop || instruction.get_code() == instruction_code::ret) {
         registers[register_code::rsp]->set_value(registers[register_code::rsp]->get_value() + instruction.get_size() / 8);
         ram.address_register->set_value(pop_temp_address);
     }

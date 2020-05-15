@@ -126,7 +126,7 @@ TEST_CASE("examples") {
 
         cpu.start();
 
-        REQUIRE(registers[register_code::rsp]->get_value() == LOADER_DEFAULT_STACK_SEGMENT + LOADER_DEFAULT_STACK_SIZE - 2);
+        REQUIRE(registers[register_code::rsp]->get_value() == LOADER_DEFAULT_STACK_SIZE - 2);
         REQUIRE(registers[register_code::cx]->get_value() == 0x2647);
         REQUIRE(registers[register_code::bx]->get_value() == 0x2647);
     }
@@ -159,7 +159,7 @@ TEST_CASE("examples") {
 
         REQUIRE(registers[register_code::rbx]->get_value() == 0x2647);
         REQUIRE(registers[register_code::rax]->get_value() == 0x2647);
-        REQUIRE(registers[register_code::rsp]->get_value() == LOADER_DEFAULT_STACK_SEGMENT + LOADER_DEFAULT_STACK_SIZE);
+        REQUIRE(registers[register_code::rsp]->get_value() == LOADER_DEFAULT_STACK_SIZE);
     }
 
     SECTION("example 05: jmp") {
