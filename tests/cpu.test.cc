@@ -19,7 +19,7 @@ TEST_CASE("cpu") {
         std::make_shared<ImmediateOperand>(2647)
     };
 
-    Instruction * i = new Instruction(instruction_code::mov, operands);
+    Instruction * i = new Instruction(instruction_code::mov, operands, 32);
 
     ram.data_register->set_value((uint64_t) i);
     ram.address_register->set_value(800);
