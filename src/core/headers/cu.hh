@@ -1,11 +1,12 @@
 #pragma once
-#include "operand.hh"
-#include "instruction.hh"
-#include "register.hh"
-#include "ram.hh"
 #include <map>
+
 #include "alu.hh"
 #include "fpu.hh"
+#include "instruction.hh"
+#include "operand.hh"
+#include "ram.hh"
+#include "register.hh"
 #include "sse.hh"
 
 class CentralProcessingUnit;
@@ -35,9 +36,14 @@ private:
 
     void evaluate_destination(operand_ptr);
     void evaluate_source(operand_ptr);
+
 public:
     ControlUnit() = delete;
-    ControlUnit(std::map<register_code, register_ptr> &, ArithemeticLogicUnit &, FloatingPointUnit &, VectorUnit &, RandomAccessMemory &);
+    ControlUnit(std::map<register_code, register_ptr> &,
+                ArithemeticLogicUnit &,
+                FloatingPointUnit &,
+                VectorUnit &,
+                RandomAccessMemory &);
 
     void fetch(register_ptr cs);
     void decode();

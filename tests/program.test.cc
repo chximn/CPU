@@ -1,23 +1,26 @@
 #include <catch.hpp>
-#include <memory>
 #include <cstdint>
-#include "program.hh"
-#include "instruction.hh"
 #include <iostream>
+#include <memory>
+
+#include "instruction.hh"
+#include "program.hh"
 
 TEST_CASE("program") {
     Program program;
 
     SECTION("add and get instructions") {
-        auto i1 = std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr>{
-            std::make_shared<RegisterOperand>(register_code::eax),
-            std::make_shared<ImmediateOperand>(2647)
-        });
+        auto i1 = std::make_shared<Instruction>(
+            instruction_code::mov,
+            std::vector<operand_ptr>{
+                std::make_shared<RegisterOperand>(register_code::eax),
+                std::make_shared<ImmediateOperand>(2647)});
 
-        auto i2 = std::make_shared<Instruction>(instruction_code::mov, std::vector<operand_ptr>{
-            std::make_shared<RegisterOperand>(register_code::ebx),
-            std::make_shared<RegisterOperand>(register_code::eax)
-        });
+        auto i2 = std::make_shared<Instruction>(
+            instruction_code::mov,
+            std::vector<operand_ptr>{
+                std::make_shared<RegisterOperand>(register_code::ebx),
+                std::make_shared<RegisterOperand>(register_code::eax)});
 
         program.add_instruction(i1);
         program.add_instruction(i2);

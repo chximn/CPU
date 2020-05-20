@@ -16,7 +16,7 @@ double FloatingPointUnit::convert_double(uint64_t v) {
 }
 
 double FloatingPointUnit::convert_float(uint64_t v) {
-     return *reinterpret_cast<float *>(&v);
+    return *reinterpret_cast<float *>(&v);
 }
 
 uint64_t FloatingPointUnit::convert_uint64(double v) {
@@ -31,6 +31,7 @@ uint64_t FloatingPointUnit::convert_uint64(float v) {
 }
 
 register_ptr FloatingPointUnit::get_register(register_code code) {
+    // clang-format off
     switch (code) {
         case register_code::st0: return stages[0];
         case register_code::st1: return stages[1];
@@ -40,8 +41,10 @@ register_ptr FloatingPointUnit::get_register(register_code code) {
         case register_code::st5: return stages[5];
         case register_code::st6: return stages[6];
         case register_code::st7: return stages[7];
-        default: throw "provided register code does not belong to the floating point unit";
+        default:
+            throw "provided register code does not belong to the floating point unit";
     }
+    // clang-format on
 }
 
 void FloatingPointUnit::push(uint64_t v) {
@@ -60,7 +63,7 @@ void FloatingPointUnit::pop() {
 }
 
 void FloatingPointUnit::execute() {
-    switch(operation) {
+    switch (operation) {
         case fpu_operation::fld: {
             perform_pop = false;
             auto value = src_dest->get_value();
@@ -91,14 +94,18 @@ void FloatingPointUnit::execute() {
             double converted;
 
             auto value = src_dest->get_value();
-            if (is_double) converted = convert_double(value);
-            else converted = convert_float(value);
+            if (is_double)
+                converted = convert_double(value);
+            else
+                converted = convert_float(value);
 
             auto result = converted + convert_double(stages[0]->get_value());
             auto converted_result = convert_uint64(result);
 
-            if (is_destination) src_dest->set_value(converted_result);
-            else stages[0]->set_value(converted_result);
+            if (is_destination)
+                src_dest->set_value(converted_result);
+            else
+                stages[0]->set_value(converted_result);
 
             break;
         }
@@ -108,5 +115,6 @@ void FloatingPointUnit::execute() {
             break;
     }
 
-    if (perform_pop) pop();
+    if (perform_pop)
+        pop();
 }

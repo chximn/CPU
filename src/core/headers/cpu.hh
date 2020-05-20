@@ -1,11 +1,12 @@
 #pragma once
 #include <map>
-#include "register.hh"
+
 #include "alu.hh"
-#include "fpu.hh"
-#include "sse.hh"
 #include "cu.hh"
+#include "fpu.hh"
 #include "ram.hh"
+#include "register.hh"
+#include "sse.hh"
 
 class Loader;
 

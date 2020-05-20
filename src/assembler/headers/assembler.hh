@@ -1,16 +1,17 @@
 #pragma once
-#include "parser.hpp"
-#include "scanner.hh"
-#include "program.hh"
-#include "driver.hh"
+#include <cstring>
 #include <iostream>
 #include <istream>
 #include <ostream>
-#include <cstring>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
+
+#include "driver.hh"
 #include "logger.hh"
+#include "parser.hpp"
+#include "program.hh"
+#include "scanner.hh"
 
 class Assembler {
 private:

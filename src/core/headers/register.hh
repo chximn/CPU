@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <memory>
 
+// clang-format off
 enum register_code {
     // Memory Registers
     mar, mdr,
@@ -43,12 +44,13 @@ enum register_code {
     xmm4, xmm5, xmm6, xmm7,
     _temp_sse
 };
+// clang-format on
 
 class Register {
 private:
     register_code code;
-public:
 
+public:
     Register() = delete;
     Register(register_code);
 
@@ -70,6 +72,7 @@ using register_ptr = std::shared_ptr<Register>;
 class FullRegister : public Register {
 private:
     uint64_t value;
+
 public:
     FullRegister() = delete;
     FullRegister(register_code);
@@ -84,6 +87,7 @@ private:
     register_ptr reg;
     unsigned int size;
     unsigned int offset;
+
 public:
     PartRegister() = delete;
     PartRegister(register_code, register_ptr, unsigned int, unsigned int);

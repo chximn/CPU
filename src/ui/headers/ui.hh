@@ -1,19 +1,18 @@
 #pragma once
 
-#include <vector>
+#include <algorithm>
 #include <list>
 #include <thread>
-#include <algorithm>
-
-#include "ftxui/dom/elements.hpp"
-#include "ftxui/screen/screen.hpp"
+#include <vector>
 
 #include "assembler.hh"
-#include "ram.hh"
 #include "cpu.hh"
-#include "loader.hh"
+#include "ftxui/dom/elements.hpp"
+#include "ftxui/screen/screen.hpp"
 #include "helpers.hh"
+#include "loader.hh"
 #include "padding.hh"
+#include "ram.hh"
 
 #define SCREEN_HEIGHT 30
 #define STACK_HEIGHT 30

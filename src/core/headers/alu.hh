@@ -1,8 +1,10 @@
 #pragma once
-#include "helpers.hh"
-#include "register.hh"
 #include <map>
 
+#include "helpers.hh"
+#include "register.hh"
+
+// clang-format off
 enum class alu_operation {
     mov, add, sub, div, mul, neg,
     _and, _or, _xor, _not,
@@ -14,11 +16,12 @@ enum class alu_operation {
 enum class flag_code {
     pf, zf, sf, of, cf
 };
-
+// clang-format on
 
 class ArithemeticLogicUnit {
 private:
     register_ptr flags_register;
+
 public:
     ArithemeticLogicUnit() = delete;
     ArithemeticLogicUnit(register_ptr);

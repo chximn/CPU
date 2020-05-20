@@ -1,7 +1,8 @@
 #pragma once
+#include <emmintrin.h>
+
 #include "ram.hh"
 #include "vector_register.hh"
-#include <emmintrin.h>
 
 enum class vector_operation {
     mov,

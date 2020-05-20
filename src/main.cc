@@ -1,11 +1,11 @@
-#include <iostream>
 #include <cxxopts.hpp>
-#include "ui.hh"
 #include <fstream>
+#include <iostream>
+
+#include "ui.hh"
 
 int main(int argc, char * argv[]) {
     // std::string code =
-
 
     // UserInterface ui(code, false, 30);
     // ui.start();
@@ -13,15 +13,13 @@ int main(int argc, char * argv[]) {
     using namespace cxxopts;
 
     Options options(argv[0], "Intel's x86-64 Architecture Simulation");
-    options.allow_unrecognised_options()
-           .add_options()
-                ("f,filename",    "Input filename", cxxopts::value<std::string>())
-                ("i,interactive", "Enable interactive execution")
-                ("s,speed",       "Execution speed (instruction per minute)", cxxopts::value<int>()->default_value("100"))
-                ("h,help",        "Print usage");
+    auto opt = options.allow_unrecognised_options().add_options()(
+        "f,filename", "Input filename", cxxopts::value<std::string>())(
+        "i,interactive", "Enable interactive execution")(
+        "s,speed", "Execution speed (instruction per minute)",
+        cxxopts::value<int>()->default_value("100"))("h,help", "Print usage");
 
-    options.positional_help("filename")
-           .show_positional_help();
+    options.positional_help("filename").show_positional_help();
 
     std::string filename;
     bool interactive;
@@ -41,8 +39,7 @@ int main(int argc, char * argv[]) {
         interactive = result.count("interactive") > 0;
     }
 
-    catch (const cxxopts::OptionException& e)
-    {
+    catch (const cxxopts::OptionException & e) {
         std::cerr << "error parsing options: " << e.what() << std::endl;
         exit(1);
     }
@@ -53,7 +50,8 @@ int main(int argc, char * argv[]) {
         exit(2);
     }
 
-    std::string file_contents { std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>() };
+    std::string file_contents{std::istreambuf_iterator<char>(file),
+                              std::istreambuf_iterator<char>()};
 
     UserInterface ui(file_contents, interactive, speed);
     ui.start();

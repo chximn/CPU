@@ -1,0 +1,6 @@
+BasedOnStyle: chromium
+IndentWidth: 4
+AccessModifierOffset: -4
+PointerAlignment: Middle
+BreakConstructorInitializers: AfterColon
+SpaceBeforeCtorInitializerColon: false

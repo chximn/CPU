@@ -1,4 +1,5 @@
 #include <catch.hpp>
+
 #include "fpu.hh"
 #include "register.hh"
 

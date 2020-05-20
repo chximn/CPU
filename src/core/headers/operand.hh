@@ -1,18 +1,17 @@
 #pragma once
-#include "register.hh"
-#include "helpers.hh"
 #include <cstdint>
-#include <memory>
 #include <iostream>
+#include <memory>
+
+#include "helpers.hh"
+#include "register.hh"
 
 // abstract class
 class Operand {
 public:
     virtual ~Operand() = default;
     virtual uint8_t get_size() const = 0;
-    virtual std::string to_string() const {
-        return "hello";
-    }
+    virtual std::string to_string() const { return "hello"; }
 };
 
 using operand_ptr = std::shared_ptr<Operand>;
@@ -21,6 +20,7 @@ class ImmediateOperand : public Operand {
 private:
     uint64_t value;
     uint8_t size;
+
 public:
     ImmediateOperand() = delete;
     ImmediateOperand(uint64_t);
@@ -52,7 +52,12 @@ private:
 
 public:
     MemoryOperand() = delete;
-    MemoryOperand(register_code, register_code, uint8_t, uint64_t, uint8_t, register_code);
+    MemoryOperand(register_code,
+                  register_code,
+                  uint8_t,
+                  uint64_t,
+                  uint8_t,
+                  register_code);
     MemoryOperand(register_code, uint8_t, uint64_t, uint8_t, register_code);
     MemoryOperand(register_code, uint64_t, uint8_t, register_code);
     MemoryOperand(uint64_t, uint8_t, register_code);
@@ -60,7 +65,6 @@ public:
     MemoryOperand(register_code, uint8_t, uint64_t, uint8_t);
     MemoryOperand(register_code, uint64_t, uint8_t);
     MemoryOperand(uint64_t, uint8_t);
-
 
     register_code get_segment() const;
     register_code get_base() const;
@@ -102,6 +106,7 @@ class SymbolOperand : public Operand {
 private:
     std::string name;
     int line;
+
 public:
     SymbolOperand() = delete;
     SymbolOperand(std::string const &, int);

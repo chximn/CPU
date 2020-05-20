@@ -1,6 +1,7 @@
 #include <catch.hpp>
-#include "alu.hh"
 #include <memory>
+
+#include "alu.hh"
 
 TEST_CASE("alu") {
     auto flags = std::make_shared<FullRegister>(register_code::flags);
@@ -13,10 +14,8 @@ TEST_CASE("alu") {
     auto ebx = std::make_shared<PartRegister>(register_code::ebx, rbx, 32, 0);
     auto edx = std::make_shared<PartRegister>(register_code::edx, rdx, 32, 0);
 
-
     auto al = std::make_shared<PartRegister>(register_code::ebx, rax, 8, 0);
     auto bl = std::make_shared<PartRegister>(register_code::ebx, rbx, 8, 0);
-
 
     SECTION("mov64 instruction") {
         rbx->set_value(2647);
@@ -73,8 +72,8 @@ TEST_CASE("alu") {
     }
 
     SECTION("add8 instruction w/ negative operand") {
-        bl->set_value(0b11111011); // -5
-        al->set_value(0b00000011); // +3
+        bl->set_value(0b11111011);  // -5
+        al->set_value(0b00000011);  // +3
 
         alu.size = 8;
         alu.source = bl;
@@ -82,12 +81,12 @@ TEST_CASE("alu") {
         alu.operation = alu_operation::add;
         alu.execute();
 
-        REQUIRE(al->get_value() == 0b11111110); // -2
+        REQUIRE(al->get_value() == 0b11111110);  // -2
     }
 
     SECTION("sub8 instruction") {
-        bl->set_value(0b00000101); // -5
-        al->set_value(0b00000011); // +3
+        bl->set_value(0b00000101);  // -5
+        al->set_value(0b00000011);  // +3
 
         alu.size = 8;
         alu.source = al;
@@ -95,7 +94,7 @@ TEST_CASE("alu") {
         alu.operation = alu_operation::sub;
         alu.execute();
 
-        REQUIRE(bl->get_value() == 0b00000010); // +2
+        REQUIRE(bl->get_value() == 0b00000010);  // +2
         REQUIRE(alu.flags[flag_code::pf]->get_value() == 1);
     }
 

@@ -15,6 +15,7 @@ VectorUnit::VectorUnit(RandomAccessMemory & r): ram(r) {
 }
 
 vector_register_ptr VectorUnit::get_register(register_code code) {
+    // clang-format off
     switch (code) {
         case register_code::xmm0: return registers[0];
         case register_code::xmm1: return registers[1];
@@ -24,8 +25,10 @@ vector_register_ptr VectorUnit::get_register(register_code code) {
         case register_code::xmm5: return registers[5];
         case register_code::xmm6: return registers[6];
         case register_code::xmm7: return registers[7];
-        default: throw "provided register code does not belong to the vector unit";
+        default:
+            throw "provided register code does not belong to the vector unit";
     }
+    // clang-format on
 }
 
 void VectorUnit::execute() {
@@ -42,7 +45,6 @@ void VectorUnit::execute() {
     }
 
     switch (operation) {
-
         case vector_operation::mov: {
             destination->set_low(source->get_low());
             destination->set_high(source->get_high());
@@ -99,7 +101,7 @@ void VectorUnit::execute() {
         }
 
         case vector_operation::pshufd: {
-            auto src  = source->value_int();
+            auto src = source->value_int();
             auto dest = destination->value_int();
 
             for (int i = 0; i < 4; i++) {

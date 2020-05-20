@@ -23,8 +23,9 @@ void Program::print(std::ostream & os) const {
 
     int i = 0;
     for (auto const & byte : data) {
-        if (i && (i % 8 == 0)) os << "\n";
-        
+        if (i && (i % 8 == 0))
+            os << "\n";
+
         os << helpers::to_hex(byte, "") << " ";
         i++;
     }

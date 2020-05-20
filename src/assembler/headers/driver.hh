@@ -1,7 +1,8 @@
 #pragma once
-#include "symbol_table.hh"
 #include <sstream>
+
 #include "program.hh"
+#include "symbol_table.hh"
 
 class Driver {
 private:

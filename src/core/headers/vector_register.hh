@@ -1,8 +1,10 @@
 #pragma once
-#include "register.hh"
-#include <stdlib.h>
-#include <memory>
 #include <emmintrin.h>
+#include <stdlib.h>
+
+#include <memory>
+
+#include "register.hh"
 
 class VectorRegister {
 private:

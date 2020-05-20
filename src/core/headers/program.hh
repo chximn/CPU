@@ -1,7 +1,8 @@
 #pragma once
-#include "instruction.hh"
-#include <vector>
 #include <cstdint>
+#include <vector>
+
+#include "instruction.hh"
 
 class Program {
 private:
@@ -11,7 +12,7 @@ private:
 public:
     Program() = default;
 
-    void add_instruction(instruction_ptr );
+    void add_instruction(instruction_ptr);
     uint64_t add_data(std::vector<uint8_t> const &);
     std::vector<instruction_ptr> const & get_instructions() const;
     std::vector<uint8_t> const & get_data() const;

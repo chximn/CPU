@@ -1,4 +1,5 @@
 #include <catch.hpp>
+
 #include "ram.hh"
 
 TEST_CASE("ram") {
@@ -29,7 +30,6 @@ TEST_CASE("ram") {
         auto value = ram.data_register->get_value() & 0xffff;
         REQUIRE(value == 0xdead);
     }
-
 
     SECTION("16bit") {
         ram.address_register->set_value(10);

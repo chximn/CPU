@@ -1,8 +1,10 @@
 #pragma once
-#include "operand.hh"
-#include <vector>
 #include <memory>
+#include <vector>
 
+#include "operand.hh"
+
+// clang-format off
 enum instruction_code {
     mov, lea,
     push, pop,
@@ -24,6 +26,7 @@ enum instruction_code {
 
     movdqu, movdqa, paddb, paddw, paddd, paddq, addps, addpd, pand, pshufd
 };
+// clang-format on
 
 class Instruction {
 private:
@@ -34,7 +37,9 @@ private:
 public:
     Instruction() = delete;
     Instruction(instruction_code, std::vector<operand_ptr> const & ops);
-    Instruction(instruction_code, std::vector<operand_ptr> const & ops, uint8_t s);
+    Instruction(instruction_code,
+                std::vector<operand_ptr> const & ops,
+                uint8_t s);
 
     Instruction(Instruction const &);
 
@@ -44,7 +49,6 @@ public:
     void set_operands(std::vector<operand_ptr> const &);
 
     std::string to_string() const;
-
 
     static std::string to_string(instruction_code);
 };

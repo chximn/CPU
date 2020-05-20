@@ -1,14 +1,16 @@
 #pragma once
-#include "register.hh"
+#include <iostream>
 #include <memory>
 
-#include <iostream>
 #include "helpers.hh"
+#include "register.hh"
 
+// clang-format off
 enum class fpu_operation {
     fld, fst,
     fadd, fsub, fmul, fsqrt
 };
+// clang-format on
 
 class FloatingPointUnit {
 public:

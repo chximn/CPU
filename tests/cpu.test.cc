@@ -1,27 +1,26 @@
 #include <catch.hpp>
-#include "instruction.hh"
+
 #include "cpu.hh"
-#include "ram.hh"
 #include "cu.hh"
+#include "instruction.hh"
+#include "ram.hh"
 
 TEST_CASE("cpu") {
     RandomAccessMemory ram;
     CentralProcessingUnit cpu(ram);
-
 
     auto registers = cpu.get_registers();
     auto cs = registers[register_code::cs];
     cs->set_value(0);
     ArithemeticLogicUnit & alu = cpu.get_arithemetic_logic_unit();
 
-    std::vector<operand_ptr> operands {
+    std::vector<operand_ptr> operands{
         std::make_shared<RegisterOperand>(register_code::eax),
-        std::make_shared<ImmediateOperand>(2647)
-    };
+        std::make_shared<ImmediateOperand>(2647)};
 
     Instruction * i = new Instruction(instruction_code::mov, operands);
 
-    ram.data_register->set_value((uint64_t) i);
+    ram.data_register->set_value((uint64_t)i);
     ram.address_register->set_value(800);
     ram.size = 64;
     ram.write();
@@ -36,7 +35,8 @@ TEST_CASE("cpu") {
         REQUIRE(ip->get_value() == 808);
 
         uint64_t instruction_pointer = (ir->get_value());
-        Instruction * loaded_instruction = reinterpret_cast<Instruction *>(instruction_pointer);
+        Instruction * loaded_instruction =
+            reinterpret_cast<Instruction *>(instruction_pointer);
 
         REQUIRE(loaded_instruction == i);
     }
@@ -45,7 +45,8 @@ TEST_CASE("cpu") {
         registers[register_code::ds]->set_value(7);
         registers[register_code::eax]->set_value(2200);
         registers[register_code::ecx]->set_value(100);
-        MemoryOperand operand(register_code::eax, register_code::ecx, 4, 40, 64, register_code::ds);
+        MemoryOperand operand(register_code::eax, register_code::ecx, 4, 40, 64,
+                              register_code::ds);
 
         REQUIRE(cu.evaluate_address(operand) == 2647);
     }

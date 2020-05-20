@@ -1,4 +1,5 @@
 #include <catch.hpp>
+
 #include "ram.hh"
 #include "sse.hh"
 
@@ -32,7 +33,6 @@ TEST_CASE("sse") {
     RandomAccessMemory ram;
     VectorUnit sse(ram);
 
-
     SECTION("load") {
         ram.size = 64;
         ram.data_register->set_value(0xabcd1234deadbeef);
@@ -43,7 +43,6 @@ TEST_CASE("sse") {
         ram.address_register->set_value(131);
         ram.write();
 
-
         ram.address_register->set_value(123);
         sse.load_from_memory = true;
         sse.write_to_memory = false;
@@ -52,8 +51,8 @@ TEST_CASE("sse") {
         sse.operation = vector_operation::mov;
         sse.execute();
 
-        REQUIRE(sse.registers[0]->get_low()   == 0xabcd1234deadbeef);
-        REQUIRE(sse.registers[0]->get_high()  == 0x1122334455667788);
+        REQUIRE(sse.registers[0]->get_low() == 0xabcd1234deadbeef);
+        REQUIRE(sse.registers[0]->get_high() == 0x1122334455667788);
     }
 
     SECTION("write") {
@@ -67,7 +66,6 @@ TEST_CASE("sse") {
         sse.destination = sse.temp_register;
         sse.operation = vector_operation::mov;
         sse.execute();
-
 
         ram.address_register->set_value(100);
         ram.size = 64;
@@ -99,7 +97,7 @@ TEST_CASE("sse") {
 
         sse.execute();
 
-        REQUIRE(sse.registers[5]->get_low()  == 0x40f0000044e03000);
+        REQUIRE(sse.registers[5]->get_low() == 0x40f0000044e03000);
         REQUIRE(sse.registers[5]->get_high() == 0x4208000042e60000);
     }
 }

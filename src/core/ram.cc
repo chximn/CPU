@@ -7,10 +7,13 @@ RandomAccessMemory::RandomAccessMemory():
 
 void RandomAccessMemory::load() const {
     auto offset = address_register->get_value();
-    auto pointer = const_cast<uint64_t *>(reinterpret_cast<const uint64_t *>(data + offset));
+    auto pointer = const_cast<uint64_t *>(
+        reinterpret_cast<const uint64_t *>(data + offset));
     data_register->set_value(*pointer);
 
-    // std::cout << "read operation from memory: address=" << helpers::to_hex(offset) << " value=" << helpers::to_hex(*pointer) << " size=" << std::to_string(size) << "\n";
+    // std::cout << "read operation from memory: address=" <<
+    // helpers::to_hex(offset) << " value=" << helpers::to_hex(*pointer) << "
+    // size=" << std::to_string(size) << "\n";
 }
 
 void RandomAccessMemory::write() {
@@ -19,7 +22,8 @@ void RandomAccessMemory::write() {
     mask = mask >> (64 - size);
 
     auto offset = address_register->get_value();
-    uint64_t* pointer = const_cast<uint64_t *>(reinterpret_cast<const uint64_t *>(data + offset));
+    uint64_t * pointer = const_cast<uint64_t *>(
+        reinterpret_cast<const uint64_t *>(data + offset));
     uint64_t old_value = *pointer;
     uint64_t new_value = data_register->get_value();
 
@@ -27,7 +31,9 @@ void RandomAccessMemory::write() {
 
     *pointer = value;
 
-    // std::cout << "write operation on memory: address=" << helpers::to_hex(offset) << " value=" << helpers::to_hex(new_value) << " size=" << std::to_string(size) << "\n";
+    // std::cout << "write operation on memory: address=" <<
+    // helpers::to_hex(offset) << " value=" << helpers::to_hex(new_value) << "
+    // size=" << std::to_string(size) << "\n";
 }
 
 std::vector<uint8_t> RandomAccessMemory::get_data(int from, int s) {
@@ -40,22 +46,24 @@ std::vector<uint8_t> RandomAccessMemory::get_data(int from, int s) {
     return bytes;
 }
 
-std::vector<std::pair<uint64_t, std::string>> RandomAccessMemory::get_instructions(int from, int n) {
+std::vector<std::pair<uint64_t, std::string>>
+RandomAccessMemory::get_instructions(int from, int n) {
     std::vector<std::pair<uint64_t, std::string>> pairs;
 
     int address = from;
     for (int i = 0; i < n; i++) {
-        uint64_t instruction_pointer = *reinterpret_cast<uint64_t *>(data + address);
+        uint64_t instruction_pointer =
+            *reinterpret_cast<uint64_t *>(data + address);
 
         if (instruction_pointer != 0) {
-            Instruction instruction = *reinterpret_cast<Instruction *>(instruction_pointer);
+            Instruction instruction =
+                *reinterpret_cast<Instruction *>(instruction_pointer);
             pairs.push_back(std::pair<uint64_t, std::string>{
-                address,
-                instruction.to_string()
-            });
+                address, instruction.to_string()});
         }
 
-        else break;
+        else
+            break;
         address += 8;
     }
 

@@ -2,10 +2,16 @@
 
 #include <iostream>
 
-ControlUnit::ControlUnit(std::map<register_code, register_ptr> & r, ArithemeticLogicUnit & a, FloatingPointUnit & f, VectorUnit & s, RandomAccessMemory & mem):
-    instruction_pointer_register(std::make_shared<FullRegister>(register_code::rip)),
+ControlUnit::ControlUnit(std::map<register_code, register_ptr> & r,
+                         ArithemeticLogicUnit & a,
+                         FloatingPointUnit & f,
+                         VectorUnit & s,
+                         RandomAccessMemory & mem):
+    instruction_pointer_register(
+        std::make_shared<FullRegister>(register_code::rip)),
     instruction_register(std::make_shared<FullRegister>(register_code::ir)),
-    immediate_register(std::make_shared<FullRegister>(register_code::_immediate)),
+    immediate_register(
+        std::make_shared<FullRegister>(register_code::_immediate)),
     halt(false),
     registers(r),
     alu(a),
@@ -29,17 +35,16 @@ bool ControlUnit::get_write_to_memory() const {
     return write_to_memory;
 }
 
-
-uint64_t ControlUnit::evaluate_address(MemoryOperand operand)  {
+uint64_t ControlUnit::evaluate_address(MemoryOperand operand) {
     uint64_t address = operand.get_displacement();
 
     if (operand.get_use_base()) {
-        address += registers[operand.get_base()]->get_value();;
+        address += registers[operand.get_base()]->get_value();
     }
 
     if (operand.get_use_index()) {
         uint64_t index = registers[operand.get_index()]->get_value();
-        uint8_t  scale = operand.get_scale();
+        uint8_t scale = operand.get_scale();
 
         address += index * scale;
     }
@@ -52,23 +57,29 @@ uint64_t ControlUnit::evaluate_address(MemoryOperand operand)  {
 }
 
 void ControlUnit::fetch(register_ptr cs) {
-    ram.address_register->set_value(instruction_pointer_register->get_value() + cs->get_value());
+    ram.address_register->set_value(instruction_pointer_register->get_value() +
+                                    cs->get_value());
     ram.load();
     instruction_register->set_value(ram.data_register->get_value());
-    instruction_pointer_register->set_value(instruction_pointer_register->get_value() + 8);
+    instruction_pointer_register->set_value(
+        instruction_pointer_register->get_value() + 8);
 }
 
 void ControlUnit::evaluate_destination(operand_ptr operand) {
-    auto register_operand_pointer  = std::dynamic_pointer_cast<RegisterOperand> (operand);
-    auto memory_operand_pointer    = std::dynamic_pointer_cast<MemoryOperand>   (operand);
-    auto immediate_operand_pointer = std::dynamic_pointer_cast<ImmediateOperand>(operand);
+    auto register_operand_pointer =
+        std::dynamic_pointer_cast<RegisterOperand>(operand);
+    auto memory_operand_pointer =
+        std::dynamic_pointer_cast<MemoryOperand>(operand);
+    auto immediate_operand_pointer =
+        std::dynamic_pointer_cast<ImmediateOperand>(operand);
 
     if (register_operand_pointer != nullptr) {
         alu.destination = registers[register_operand_pointer->get_reg()];
     }
 
     else if (memory_operand_pointer != nullptr) {
-        ram.address_register->set_value(evaluate_address(*memory_operand_pointer));
+        ram.address_register->set_value(
+            evaluate_address(*memory_operand_pointer));
         ram.size = memory_operand_pointer->get_size();
         alu.destination = ram.data_register;
         write_to_memory = true;
@@ -81,16 +92,20 @@ void ControlUnit::evaluate_destination(operand_ptr operand) {
 }
 
 void ControlUnit::evaluate_source(operand_ptr operand) {
-    auto register_operand_pointer  = std::dynamic_pointer_cast<RegisterOperand> (operand);
-    auto memory_operand_pointer    = std::dynamic_pointer_cast<MemoryOperand>   (operand);
-    auto immediate_operand_pointer = std::dynamic_pointer_cast<ImmediateOperand>(operand);
+    auto register_operand_pointer =
+        std::dynamic_pointer_cast<RegisterOperand>(operand);
+    auto memory_operand_pointer =
+        std::dynamic_pointer_cast<MemoryOperand>(operand);
+    auto immediate_operand_pointer =
+        std::dynamic_pointer_cast<ImmediateOperand>(operand);
 
     if (register_operand_pointer != nullptr) {
         alu.source = registers[register_operand_pointer->get_reg()];
     }
 
     else if (memory_operand_pointer != nullptr) {
-        ram.address_register->set_value(evaluate_address(*memory_operand_pointer));
+        ram.address_register->set_value(
+            evaluate_address(*memory_operand_pointer));
         ram.size = memory_operand_pointer->get_size();
         alu.source = ram.data_register;
         load_from_memory = true;
@@ -111,7 +126,8 @@ void ControlUnit::decode() {
     halt = false;
 
     uint64_t instruction_pointer = (instruction_register->get_value());
-    Instruction instruction = *reinterpret_cast<Instruction *>(instruction_pointer);
+    Instruction instruction =
+        *reinterpret_cast<Instruction *>(instruction_pointer);
 
     auto code = instruction.get_code();
     auto operands = instruction.get_operands();
@@ -124,7 +140,8 @@ void ControlUnit::decode() {
             evaluate_destination(operands.at(0));
             evaluate_source(operands.at(1));
 
-            auto pointer = std::dynamic_pointer_cast<MemoryOperand>(operands.at(0));
+            auto pointer =
+                std::dynamic_pointer_cast<MemoryOperand>(operands.at(0));
             if (pointer != nullptr) {
                 load_from_memory = false;
             }
@@ -138,9 +155,13 @@ void ControlUnit::decode() {
             alu.operation = alu_operation::mov;
             load_from_memory = false;
             write_to_memory = false;
-            ram.address_register->set_value(evaluate_address(*std::dynamic_pointer_cast<MemoryOperand>(operands.at(1))));
+            ram.address_register->set_value(evaluate_address(
+                *std::dynamic_pointer_cast<MemoryOperand>(operands.at(1))));
             alu.source = ram.address_register;
-            alu.destination = registers[std::dynamic_pointer_cast<RegisterOperand>(operands.at(0))->get_reg()];
+            alu.destination =
+                registers[std::dynamic_pointer_cast<RegisterOperand>(
+                              operands.at(0))
+                              ->get_reg()];
             execute_alu = true;
             break;
         }
@@ -296,7 +317,8 @@ void ControlUnit::decode() {
 
             evaluate_destination(operands.at(0));
 
-            if (operands.size() == 2) evaluate_source(operands.at(1));
+            if (operands.size() == 2)
+                evaluate_source(operands.at(1));
             else {
                 alu.source = immediate_register;
                 immediate_register->set_value(1);
@@ -315,7 +337,8 @@ void ControlUnit::decode() {
 
             evaluate_destination(operands.at(0));
 
-            if (operands.size() == 2) evaluate_source(operands.at(1));
+            if (operands.size() == 2)
+                evaluate_source(operands.at(1));
             else {
                 alu.source = immediate_register;
                 immediate_register->set_value(1);
@@ -331,13 +354,15 @@ void ControlUnit::decode() {
             load_from_memory = false;
             write_to_memory = false;
 
-            auto immediate_operand_pointer = std::dynamic_pointer_cast<ImmediateOperand>(operands.at(0));
+            auto immediate_operand_pointer =
+                std::dynamic_pointer_cast<ImmediateOperand>(operands.at(0));
             if (immediate_operand_pointer != nullptr) {
                 alu.operation = alu_operation::add;
 
             }
 
-            else alu.operation = alu_operation::mov;
+            else
+                alu.operation = alu_operation::mov;
 
             evaluate_source(operands.at(0));
             alu.destination = instruction_pointer_register;
@@ -355,12 +380,14 @@ void ControlUnit::decode() {
                 break;
             }
 
-            auto immediate_operand_pointer = std::dynamic_pointer_cast<ImmediateOperand>(operands.at(0));
+            auto immediate_operand_pointer =
+                std::dynamic_pointer_cast<ImmediateOperand>(operands.at(0));
             if (immediate_operand_pointer != nullptr) {
                 alu.operation = alu_operation::add;
             }
 
-            else alu.operation = alu_operation::mov;
+            else
+                alu.operation = alu_operation::mov;
 
             evaluate_source(operands.at(0));
             alu.destination = instruction_pointer_register;
@@ -378,12 +405,14 @@ void ControlUnit::decode() {
                 break;
             }
 
-            auto immediate_operand_pointer = std::dynamic_pointer_cast<ImmediateOperand>(operands.at(0));
+            auto immediate_operand_pointer =
+                std::dynamic_pointer_cast<ImmediateOperand>(operands.at(0));
             if (immediate_operand_pointer != nullptr) {
                 alu.operation = alu_operation::add;
             }
 
-            else alu.operation = alu_operation::mov;
+            else
+                alu.operation = alu_operation::mov;
 
             evaluate_source(operands.at(0));
             alu.destination = instruction_pointer_register;
@@ -396,17 +425,20 @@ void ControlUnit::decode() {
             load_from_memory = false;
             write_to_memory = false;
 
-            if (alu.flags[flag_code::sf]->get_value() != 0 && alu.flags[flag_code::zf]->get_value() != 0) {
+            if (alu.flags[flag_code::sf]->get_value() != 0 &&
+                alu.flags[flag_code::zf]->get_value() != 0) {
                 execute_alu = false;
                 break;
             }
 
-            auto immediate_operand_pointer = std::dynamic_pointer_cast<ImmediateOperand>(operands.at(0));
+            auto immediate_operand_pointer =
+                std::dynamic_pointer_cast<ImmediateOperand>(operands.at(0));
             if (immediate_operand_pointer != nullptr) {
                 alu.operation = alu_operation::add;
             }
 
-            else alu.operation = alu_operation::mov;
+            else
+                alu.operation = alu_operation::mov;
 
             evaluate_source(operands.at(0));
             alu.destination = instruction_pointer_register;
@@ -419,17 +451,20 @@ void ControlUnit::decode() {
             load_from_memory = false;
             write_to_memory = false;
 
-            if (alu.flags[flag_code::sf]->get_value() != 1 && alu.flags[flag_code::zf]->get_value() != 0) {
+            if (alu.flags[flag_code::sf]->get_value() != 1 &&
+                alu.flags[flag_code::zf]->get_value() != 0) {
                 execute_alu = false;
                 break;
             }
 
-            auto immediate_operand_pointer = std::dynamic_pointer_cast<ImmediateOperand>(operands.at(0));
+            auto immediate_operand_pointer =
+                std::dynamic_pointer_cast<ImmediateOperand>(operands.at(0));
             if (immediate_operand_pointer != nullptr) {
                 alu.operation = alu_operation::add;
             }
 
-            else alu.operation = alu_operation::mov;
+            else
+                alu.operation = alu_operation::mov;
 
             evaluate_source(operands.at(0));
             alu.destination = instruction_pointer_register;
@@ -442,13 +477,16 @@ void ControlUnit::decode() {
             load_from_memory = false;
             write_to_memory = false;
 
-            if (alu.flags[flag_code::zf]->get_value() == 1 || alu.flags[flag_code::sf]->get_value() == 0) {
-                auto immediate_operand_pointer = std::dynamic_pointer_cast<ImmediateOperand>(operands.at(0));
+            if (alu.flags[flag_code::zf]->get_value() == 1 ||
+                alu.flags[flag_code::sf]->get_value() == 0) {
+                auto immediate_operand_pointer =
+                    std::dynamic_pointer_cast<ImmediateOperand>(operands.at(0));
                 if (immediate_operand_pointer != nullptr) {
                     alu.operation = alu_operation::add;
                 }
 
-                else alu.operation = alu_operation::mov;
+                else
+                    alu.operation = alu_operation::mov;
 
                 evaluate_source(operands.at(0));
                 alu.destination = instruction_pointer_register;
@@ -468,13 +506,16 @@ void ControlUnit::decode() {
             load_from_memory = false;
             write_to_memory = false;
 
-            if (alu.flags[flag_code::zf]->get_value() == 1 || alu.flags[flag_code::sf]->get_value() == 1) {
-                auto immediate_operand_pointer = std::dynamic_pointer_cast<ImmediateOperand>(operands.at(0));
+            if (alu.flags[flag_code::zf]->get_value() == 1 ||
+                alu.flags[flag_code::sf]->get_value() == 1) {
+                auto immediate_operand_pointer =
+                    std::dynamic_pointer_cast<ImmediateOperand>(operands.at(0));
                 if (immediate_operand_pointer != nullptr) {
                     alu.operation = alu_operation::add;
                 }
 
-                else alu.operation = alu_operation::mov;
+                else
+                    alu.operation = alu_operation::mov;
 
                 evaluate_source(operands.at(0));
                 alu.destination = instruction_pointer_register;
@@ -493,18 +534,21 @@ void ControlUnit::decode() {
             load_from_memory = false;
             write_to_memory = false;
 
-            auto immediate_operand_pointer = std::dynamic_pointer_cast<ImmediateOperand>(operands.at(0));
+            auto immediate_operand_pointer =
+                std::dynamic_pointer_cast<ImmediateOperand>(operands.at(0));
             if (immediate_operand_pointer != nullptr) {
                 alu.operation = alu_operation::add;
             }
 
-            else alu.operation = alu_operation::mov;
+            else
+                alu.operation = alu_operation::mov;
 
             evaluate_source(operands.at(0));
             alu.destination = instruction_pointer_register;
             alu.size = 32;
             ram.size = 32;
-            ram.data_register->set_value(instruction_pointer_register->get_value());
+            ram.data_register->set_value(
+                instruction_pointer_register->get_value());
             write_to_memory = true;
             execute_alu = true;
             break;
@@ -540,7 +584,8 @@ void ControlUnit::decode() {
             write_to_memory = false;
             execute_fpu = true;
 
-            ram.address_register->set_value(evaluate_address(*std::dynamic_pointer_cast<MemoryOperand>(operands.at(0))));
+            ram.address_register->set_value(evaluate_address(
+                *std::dynamic_pointer_cast<MemoryOperand>(operands.at(0))));
             fpu.operation = fpu_operation::fld;
             fpu.src_dest = ram.data_register;
             fpu.is_double = operands.at(0)->get_size() == 64;
@@ -552,7 +597,8 @@ void ControlUnit::decode() {
             execute_fpu = true;
             fpu.perform_pop = false;
 
-            ram.address_register->set_value(evaluate_address(*std::dynamic_pointer_cast<MemoryOperand>(operands.at(0))));
+            ram.address_register->set_value(evaluate_address(
+                *std::dynamic_pointer_cast<MemoryOperand>(operands.at(0))));
             fpu.operation = fpu_operation::fst;
             fpu.src_dest = ram.data_register;
             fpu.is_double = operands.at(0)->get_size() == 64;
@@ -564,7 +610,8 @@ void ControlUnit::decode() {
             execute_fpu = true;
             fpu.perform_pop = true;
 
-            ram.address_register->set_value(evaluate_address(*std::dynamic_pointer_cast<MemoryOperand>(operands.at(0))));
+            ram.address_register->set_value(evaluate_address(
+                *std::dynamic_pointer_cast<MemoryOperand>(operands.at(0))));
             fpu.operation = fpu_operation::fst;
             fpu.src_dest = ram.data_register;
             fpu.is_double = operands.at(0)->get_size() == 64;
@@ -599,17 +646,21 @@ void ControlUnit::decode() {
             fpu.operation = fpu_operation::fadd;
 
             if (operands.size() == 1) {
-                auto memory_operand_pointer = std::dynamic_pointer_cast<MemoryOperand>(operands.at(0));
+                auto memory_operand_pointer =
+                    std::dynamic_pointer_cast<MemoryOperand>(operands.at(0));
                 fpu.is_double = memory_operand_pointer->get_size() == 64;
                 load_from_memory = true;
-                ram.address_register->set_value(evaluate_address(*memory_operand_pointer));
+                ram.address_register->set_value(
+                    evaluate_address(*memory_operand_pointer));
                 fpu.src_dest = ram.data_register;
                 fpu.is_destination = false;
             }
 
             else if (operands.size() == 2) {
-                auto op1 = std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
-                auto op2 = std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
+                auto op1 =
+                    std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
+                auto op2 =
+                    std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
 
                 if (op1->get_reg() == register_code::st0) {
                     fpu.is_destination = false;
@@ -636,8 +687,12 @@ void ControlUnit::decode() {
             fpu.is_double = true;
             fpu.is_destination = true;
 
-            if (operands.size() == 0) fpu.src_dest = fpu.stages[1];
-            else if (operands.size() == 2) fpu.src_dest = fpu.get_register(std::dynamic_pointer_cast<RegisterOperand>(operands.at(0))->get_reg());
+            if (operands.size() == 0)
+                fpu.src_dest = fpu.stages[1];
+            else if (operands.size() == 2)
+                fpu.src_dest = fpu.get_register(
+                    std::dynamic_pointer_cast<RegisterOperand>(operands.at(0))
+                        ->get_reg());
             break;
 
         case instruction_code::movdqu:
@@ -648,22 +703,27 @@ void ControlUnit::decode() {
             sse.load_from_memory = false;
             sse.write_to_memory = false;
 
-            auto op1mem = std::dynamic_pointer_cast<MemoryOperand>(operands.at(0));
-            auto op1reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
+            auto op1mem =
+                std::dynamic_pointer_cast<MemoryOperand>(operands.at(0));
+            auto op1reg =
+                std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
             if (op1mem != nullptr) {
                 ram.address_register->set_value(evaluate_address(*op1mem));
                 sse.destination = sse.temp_register;
                 sse.write_to_memory = true;
 
-                auto op2reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
+                auto op2reg =
+                    std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
                 sse.source = sse.get_register(op2reg->get_reg());
             }
 
             else {
                 sse.destination = sse.get_register(op1reg->get_reg());
 
-                auto op2mem = std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
-                auto op2reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
+                auto op2mem =
+                    std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
+                auto op2reg =
+                    std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
 
                 if (op2mem != nullptr) {
                     sse.source = sse.temp_register;
@@ -675,7 +735,6 @@ void ControlUnit::decode() {
                     sse.operation = vector_operation::mov;
                     sse.source = sse.get_register(op2reg->get_reg());
                 }
-
             }
 
             execute_sse = true;
@@ -686,13 +745,15 @@ void ControlUnit::decode() {
             sse.operation = vector_operation::paddb;
             sse.write_to_memory = false;
 
-            auto op1reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
+            auto op1reg =
+                std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
             sse.destination = sse.get_register(op1reg->get_reg());
-            sse.source      = sse.get_register(op1reg->get_reg());
+            sse.source = sse.get_register(op1reg->get_reg());
 
-
-            auto op2mem = std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
-            auto op2reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
+            auto op2mem =
+                std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
+            auto op2reg =
+                std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
 
             if (op2mem != nullptr) {
                 sse.source2 = sse.temp_register;
@@ -713,13 +774,15 @@ void ControlUnit::decode() {
             sse.operation = vector_operation::paddw;
             sse.write_to_memory = false;
 
-            auto op1reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
+            auto op1reg =
+                std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
             sse.destination = sse.get_register(op1reg->get_reg());
-            sse.source      = sse.get_register(op1reg->get_reg());
+            sse.source = sse.get_register(op1reg->get_reg());
 
-
-            auto op2mem = std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
-            auto op2reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
+            auto op2mem =
+                std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
+            auto op2reg =
+                std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
 
             if (op2mem != nullptr) {
                 sse.source2 = sse.temp_register;
@@ -740,12 +803,15 @@ void ControlUnit::decode() {
             sse.operation = vector_operation::paddd;
             sse.write_to_memory = false;
 
-            auto op1reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
+            auto op1reg =
+                std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
             sse.destination = sse.get_register(op1reg->get_reg());
-            sse.source      = sse.get_register(op1reg->get_reg());
+            sse.source = sse.get_register(op1reg->get_reg());
 
-            auto op2mem = std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
-            auto op2reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
+            auto op2mem =
+                std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
+            auto op2reg =
+                std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
 
             if (op2mem != nullptr) {
                 sse.source2 = sse.temp_register;
@@ -766,13 +832,15 @@ void ControlUnit::decode() {
             sse.operation = vector_operation::paddq;
             sse.write_to_memory = false;
 
-            auto op1reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
+            auto op1reg =
+                std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
             sse.destination = sse.get_register(op1reg->get_reg());
-            sse.source      = sse.get_register(op1reg->get_reg());
+            sse.source = sse.get_register(op1reg->get_reg());
 
-
-            auto op2mem = std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
-            auto op2reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
+            auto op2mem =
+                std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
+            auto op2reg =
+                std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
 
             if (op2mem != nullptr) {
                 sse.source2 = sse.temp_register;
@@ -793,13 +861,15 @@ void ControlUnit::decode() {
             sse.operation = vector_operation::addps;
             sse.write_to_memory = false;
 
-            auto op1reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
+            auto op1reg =
+                std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
             sse.destination = sse.get_register(op1reg->get_reg());
-            sse.source      = sse.get_register(op1reg->get_reg());
+            sse.source = sse.get_register(op1reg->get_reg());
 
-
-            auto op2mem = std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
-            auto op2reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
+            auto op2mem =
+                std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
+            auto op2reg =
+                std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
 
             if (op2mem != nullptr) {
                 sse.source2 = sse.temp_register;
@@ -820,13 +890,15 @@ void ControlUnit::decode() {
             sse.operation = vector_operation::addpd;
             sse.write_to_memory = false;
 
-            auto op1reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
+            auto op1reg =
+                std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
             sse.destination = sse.get_register(op1reg->get_reg());
-            sse.source      = sse.get_register(op1reg->get_reg());
+            sse.source = sse.get_register(op1reg->get_reg());
 
-
-            auto op2mem = std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
-            auto op2reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
+            auto op2mem =
+                std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
+            auto op2reg =
+                std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
 
             if (op2mem != nullptr) {
                 sse.source2 = sse.temp_register;
@@ -847,13 +919,15 @@ void ControlUnit::decode() {
             sse.operation = vector_operation::pand;
             sse.write_to_memory = false;
 
-            auto op1reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
+            auto op1reg =
+                std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
             sse.destination = sse.get_register(op1reg->get_reg());
-            sse.source      = sse.get_register(op1reg->get_reg());
+            sse.source = sse.get_register(op1reg->get_reg());
 
-
-            auto op2mem = std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
-            auto op2reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
+            auto op2mem =
+                std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
+            auto op2reg =
+                std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
 
             if (op2mem != nullptr) {
                 sse.source2 = sse.temp_register;
@@ -874,11 +948,14 @@ void ControlUnit::decode() {
             sse.operation = vector_operation::pshufd;
             sse.write_to_memory = false;
 
-            auto op1reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
+            auto op1reg =
+                std::dynamic_pointer_cast<RegisterOperand>(operands.at(0));
             sse.destination = sse.get_register(op1reg->get_reg());
 
-            auto op2mem = std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
-            auto op2reg = std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
+            auto op2mem =
+                std::dynamic_pointer_cast<MemoryOperand>(operands.at(1));
+            auto op2reg =
+                std::dynamic_pointer_cast<RegisterOperand>(operands.at(1));
 
             if (op2mem != nullptr) {
                 sse.source = sse.temp_register;
@@ -891,7 +968,9 @@ void ControlUnit::decode() {
                 sse.source = sse.get_register(op2reg->get_reg());
             }
 
-            auto value = std::dynamic_pointer_cast<ImmediateOperand>(operands.at(2))->get_value();
+            auto value =
+                std::dynamic_pointer_cast<ImmediateOperand>(operands.at(2))
+                    ->get_value();
             sse.control_byte = *reinterpret_cast<uint8_t *>(&value);
 
             execute_sse = true;
@@ -906,41 +985,61 @@ void ControlUnit::decode() {
 
 void ControlUnit::load() {
     uint64_t instruction_pointer = (instruction_register->get_value());
-    Instruction instruction = *reinterpret_cast<Instruction *>(instruction_pointer);
+    Instruction instruction =
+        *reinterpret_cast<Instruction *>(instruction_pointer);
 
-    if (instruction.get_code() == instruction_code::pop || instruction.get_code() == instruction_code::ret) {
+    if (instruction.get_code() == instruction_code::pop ||
+        instruction.get_code() == instruction_code::ret) {
         pop_temp_address = ram.address_register->get_value();
-        ram.address_register->set_value(registers[register_code::rsp]->get_value() + registers[register_code::ss]->get_value());
+        ram.address_register->set_value(
+            registers[register_code::rsp]->get_value() +
+            registers[register_code::ss]->get_value());
     }
 
-    else if (instruction.get_code() == instruction_code::push || instruction.get_code() == instruction_code::call) {
-        registers[register_code::rsp]->set_value(registers[register_code::rsp]->get_value() - instruction.get_size() / 8);
+    else if (instruction.get_code() == instruction_code::push ||
+             instruction.get_code() == instruction_code::call) {
+        registers[register_code::rsp]->set_value(
+            registers[register_code::rsp]->get_value() -
+            instruction.get_size() / 8);
     }
 
     // if (instruction.get_code() == instruction_code::call) {
-    //     std::cout << std::to_string(registers[register_code::rsp]->get_value()) << "\n";
+    //     std::cout <<
+    //     std::to_string(registers[register_code::rsp]->get_value()) << "\n";
     //     exit(0);
     //
     // }
 
-    if (load_from_memory) ram.load();
+    if (load_from_memory)
+        ram.load();
 
-    if (instruction.get_code() == instruction_code::pop || instruction.get_code() == instruction_code::ret) {
-        registers[register_code::rsp]->set_value(registers[register_code::rsp]->get_value() + instruction.get_size() / 8);
+    if (instruction.get_code() == instruction_code::pop ||
+        instruction.get_code() == instruction_code::ret) {
+        registers[register_code::rsp]->set_value(
+            registers[register_code::rsp]->get_value() +
+            instruction.get_size() / 8);
         ram.address_register->set_value(pop_temp_address);
     }
 
-    if (instruction.get_code() == instruction_code::push || instruction.get_code() == instruction_code::call)
-        ram.address_register->set_value(registers[register_code::rsp]->get_value() + registers[register_code::ss]->get_value());
+    if (instruction.get_code() == instruction_code::push ||
+        instruction.get_code() == instruction_code::call)
+        ram.address_register->set_value(
+            registers[register_code::rsp]->get_value() +
+            registers[register_code::ss]->get_value());
 }
 
 void ControlUnit::execute() {
-    if (halt) return;
-    if (execute_alu) alu.execute();
-    else if (execute_fpu) fpu.execute();
-    else if (execute_sse) sse.execute();
+    if (halt)
+        return;
+    if (execute_alu)
+        alu.execute();
+    else if (execute_fpu)
+        fpu.execute();
+    else if (execute_sse)
+        sse.execute();
 }
 
 void ControlUnit::write() {
-    if (write_to_memory) ram.write();
+    if (write_to_memory)
+        ram.write();
 }

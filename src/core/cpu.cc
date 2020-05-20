@@ -5,9 +5,12 @@ CentralProcessingUnit::CentralProcessingUnit(RandomAccessMemory & r):
     flags(std::make_shared<FullRegister>(register_code::rflags)),
     arithmetic_logic_unit(flags),
     vector_unit(ram),
-    control_unit(registers, arithmetic_logic_unit, floating_point_unit, vector_unit, ram) {
-
-
+    control_unit(registers,
+                 arithmetic_logic_unit,
+                 floating_point_unit,
+                 vector_unit,
+                 ram) {
+    // clang-format off
     registers[register_code::rax] = std::make_shared<FullRegister>(register_code::rax);
     registers[register_code::eax] = std::make_shared<PartRegister>(register_code::eax, registers[register_code::rax], 32, 0);
     registers[register_code::ax]  = std::make_shared<PartRegister>(register_code::ax,  registers[register_code::rax], 16, 0);
@@ -95,6 +98,7 @@ CentralProcessingUnit::CentralProcessingUnit(RandomAccessMemory & r):
     registers[register_code::rflags] = flags;
     registers[register_code::eflags] = std::make_shared<PartRegister>(register_code::eflags, registers[register_code::rflags], 32, 0);
     registers[register_code::flags]  = std::make_shared<PartRegister>(register_code::flags,  registers[register_code::rflags], 16, 0);
+    // clang-format on
 }
 
 void CentralProcessingUnit::start() {
@@ -129,6 +133,7 @@ VectorUnit & CentralProcessingUnit::get_vector_unit() {
     return vector_unit;
 }
 
-std::map<register_code, register_ptr> const & CentralProcessingUnit::get_registers() const {
+std::map<register_code, register_ptr> const &
+CentralProcessingUnit::get_registers() const {
     return registers;
 }

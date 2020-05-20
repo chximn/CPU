@@ -6,12 +6,12 @@ Assembler::Assembler(std::string const & input):
     logger(),
     scanner(in, out),
     parser(scanner, driver, logger) {
-
     std::vector<std::string> lines;
     std::stringstream ss(input);
     std::string line;
 
-    while(std::getline(ss, line, '\n')) lines.push_back(line);
+    while (std::getline(ss, line, '\n'))
+        lines.push_back(line);
 
     logger.set_lines(lines);
 }

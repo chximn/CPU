@@ -1,11 +1,14 @@
 #include "alu.hh"
 
-ArithemeticLogicUnit::ArithemeticLogicUnit(register_ptr flags_reg): flags_register(flags_reg) {
+ArithemeticLogicUnit::ArithemeticLogicUnit(register_ptr flags_reg):
+    flags_register(flags_reg) {
+    // clang-format off
     flags[flag_code::cf] = std::make_shared<PartRegister>(register_code::flags, flags_reg, 1, 0);
     flags[flag_code::pf] = std::make_shared<PartRegister>(register_code::flags, flags_reg, 1, 2);
     flags[flag_code::zf] = std::make_shared<PartRegister>(register_code::flags, flags_reg, 1, 6);
     flags[flag_code::sf] = std::make_shared<PartRegister>(register_code::flags, flags_reg, 1, 7);
     flags[flag_code::of] = std::make_shared<PartRegister>(register_code::flags, flags_reg, 1, 11);
+    // clang-format on
 }
 
 void ArithemeticLogicUnit::execute() {
@@ -28,7 +31,6 @@ void ArithemeticLogicUnit::execute() {
         }
 
         case alu_operation::add: {
-
             uint64_t result = 0;
             auto source_value = source->get_value();
             auto destination_value = destination->get_value();
@@ -61,7 +63,9 @@ void ArithemeticLogicUnit::execute() {
                 result += r;
             }
 
-            else throw "invalid alu size modifier";
+            else {
+                throw "invalid alu size modifier";
+            }
 
             destination->set_value(result);
             break;
@@ -100,12 +104,17 @@ void ArithemeticLogicUnit::execute() {
                 result += r;
             }
 
-            else throw "invalid alu size modifier";
+            else {
+                throw "invalid alu size modifier";
+            }
 
             update_flags = false;
-            if (result == 0) flags[flag_code::zf]->set_value(1);
-            if ((result >> (size - 1)) & 1) flags[flag_code::sf]->set_value(1);
-            if ((result & 1) == 0) flags[flag_code::pf]->set_value(1);
+            if (result == 0)
+                flags[flag_code::zf]->set_value(1);
+            if ((result >> (size - 1)) & 1)
+                flags[flag_code::sf]->set_value(1);
+            if ((result & 1) == 0)
+                flags[flag_code::pf]->set_value(1);
             break;
         }
 
@@ -142,7 +151,9 @@ void ArithemeticLogicUnit::execute() {
                 result += r;
             }
 
-            else throw "invalid alu size modifier";
+            else {
+                throw "invalid alu size modifier";
+            }
 
             destination->set_value(result);
             break;
@@ -162,7 +173,8 @@ void ArithemeticLogicUnit::execute() {
 
         case alu_operation::div: {
             uint64_t q, r;
-            helpers::multiply(destination->get_value(), source->get_value(), q, r, size);
+            helpers::multiply(destination->get_value(), source->get_value(), q,
+                              r, size);
             destination->set_value(q);
             extra->set_value(r);
             break;
@@ -176,32 +188,37 @@ void ArithemeticLogicUnit::execute() {
         }
 
         case alu_operation::_and: {
-            destination->set_value(source->get_value() & destination->get_value());
+            destination->set_value(source->get_value() &
+                                   destination->get_value());
             break;
         }
 
         case alu_operation::_or: {
-            destination->set_value(source->get_value() | destination->get_value());
+            destination->set_value(source->get_value() |
+                                   destination->get_value());
             break;
         }
 
         case alu_operation::_xor: {
-            destination->set_value(source->get_value() ^ destination->get_value());
+            destination->set_value(source->get_value() ^
+                                   destination->get_value());
             break;
         }
 
         case alu_operation::_not: {
-            destination->set_value( ~(destination->get_value()) );
+            destination->set_value(~(destination->get_value()));
             break;
         }
 
         case alu_operation::shl: {
-            destination->set_value( (destination->get_value()) << (source->get_value()) );
+            destination->set_value((destination->get_value())
+                                   << (source->get_value()));
             break;
         }
 
         case alu_operation::shr: {
-            destination->set_value( (destination->get_value()) >> (source->get_value()) );
+            destination->set_value((destination->get_value()) >>
+                                   (source->get_value()));
             break;
         }
 
@@ -211,8 +228,11 @@ void ArithemeticLogicUnit::execute() {
     }
 
     if (update_flags) {
-        if (destination->get_value() == 0) flags[flag_code::zf]->set_value(1);
-        if ((destination->get_value() >> (size - 1)) & 1) flags[flag_code::sf]->set_value(1);
-        if ((destination->get_value() & 1) == 0) flags[flag_code::pf]->set_value(1);
+        if (destination->get_value() == 0)
+            flags[flag_code::zf]->set_value(1);
+        if ((destination->get_value() >> (size - 1)) & 1)
+            flags[flag_code::sf]->set_value(1);
+        if ((destination->get_value() & 1) == 0)
+            flags[flag_code::pf]->set_value(1);
     }
 }

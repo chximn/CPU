@@ -10,7 +10,11 @@ uint64_t helpers::lo(uint64_t x, uint8_t size) {
     return ((1L << size) - 1) & x;
 }
 
-void helpers::multiply(uint64_t a, uint64_t b, uint64_t & result, uint64_t & carry, uint8_t full_size) {
+void helpers::multiply(uint64_t a,
+                       uint64_t b,
+                       uint64_t & result,
+                       uint64_t & carry,
+                       uint8_t full_size) {
     uint8_t size = full_size / 2;
     uint64_t s0, s1, s2, s3;
 
@@ -30,10 +34,14 @@ void helpers::multiply(uint64_t a, uint64_t b, uint64_t & result, uint64_t & car
     s3 = hi(x, size);
 
     result = s1 << size | s0;
-    carry  = s3 << size | s2;
+    carry = s3 << size | s2;
 }
 
-void helpers::devide(uint64_t a, uint64_t b, uint64_t & q, uint64_t & r, uint8_t full_size) {
+void helpers::devide(uint64_t a,
+                     uint64_t b,
+                     uint64_t & q,
+                     uint64_t & r,
+                     uint8_t full_size) {
     uint64_t mask = (~static_cast<uint64_t>(0) >> (64 - full_size));
 
     r = (a % b) & mask;
@@ -48,7 +56,8 @@ std::string helpers::to_hex(uint64_t value, std::string const & prefix) {
     std::stringstream stream;
     stream << std::hex << value;
     auto result = prefix;
-    if (value < 16) result += "0";
+    if (value < 16)
+        result += "0";
     result += stream.str();
     return result;
 }
