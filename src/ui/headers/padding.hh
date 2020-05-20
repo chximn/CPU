@@ -14,7 +14,7 @@ public:
     padding(int, int);
     padding(int);
 
-    std::unique_ptr<ftxui::Node> apply(std::unique_ptr<ftxui::Node>) const;
+    ftxui::Element apply(ftxui::Element) const;
 };
 
-std::unique_ptr<ftxui::Node> operator|(std::unique_ptr<ftxui::Node>, padding const &);
+ftxui::Element operator|(ftxui::Element, padding const &);

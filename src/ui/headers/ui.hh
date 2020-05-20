@@ -39,12 +39,12 @@ private:
     std::string reset_position;
     int n_lines;
 
-    std::unique_ptr<ftxui::Node> render_stack();
-    std::unique_ptr<ftxui::Node> render_data_segment();
-    std::unique_ptr<ftxui::Node> render_registers();
-    std::unique_ptr<ftxui::Node> render_instructions();
-    std::unique_ptr<ftxui::Node> render_fpu();
-    std::unique_ptr<ftxui::Node> render_sse();
+    ftxui::Element render_stack();
+    ftxui::Element render_data_segment();
+    ftxui::Element render_registers();
+    ftxui::Element render_instructions();
+    ftxui::Element render_fpu();
+    ftxui::Element render_sse();
 
     void render();
     void print(std::string const &);
