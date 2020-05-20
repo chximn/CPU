@@ -26,7 +26,7 @@ UserInterface::UserInterface(std::string const & c, bool i, int s):
     loader.load(program);
 }
 
-std::unique_ptr<ftxui::Node> UserInterface::render_data_segment() {
+ftxui::Element UserInterface::render_data_segment() {
     auto registers = cpu.get_registers();
     auto ds = registers[register_code::ds]->get_value();
     std::vector<uint8_t> data(ram.get_data(ds, 108));
@@ -56,7 +56,7 @@ std::unique_ptr<ftxui::Node> UserInterface::render_data_segment() {
     ) | border;
 }
 
-std::unique_ptr<ftxui::Node> UserInterface::render_registers() {
+ftxui::Element UserInterface::render_registers() {
     auto registers = cpu.get_registers();
 
     Elements elements;
@@ -88,7 +88,7 @@ std::unique_ptr<ftxui::Node> UserInterface::render_registers() {
     return vbox(std::move(elements)) | border;
 }
 
-std::unique_ptr<ftxui::Node> UserInterface::render_instructions() {
+ftxui::Element UserInterface::render_instructions() {
     auto registers = cpu.get_registers();
     auto reg = cpu.get_control_unit().get_instruction_pointer_register();
     auto reg_value = static_cast<int>(reg->get_value());
