@@ -173,18 +173,10 @@ target_compile_options(core PRIVATE
     "/Wall" >
     )
 
-# Set the properties you require, e.g. what C++ standard to use (change as needed).
-set_target_properties(core app PROPERTIES
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO
-)
-
 # --------------------------------------------------------------------------------
 #                         Make Tests (no change needed).
 # --------------------------------------------------------------------------------\
 set(TEST_MAIN unit_tests) # Default name for test executable (change if you wish).
-
 
 add_library(Catch2 INTERFACE)
 target_include_directories(Catch2 INTERFACE lib/)
@@ -197,3 +189,10 @@ add_custom_target(catch
 
 include(Catch)
 catch_discover_tests(${TEST_MAIN})
+
+# Set the properties you require, e.g. what C++ standard to use (change as needed).
+set_target_properties(core app ui assembler ${TEST_MAIN} PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO
+)
