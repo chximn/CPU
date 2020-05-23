@@ -4,7 +4,7 @@
 #include <vector>
 #include <algorithm>
 
-#define LOGGER_PADDING 50
+#define LOGGER_PADDING 7
 
 class Logger {
 private:
