@@ -630,7 +630,11 @@ sse_instruction:
 
 one_alu_operand:
     register_op  { $$ = std::vector<operand_ptr>{$1}; } |
-    memory_op    { $$ = std::vector<operand_ptr>{$1}; } |
+    memory_op    {
+        auto op = std::dynamic_pointer_cast<MemoryOperand>($1);
+        if (!op->get_use_segment()) op->set_segment(register_code::ds);
+        $$ = std::vector<operand_ptr>{$1};
+    } |
     immediate_op { $$ = std::vector<operand_ptr>{$1}; } |
     object_op    { $$ = std::vector<operand_ptr>{$1}; }
 
