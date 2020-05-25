@@ -547,8 +547,8 @@ void ControlUnit::decode() {
             break;
 
         case instruction_code::fst:
-            load_from_memory = true;
-            write_to_memory = false;
+            load_from_memory = false;
+            write_to_memory = true;
             execute_fpu = true;
             fpu.perform_pop = false;
 
@@ -556,11 +556,12 @@ void ControlUnit::decode() {
             fpu.operation = fpu_operation::fst;
             fpu.src_dest = ram.data_register;
             fpu.is_double = operands.at(0)->get_size() == 64;
+            ram.size = instruction.get_size();
             break;
 
         case instruction_code::fstp:
-            load_from_memory = true;
-            write_to_memory = false;
+            load_from_memory = false;
+            write_to_memory = true;
             execute_fpu = true;
             fpu.perform_pop = true;
 
@@ -568,6 +569,7 @@ void ControlUnit::decode() {
             fpu.operation = fpu_operation::fst;
             fpu.src_dest = ram.data_register;
             fpu.is_double = operands.at(0)->get_size() == 64;
+            ram.size = instruction.get_size();
             break;
 
         case instruction_code::fldz:
