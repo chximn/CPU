@@ -97,4 +97,5 @@ $ ./unit_tests
 All tests passed (18 assertions in 3 test cases)
 ```
 
-
+## Thanks
+Special thanks to [@ArthurSonzogni](https://github.com/ArthurSonzogni) for his amazing UI library [FTXUI](https://github.com/ArthurSonzogni/FTXUI)
