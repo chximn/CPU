@@ -18,6 +18,12 @@ cd build
 cmake ..
 make
 ```
+
+Pour Debian based operating systems you can juste use the command:
+```bash
+sudo apt-get install flex bison cmake g++ git && git clone https://github.com/AnisBdz/CPU && cd CPU && mkdir build && cd build && cmake .. && make
+```
+
 ### Unit Tests
 This project uses [Catch2](https://github.com/catchorg/Catch2).
 The tests are available in the `tests` folder.
