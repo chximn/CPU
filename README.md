@@ -19,7 +19,7 @@ cmake ..
 make
 ```
 
-Pour Debian based operating systems you can just use this:
+For Debian based operating systems you can just use this:
 ```bash
 sudo apt-get install flex bison cmake g++ git && git clone https://github.com/AnisBdz/CPU && cd CPU && mkdir build && cd build && cmake .. && make
 ```
